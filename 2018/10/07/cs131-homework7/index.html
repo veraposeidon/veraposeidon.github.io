@@ -1,0 +1,488 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CS131,Homewrok7,Object-Detection | SHEN's BLOG</title><meta name="keywords" content="计算机视觉,CS131,Hog特征,滑窗法,图像金字塔,DPM"><meta name="author" content="SHEN Xiaohai"><meta name="copyright" content="SHEN Xiaohai"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="CS131 Computer Vision： Foundations and Applications，Homework7,Object-Detection。 实现人脸检测。使用Hog表征和滑窗法进行人脸检测，使用图像金字塔对尺度问题进行改进，使用DPM(可变形组件模型)进行人脸检测。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS131,Homewrok7,Object-Detection">
+<meta property="og:url" content="https://shenxiaohai.me/2018/10/07/cs131-homework7/index.html">
+<meta property="og:site_name" content="SHEN&#39;s BLOG">
+<meta property="og:description" content="CS131 Computer Vision： Foundations and Applications，Homework7,Object-Detection。 实现人脸检测。使用Hog表征和滑窗法进行人脸检测，使用图像金字塔对尺度问题进行改进，使用DPM(可变形组件模型)进行人脸检测。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/12/27/i76rSB5RH4k8eEW.jpg">
+<meta property="article:published_time" content="2018-10-06T16:03:03.000Z">
+<meta property="article:modified_time" content="2018-10-06T08:08:12.000Z">
+<meta property="article:author" content="SHEN Xiaohai">
+<meta property="article:tag" content="计算机视觉">
+<meta property="article:tag" content="CS131">
+<meta property="article:tag" content="Hog特征">
+<meta property="article:tag" content="滑窗法">
+<meta property="article:tag" content="图像金字塔">
+<meta property="article:tag" content="DPM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/12/27/i76rSB5RH4k8eEW.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://shenxiaohai.me/2018/10/07/cs131-homework7/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.js" defer></script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-74360128-2"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-74360128-2');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: {"appId":"TA1T7F3R2E","apiKey":"c4d8bb07ab3fa68ab573e9bf8f264e0c","indexName":"SHENBLOG","hits":{"per_page":15},"languages":{"input_placeholder":"搜索文章","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":600,"position":"top","messagePrev":"距离我扯这篇文章已经","messageNext":"天了，内容可能跟不上时代了，对不住了各位老铁。注意自己搜搜新的材料对照着看。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":600,"languages":{"author":"作者: SHEN Xiaohai","link":"链接: ","source":"来源: SHEN's BLOG","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2018-10-06 08:08:12'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const now = new Date()
+          const hour = now.getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://i.loli.net/2020/12/27/i76rSB5RH4k8eEW.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">SHEN's BLOG</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">CS131,Homewrok7,Object-Detection</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-10-06T16:03:03.000Z" title="发表于 2018-10-06 16:03:03">2018-10-06</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2018-10-06T08:08:12.000Z" title="更新于 2018-10-06 08:08:12">2018-10-06</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/">计算机视觉</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">3.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>17分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Homework-7"><a href="#Homework-7" class="headerlink" title="Homework 7"></a>Homework 7</h1><p>In this homework, we will implement a simplified version of object detection process. Note that the tests on the notebook are not comprehensive, autograder will contain more tests.</p>
+<p>这份作业是要实现一个简单版本的目标检测流程。</p>
+<p>当然，作业里的任务不是很复杂。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> print_function</span><br><span class="line"><span class="keyword">import</span> random </span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> matplotlib.patches <span class="keyword">as</span> patches</span><br><span class="line"><span class="keyword">from</span> skimage <span class="keyword">import</span> io</span><br><span class="line"><span class="keyword">from</span> skimage.feature <span class="keyword">import</span> hog</span><br><span class="line"><span class="keyword">from</span> skimage <span class="keyword">import</span> data, color, exposure</span><br><span class="line"><span class="keyword">from</span> skimage.transform <span class="keyword">import</span> rescale, resize, downscale_local_mean</span><br><span class="line"><span class="keyword">import</span> glob, os</span><br><span class="line"><span class="keyword">import</span> fnmatch</span><br><span class="line"><span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> warnings</span><br><span class="line">warnings.filterwarnings(<span class="string">&#x27;ignore&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> detection <span class="keyword">import</span> *</span><br><span class="line"><span class="keyword">from</span> util <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment"># This code is to make matplotlib figures appear inline in the</span></span><br><span class="line"><span class="comment"># notebook rather than in a new window.</span></span><br><span class="line">%matplotlib inline</span><br><span class="line">plt.rcParams[<span class="string">&#x27;figure.figsize&#x27;</span>] = (<span class="number">10.0</span>, <span class="number">8.0</span>) <span class="comment"># set default size of plots</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;image.interpolation&#x27;</span>] = <span class="string">&#x27;nearest&#x27;</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;image.cmap&#x27;</span>] = <span class="string">&#x27;gray&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Some more magic so that the notebook will reload external python modules;</span></span><br><span class="line"><span class="comment"># see http://stackoverflow.com/questions/1907993/autoreload-of-modules-in-ipython</span></span><br><span class="line">%load_ext autoreload</span><br><span class="line">%autoreload <span class="number">2</span></span><br><span class="line">%reload_ext autoreload</span><br></pre></td></tr></table></figure>
+
+<h1 id="Part-1-Hog-Representation-10-points"><a href="#Part-1-Hog-Representation-10-points" class="headerlink" title="Part 1: Hog Representation (10 points)"></a>Part 1: Hog Representation (10 points)</h1><p>In this section, we will compute the average hog representation of human faces.<br><br>There are 31 aligned face images provided in the <code>\face</code> folder. They are all aligned and have the same size. We will get an average face from these images and compute a hog feature representation for the averaged face. <br><br>Use the hog function provided by skimage library, and implement a hog representation of objects.<br>Implement <strong><code>hog_feature</code></strong> function in <code>detection.py</code></p>
+<p><strong>Hog表征</strong></p>
+<p>这里要计算人脸的平均hog表征。可以直接调用skimage包中feature模块内的hog函数进行hog特征的提取。</p>
+<blockquote>
+<p><strong>博客推荐</strong></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/hujingshuang/article/details/47337707">【特征检测】HOG特征算法</a></p>
+</blockquote>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">image_paths = fnmatch.<span class="built_in">filter</span>(os.listdir(<span class="string">&#x27;./face&#x27;</span>), <span class="string">&#x27;*.jpg&#x27;</span>)</span><br><span class="line"><span class="built_in">list</span>.sort(image_paths)</span><br><span class="line">n = <span class="built_in">len</span>(image_paths)</span><br><span class="line">face_shape = io.imread(<span class="string">&#x27;./face/&#x27;</span>+image_paths[<span class="number">0</span>], as_grey=<span class="literal">True</span>).shape</span><br><span class="line">avg_face= np.zeros((face_shape))</span><br><span class="line"><span class="keyword">for</span> i,image_path <span class="keyword">in</span> <span class="built_in">enumerate</span>(image_paths):</span><br><span class="line">    image = io.imread(<span class="string">&#x27;./face/&#x27;</span>+image_path, as_grey=<span class="literal">True</span>)</span><br><span class="line">    avg_face = np.asarray(image)+np.asarray(avg_face)</span><br><span class="line">avg_face = avg_face/n</span><br><span class="line"></span><br><span class="line">(face_feature, face_hog) = hog_feature(avg_face)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(avg_face)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;average face image&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(face_hog)</span><br><span class="line">plt.title(<span class="string">&#x27;hog representation of face&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_5_0.png" alt="png"></p>
+<h1 id="Part-2-Sliding-Window-30-points"><a href="#Part-2-Sliding-Window-30-points" class="headerlink" title="Part 2: Sliding Window (30 points)"></a>Part 2: Sliding Window (30 points)</h1><p>Implement <strong><code>sliding_window</code></strong> function to have windows slide across an image with a specific window size. The window slides through the image and check if an object is detected with a high score at every location. These scores will generate a response map and you will be able to find the location of the window with the highest hog score. </p>
+<p><strong>滑窗法</strong></p>
+<p>滑窗法就是定义一个窗体对象（匹配对象），遍历图像中的图像块，计算卷积响应（此处对两者Hog特征序列进行内积计算），输出值最高的地方就是图像中与匹配对象最相似的地方。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line">image_path = <span class="string">&#x27;image_0001.jpg&#x27;</span></span><br><span class="line"></span><br><span class="line">image = io.imread(image_path, as_grey=<span class="literal">True</span>)</span><br><span class="line">image = rescale(image, <span class="number">0.8</span>)</span><br><span class="line"></span><br><span class="line">(hogFeature, hogImage) = hog_feature(image)</span><br><span class="line"></span><br><span class="line">(winH, winW) = face_shape</span><br><span class="line">(score, r, c, response_map) = sliding_window(image, face_feature, stepSize=<span class="number">30</span>, windowSize=face_shape)</span><br><span class="line">crop = image[r:r+winH, c:c+winW]</span><br><span class="line"></span><br><span class="line">fig,ax = plt.subplots(<span class="number">1</span>)</span><br><span class="line">ax.imshow(image)</span><br><span class="line">rect = patches.Rectangle((c,r),winW,winH,linewidth=<span class="number">1</span>,edgecolor=<span class="string">&#x27;r&#x27;</span>,facecolor=<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line">ax.add_patch(rect)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line">plt.imshow(response_map,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;sliding window&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_8_0.png" alt="png"></p>
+<p><img src= "/img/loading.gif" data-lazy-src="output_8_1.png" alt="png"></p>
+<p>Sliding window successfully found the human face in the above example. However, in the cell below, we are only changing the scale of the image, and you can see that sliding window does not work once the scale of the image is changed. </p>
+<p>上面的图像能够检测到人脸的正确区域，但是下面这张图却出现了错误。说明滑窗这种方法对于图像的尺度十分敏感。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">image_path = <span class="string">&#x27;image_0001.jpg&#x27;</span></span><br><span class="line">image = io.imread(image_path, as_grey=<span class="literal">True</span>)</span><br><span class="line">image = rescale(image, <span class="number">1.0</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">(winH, winW) = face_shape</span><br><span class="line">(score, r, c, max_response_map) = sliding_window(image, face_feature, stepSize=<span class="number">30</span>, windowSize=face_shape)</span><br><span class="line"></span><br><span class="line">crop = image[r:r+winH, c:c+winW]</span><br><span class="line"></span><br><span class="line">fig,ax = plt.subplots(<span class="number">1</span>)</span><br><span class="line">ax.imshow(image)</span><br><span class="line">rect = patches.Rectangle((c,r),winW,winH,linewidth=<span class="number">1</span>,edgecolor=<span class="string">&#x27;r&#x27;</span>,facecolor=<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line">ax.add_patch(rect)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line">plt.imshow(max_response_map,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;sliding window&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_11_0.png" alt="png"></p>
+<p><img src= "/img/loading.gif" data-lazy-src="output_11_1.png" alt="png"></p>
+<h1 id="Part-3-Image-Pyramids-30-points"><a href="#Part-3-Image-Pyramids-30-points" class="headerlink" title="Part 3: Image Pyramids (30 points)"></a>Part 3: Image Pyramids (30 points)</h1><p>In order to make sliding window work for different scales of images, you need to implement image pyramids where you resize the image to different scales and run the sliding window method on each resized image. This way you scale the objects and can detect both small and large objects. </p>
+<p>针对上面的问题，需要采用图像金字塔的方案来进行匹配。</p>
+<p>关于图像金字塔，可以看博客。</p>
+<blockquote>
+<p><strong>博客推荐</strong></p>
+<p>[图像金字塔分层算法](<a target="_blank" rel="noopener" href="https://blog.csdn.net/x454045816/article/details/52573637">https://blog.csdn.net/x454045816/article/details/52573637</a></p>
+</blockquote>
+<p>代码中直接是使用resize函数，生成了不同尺度的图像，具体的图像金字塔实现可以看博客，上采样和下采样是利用高斯滤波器和插值滤波器实现的。</p>
+<h3 id="3-1-Image-Pyramid-10-points"><a href="#3-1-Image-Pyramid-10-points" class="headerlink" title="3.1 Image Pyramid (10 points)"></a>3.1 Image Pyramid (10 points)</h3><p>Implement <strong><code>pyramid</code></strong> function in <code>detection.py</code>, this will create pyramid of images at different scales. Run the following code, and you will see the shape of the original image gets smaller until it reaches a minimum size.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">image_path = <span class="string">&#x27;image_0001.jpg&#x27;</span></span><br><span class="line"></span><br><span class="line">image = io.imread(image_path, as_grey=<span class="literal">True</span>)</span><br><span class="line">image = rescale(image, <span class="number">1.2</span>)</span><br><span class="line"></span><br><span class="line">images = pyramid(image, scale = <span class="number">0.9</span>)</span><br><span class="line">sum_r = <span class="number">0</span></span><br><span class="line">sum_c = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i,result <span class="keyword">in</span> <span class="built_in">enumerate</span>(images):</span><br><span class="line">    (scale, image) = result</span><br><span class="line">    <span class="keyword">if</span> (i==<span class="number">0</span>):</span><br><span class="line">        sum_c = image.shape[<span class="number">1</span>]</span><br><span class="line">    sum_r+=image.shape[<span class="number">0</span>]</span><br><span class="line"></span><br><span class="line">composite_image = np.zeros((sum_r, sum_c))</span><br><span class="line"></span><br><span class="line">pointer = <span class="number">0</span></span><br><span class="line"><span class="keyword">for</span> i, result <span class="keyword">in</span> <span class="built_in">enumerate</span>(images):</span><br><span class="line">    (scale, image) = result   </span><br><span class="line">    composite_image[pointer:pointer+image.shape[<span class="number">0</span>], :image.shape[<span class="number">1</span>]] = image</span><br><span class="line">    pointer+= image.shape[<span class="number">0</span>]</span><br><span class="line">    </span><br><span class="line">plt.imshow(composite_image)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;image pyramid&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_15_0.png" alt="png"></p>
+<h3 id="3-2-Pyramid-Score-20-points"><a href="#3-2-Pyramid-Score-20-points" class="headerlink" title="3.2 Pyramid Score (20 points)"></a>3.2 Pyramid Score (20 points)</h3><p>After getting the image pyramid, we will run sliding window on all the images to find a place that gets the highest score. Implement <strong><code>pyramid_score</code></strong> function in <code>detection.py</code>. It will return the highest score and its related information in the image pyramids.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">image_path = <span class="string">&#x27;image_0001.jpg&#x27;</span></span><br><span class="line"></span><br><span class="line">image = io.imread(image_path, as_grey=<span class="literal">True</span>)</span><br><span class="line">image = rescale(image, <span class="number">1.4</span>)</span><br><span class="line"></span><br><span class="line">(winH, winW) = face_shape</span><br><span class="line">max_score, maxr, maxc, max_scale, max_response_map = pyramid_score \</span><br><span class="line">        (image, face_feature, face_shape, stepSize = <span class="number">30</span>, scale=<span class="number">0.8</span>)</span><br><span class="line"></span><br><span class="line">fig,ax = plt.subplots(<span class="number">1</span>)</span><br><span class="line">ax.imshow(rescale(image, max_scale))</span><br><span class="line">rect = patches.Rectangle((maxc,maxr),winW,winH,linewidth=<span class="number">3</span>,edgecolor=<span class="string">&#x27;r&#x27;</span>,facecolor=<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line">ax.add_patch(rect)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line">plt.imshow(max_response_map, cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_17_0.png" alt="png"></p>
+<p><img src= "/img/loading.gif" data-lazy-src="output_17_1.png" alt="png"></p>
+<p>From the above example, we can see that image pyramid has fixed the problem of scaling. Then in the example below, we will try another image and implement deformable part model.</p>
+<p>通过调整<code>image = rescale(image, 1.2)</code>中的缩放比例，可以看到，图像金字塔的方案还是能解决掉上一步中尺度引起的问题的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">image_path = <span class="string">&#x27;image_0338.jpg&#x27;</span></span><br><span class="line">image = io.imread(image_path, as_grey=<span class="literal">True</span>)</span><br><span class="line">image = rescale(image, <span class="number">1.0</span>)</span><br><span class="line"></span><br><span class="line">(winH, winW) = face_shape</span><br><span class="line"></span><br><span class="line">max_score, maxr, maxc, max_scale, max_response_map = pyramid_score \</span><br><span class="line">    (image, face_feature, face_shape, stepSize = <span class="number">30</span>, scale=<span class="number">0.8</span>)</span><br><span class="line"></span><br><span class="line">fig,ax = plt.subplots(<span class="number">1</span>)</span><br><span class="line">ax.imshow(rescale(image, max_scale))</span><br><span class="line">rect = patches.Rectangle((maxc,maxr),winW,winH,linewidth=<span class="number">1</span>,edgecolor=<span class="string">&#x27;r&#x27;</span>,facecolor=<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line">ax.add_patch(rect)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line">plt.imshow(max_response_map,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line">    </span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_20_0.png" alt="png"></p>
+<p><img src= "/img/loading.gif" data-lazy-src="output_20_1.png" alt="png"></p>
+<p>这张图片的检测貌似没毛病啊。</p>
+<h1 id="Part-4-Deformable-Parts-Detection"><a href="#Part-4-Deformable-Parts-Detection" class="headerlink" title="Part 4: Deformable Parts Detection"></a>Part 4: Deformable Parts Detection</h1><p>In order to solve the problem above, you will implement deformable parts model in this section, and apply it on human faces. <br><br>The first step is to get a detector for each part of the face, including left eye, right eye, nose and mouth. <br><br>For example for the left eye, we have provided the groundtruth location of left eyes for each image in the <code>\face</code> directory. This is stored in the <code>lefteyes</code> array with shape <code>(n,2)</code>, each row is the <code>(r,c)</code> location of the center of left eye. You will then find the average hog representation of the left eyes in the images.</p>
+<p>关于DPM算法的原理，可以看博客。大致就是跟模型的检测和组件模型的检测，然后求响应值。</p>
+<blockquote>
+<p><strong>博客推荐</strong></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/qq_14845119/article/details/52625426">DPM（Deformable Part Model）原理详解</a></p>
+</blockquote>
+<p>下面四块分别是左眼、右眼、鼻子和眼镜的检测器。</p>
+<p>代码是作业本身就提供了的，不过可以仔细研究一下具体实现。</p>
+<p>Run through the following code to get a detector for left eyes.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">image_paths = fnmatch.<span class="built_in">filter</span>(os.listdir(<span class="string">&#x27;./face&#x27;</span>), <span class="string">&#x27;*.jpg&#x27;</span>)</span><br><span class="line"></span><br><span class="line">parts = read_facial_labels(image_paths)</span><br><span class="line">lefteyes, righteyes, noses, mouths = parts</span><br><span class="line"></span><br><span class="line"><span class="comment"># Typical shape for left eye</span></span><br><span class="line">lefteye_h = <span class="number">10</span></span><br><span class="line">lefteye_w = <span class="number">20</span></span><br><span class="line"></span><br><span class="line">lefteye_shape = (lefteye_h, lefteye_w)</span><br><span class="line"></span><br><span class="line">avg_lefteye = get_detector(lefteye_h, lefteye_w, lefteyes, image_paths)</span><br><span class="line">(lefteye_feature, lefteye_hog) = hog_feature(avg_lefteye, pixel_per_cell=<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(avg_lefteye)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;average left eye image&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(lefteye_hog)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;average hog image&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_26_0.png" alt="png"></p>
+<p>Run through the following code to get a detector for right eye.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">righteye_h = <span class="number">10</span></span><br><span class="line">righteye_w = <span class="number">20</span></span><br><span class="line"></span><br><span class="line">righteye_shape = (righteye_h, righteye_w)</span><br><span class="line"></span><br><span class="line">avg_righteye = get_detector(righteye_h, righteye_w, righteyes, image_paths)</span><br><span class="line"></span><br><span class="line">(righteye_feature, righteye_hog) = hog_feature(avg_righteye, pixel_per_cell=<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(avg_righteye)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;average right eye image&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(righteye_hog)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;average hog image&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_28_0.png" alt="png"></p>
+<p>Run through the following code to get a detector for nose.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">nose_h = <span class="number">30</span></span><br><span class="line">nose_w = <span class="number">26</span></span><br><span class="line"></span><br><span class="line">nose_shape = (nose_h, nose_w)</span><br><span class="line"></span><br><span class="line">avg_nose = get_detector(nose_h, nose_w, noses, image_paths)</span><br><span class="line"></span><br><span class="line">(nose_feature, nose_hog) = hog_feature(avg_nose, pixel_per_cell=<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(avg_nose)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;average nose image&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(nose_hog)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;average hog image&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_30_0.png" alt="png"></p>
+<p>Run through the following code to get a detector for mouth</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mouth_h = <span class="number">20</span></span><br><span class="line">mouth_w = <span class="number">36</span></span><br><span class="line"></span><br><span class="line">mouth_shape = (mouth_h, mouth_w)</span><br><span class="line"></span><br><span class="line">avg_mouth = get_detector(mouth_h, mouth_w, mouths, image_paths)</span><br><span class="line"></span><br><span class="line">(mouth_feature, mouth_hog) = hog_feature(avg_mouth, pixel_per_cell=<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">detectors_list = [lefteye_feature, righteye_feature, nose_feature, mouth_feature]</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(avg_mouth)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;average mouth image&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(mouth_hog)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;average hog image&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_32_0.png" alt="png"></p>
+<h1 id="Part-5-Human-Parts-Location-10-points"><a href="#Part-5-Human-Parts-Location-10-points" class="headerlink" title="Part 5: Human Parts Location (10 points)"></a>Part 5: Human Parts Location (10 points)</h1><p>Implement <strong><code>compute_displacement</code></strong> to get an average shift vector mu and standard deviation sigma for each part of the face. The vector mu is the distance from the main center, i.e the center of the face, to the center of the part. <br></p>
+<p><strong>找到各个部位的位置</strong></p>
+<p>这里计算的是相对位置，即各个组件的中心与脸部中心的距离。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># test for compute_displacement</span></span><br><span class="line">test_array = np.array([[<span class="number">0</span>,<span class="number">1</span>],[<span class="number">1</span>,<span class="number">2</span>],[<span class="number">2</span>,<span class="number">3</span>],[<span class="number">3</span>,<span class="number">4</span>]])</span><br><span class="line">test_shape = (<span class="number">6</span>,<span class="number">6</span>)</span><br><span class="line">mu, std = compute_displacement(test_array, test_shape)</span><br><span class="line"><span class="keyword">assert</span>(np.<span class="built_in">all</span>(mu == [<span class="number">1</span>,<span class="number">0</span>]))</span><br><span class="line"><span class="keyword">assert</span>(np.<span class="built_in">sum</span>(std-[ <span class="number">1.11803399</span>,  <span class="number">1.11803399</span>])&lt;<span class="number">1e-5</span>)</span><br><span class="line">print(<span class="string">&quot;Your implementation is correct!&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<pre><code>Your implementation is correct!
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">lefteye_mu, lefteye_std = compute_displacement(lefteyes, face_shape)</span><br><span class="line">righteye_mu, righteye_std = compute_displacement(righteyes, face_shape)</span><br><span class="line">nose_mu, nose_std = compute_displacement(noses, face_shape)</span><br><span class="line">mouth_mu, mouth_std = compute_displacement(mouths, face_shape)</span><br></pre></td></tr></table></figure>
+
+<p>After getting the shift vectors, we can run our detector on a test image. We will first run the following code to detect each part of left eye, right eye, nose and mouth in  the image. You will see a response map for each of them.</p>
+<p>分别使用脸部和各个组件的检测器，对整张图像进行匹配计算，得到每个组件的响应图。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">image_path = <span class="string">&#x27;image_0338.jpg&#x27;</span></span><br><span class="line">image = io.imread(image_path, as_grey=<span class="literal">True</span>)</span><br><span class="line">image = rescale(image, <span class="number">1.0</span>)</span><br><span class="line"></span><br><span class="line">(face_H, face_W) = face_shape</span><br><span class="line">max_score, face_r, face_c, face_scale, face_response_map = pyramid_score\</span><br><span class="line">    (image, face_feature, face_shape,stepSize = <span class="number">30</span>, scale=<span class="number">0.8</span>)</span><br><span class="line"></span><br><span class="line">plt.imshow(face_response_map, cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_39_0.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">max_score, lefteye_r, lefteye_c, lefteye_scale, lefteye_response_map = \</span><br><span class="line">    pyramid_score(image, lefteye_feature,lefteye_shape, stepSize = <span class="number">20</span>,scale=<span class="number">0.9</span>, pixel_per_cell = <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">lefteye_response_map = resize(lefteye_response_map, face_response_map.shape)</span><br><span class="line"></span><br><span class="line">plt.imshow(lefteye_response_map,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_40_0.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">max_score, righteye_r, righteye_c, righteye_scale, righteye_response_map = \</span><br><span class="line">    pyramid_score (image, righteye_feature, righteye_shape, stepSize = <span class="number">20</span>,scale=<span class="number">0.9</span>, pixel_per_cell=<span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">righteye_response_map = resize(righteye_response_map, face_response_map.shape)</span><br><span class="line"></span><br><span class="line">plt.imshow(righteye_response_map,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_41_0.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">max_score, nose_r, nose_c, nose_scale, nose_response_map = \</span><br><span class="line">    pyramid_score (image, nose_feature, nose_shape, stepSize = <span class="number">20</span>,scale=<span class="number">0.9</span>, pixel_per_cell = <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">nose_response_map = resize(nose_response_map, face_response_map.shape)</span><br><span class="line"></span><br><span class="line">plt.imshow(nose_response_map,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_42_0.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">max_score, mouth_r, mouth_c, mouth_scale, mouth_response_map =\</span><br><span class="line">    pyramid_score (image, mouth_feature, mouth_shape, stepSize = <span class="number">20</span>,scale=<span class="number">0.9</span>, pixel_per_cell = <span class="number">2</span>)</span><br><span class="line"></span><br><span class="line">mouth_response_map = resize(mouth_response_map, face_response_map.shape)</span><br><span class="line">plt.imshow(mouth_response_map,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_43_0.png" alt="png"></p>
+<p>After getting the response maps for each part of the face, we will shift these maps so that they all have the same center as the face. We have calculated the shift vector mu in <code>compute_displacement</code>, so we are shifting based on vector mu. Implement <code>shift_heatmap</code> function in <code>detection.py</code>.</p>
+<p>得到各个组件的响应图之后，移动这些响应图，使得它们的中心和脸部的中心相同，方便求和。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">face_heatmap_shifted = shift_heatmap(face_response_map, [<span class="number">0</span>,<span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">lefteye_heatmap_shifted = shift_heatmap(lefteye_response_map, lefteye_mu)</span><br><span class="line">righteye_heatmap_shifted = shift_heatmap(righteye_response_map, righteye_mu)</span><br><span class="line">nose_heatmap_shifted = shift_heatmap(nose_response_map, nose_mu)</span><br><span class="line">mouth_heatmap_shifted = shift_heatmap(mouth_response_map, mouth_mu)</span><br><span class="line"></span><br><span class="line">f, axarr = plt.subplots(<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">axarr[<span class="number">0</span>,<span class="number">0</span>].axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">axarr[<span class="number">0</span>,<span class="number">1</span>].axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">axarr[<span class="number">1</span>,<span class="number">0</span>].axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">axarr[<span class="number">1</span>,<span class="number">1</span>].axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">axarr[<span class="number">0</span>,<span class="number">0</span>].imshow(lefteye_heatmap_shifted,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">axarr[<span class="number">0</span>,<span class="number">1</span>].imshow(righteye_heatmap_shifted,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">axarr[<span class="number">1</span>,<span class="number">0</span>].imshow(nose_heatmap_shifted,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">axarr[<span class="number">1</span>,<span class="number">1</span>].imshow(mouth_heatmap_shifted,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_46_0.png" alt="png"></p>
+<h1 id="Part-6-Gaussian-Filter-20-points"><a href="#Part-6-Gaussian-Filter-20-points" class="headerlink" title="Part 6: Gaussian Filter (20 points)"></a>Part 6: Gaussian Filter (20 points)</h1><h2 id="Part-6-1-Gaussian-Filter"><a href="#Part-6-1-Gaussian-Filter" class="headerlink" title="Part 6.1 Gaussian Filter"></a>Part 6.1 Gaussian Filter</h2><p>In this part, apply gaussian filter convolution to each heatmap. Blur by kernel of standard deviation sigma, and then add the heatmaps of the parts with the heatmap of the face. On the combined heatmap, find the maximum value and its location. You can use function provided by skimage to implement <strong><code>gaussian_heatmap</code></strong>.</p>
+<p>这个部分呢，就是将之前的各个组件的响应图给叠加起来，然后判断图像区域内哪个点的响应最大，则该处判断为人脸区域。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">heatmap_face= face_heatmap_shifted</span><br><span class="line"></span><br><span class="line"><span class="comment"># 这里将各个组件构建数组，传入</span></span><br><span class="line">heatmaps = [lefteye_heatmap_shifted, </span><br><span class="line">           righteye_heatmap_shifted,</span><br><span class="line">           nose_heatmap_shifted,</span><br><span class="line">           mouth_heatmap_shifted]</span><br><span class="line">sigmas = [lefteye_std, righteye_std, nose_std, mouth_std]</span><br><span class="line"></span><br><span class="line">heatmap, i , j = gaussian_heatmap(heatmap_face, heatmaps, sigmas)</span><br><span class="line"></span><br><span class="line">fig,ax = plt.subplots(<span class="number">1</span>)</span><br><span class="line">rect = patches.Rectangle((j-winW//<span class="number">2</span>, i-winH//<span class="number">2</span>),winW,winH,linewidth=<span class="number">1</span>,edgecolor=<span class="string">&#x27;r&#x27;</span>,facecolor=<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line">ax.add_patch(rect)</span><br><span class="line"></span><br><span class="line">plt.imshow(heatmap,cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line">fig,ax = plt.subplots(<span class="number">1</span>)</span><br><span class="line">rect = patches.Rectangle((j-winW//<span class="number">2</span>, i-winH//<span class="number">2</span>),winW,winH,linewidth=<span class="number">1</span>,edgecolor=<span class="string">&#x27;r&#x27;</span>,facecolor=<span class="string">&#x27;none&#x27;</span>)</span><br><span class="line">ax.add_patch(rect)</span><br><span class="line"></span><br><span class="line">plt.imshow(resize(image, heatmap.shape))</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_49_0.png" alt="png"></p>
+<p><img src= "/img/loading.gif" data-lazy-src="output_49_1.png" alt="png"></p>
+<h2 id="6-2-Result-Analysis-10-points"><a href="#6-2-Result-Analysis-10-points" class="headerlink" title="6.2 Result Analysis (10 points)"></a>6.2 Result Analysis (10 points)</h2><p>Does your DPM work on detecting human faces? Can you think of a case where DPM may work better than the detector we had in part 3 (sliding window + image pyramid)? You can also have examples that are not faces.</p>
+<p>DPM的原理是很能理解的，就是将各个组件的响应值累加起来，判断哪个区域拥有最高的响应值。</p>
+<p>上图的检测出现了问题，怀疑是脸部组件的检测不咋滴。</p>
+<p><strong>Your Answer:</strong> Write your answer in this markdown cell.</p>
+<h2 id="Extra-Credit-1-point"><a href="#Extra-Credit-1-point" class="headerlink" title="Extra Credit (1 point)"></a>Extra Credit (1 point)</h2><p>You have tried detecting one face from the image, and the next step is to extend it to detecting multiple occurences of the object. For example in the following image, how do you detect more than one face from your response map? Implement the function <strong><code>detect_multiple</code></strong>, and write code to visualize your detected faces in the cell below.</p>
+<p>没有好思路啊，唯一有的就是检测到一张人脸，就将该区域置为白色或黑色。</p>
+<p>可是上一步的DPM算法效果貌似不行，不想往下进行下去了。先做第八份作业吧。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">image_path = <span class="string">&#x27;image_0002.jpg&#x27;</span></span><br><span class="line">image = io.imread(image_path, as_grey=<span class="literal">True</span>)</span><br><span class="line">plt.imshow(image)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_55_0.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">image_path = <span class="string">&#x27;image_0002.jpg&#x27;</span></span><br><span class="line">image = io.imread(image_path, as_grey=<span class="literal">True</span>)</span><br><span class="line">heatmap = get_heatmap (image,face_feature, face_shape,detectors_list, parts )</span><br><span class="line"></span><br><span class="line">plt.imshow(heatmap, cmap=<span class="string">&#x27;viridis&#x27;</span>, interpolation=<span class="string">&#x27;nearest&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">detected_faces = detect_multiple(image, heatmap)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Visualize your detected faces</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### YOUR CODE HERE</span></span><br><span class="line"><span class="keyword">pass</span></span><br><span class="line"><span class="comment">### END YOUR CODE</span></span><br></pre></td></tr></table></figure>
+
+
+
+<h1 id="代码档案"><a href="#代码档案" class="headerlink" title="代码档案"></a>代码档案</h1><p><a target="_blank" rel="noopener" href="https://github.com/StanfordVL/CS131_release/tree/master/hw7_release">官方Repo作业材料</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/veraposeidon/CS131_Assignments/tree/master/hw7_release">个人Repo作业存档</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">SHEN Xiaohai</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://shenxiaohai.me/2018/10/07/cs131-homework7/">https://shenxiaohai.me/2018/10/07/cs131-homework7/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://shenxiaohai.me" target="_blank">SHEN's BLOG</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/">计算机视觉</a><a class="post-meta__tags" href="/tags/CS131/">CS131</a><a class="post-meta__tags" href="/tags/Hog%E7%89%B9%E5%BE%81/">Hog特征</a><a class="post-meta__tags" href="/tags/%E6%BB%91%E7%AA%97%E6%B3%95/">滑窗法</a><a class="post-meta__tags" href="/tags/%E5%9B%BE%E5%83%8F%E9%87%91%E5%AD%97%E5%A1%94/">图像金字塔</a><a class="post-meta__tags" href="/tags/DPM/">DPM</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/12/27/i76rSB5RH4k8eEW.jpg" data-sites="wechat,weibo,qq,facebook,twitter"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2018/10/12/cs131-homework8/"><img class="prev-cover" data-lazy-src="https://i.loli.net/2020/09/08/xoyp2O8gkwTN7Ri.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">CS131,Homewrok8,Tracking-OpticalFlow</div></div></a></div><div class="next-post pull-right"><a href="/2018/09/20/cs131-homework6/"><img class="next-cover" data-lazy-src="https://i.loli.net/2020/12/27/KbCG73ypWtu26QN.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">CS131,Homewrok6,Recognition-Classification</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2018/04/15/cs131-homework0/" title="CS131, Homewrok0, Basics"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/PFYmvxWrsitkyb3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-04-15</div><div class="title">CS131, Homewrok0, Basics</div></div></a></div><div><a href="/2018/04/15/cs131-homework1/" title="CS131, Homewrok1, Filters-Instagram"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/OB8qRKXtFemPDuc.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-04-15</div><div class="title">CS131, Homewrok1, Filters-Instagram</div></div></a></div><div><a href="/2018/04/16/cs131-homework2/" title="CS131, Homewrok2, Edges-Smart Car Lane Detection"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/S7kCainPZvpVJfj.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-04-15</div><div class="title">CS131, Homewrok2, Edges-Smart Car Lane Detection</div></div></a></div><div><a href="/2018/09/07/cs131-homework3/" title="CS131,Homewrok3,Panorama-ImageStiching"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/eMvrld9nsix1fXq.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-09-07</div><div class="title">CS131,Homewrok3,Panorama-ImageStiching</div></div></a></div><div><a href="/2018/09/10/cs131-homework4/" title="CS131,Homewrok4,Resizing-SeamCarving"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/qTeUEj58FYLZvx4.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-09-09</div><div class="title">CS131,Homewrok4,Resizing-SeamCarving</div></div></a></div><div><a href="/2018/09/11/cs131-homework5/" title="CS131,Homewrok5,Segmentation-Clustering"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/71eB5HR2UlyPEgv.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-09-11</div><div class="title">CS131,Homewrok5,Segmentation-Clustering</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">SHEN Xiaohai</div><div class="author-info__description">我的心愿是没有蛀牙</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/veraposeidon"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/veraposeidon" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:veraposeidon@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">右下角设置可以切换 Dark Mode / Light Mode</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Homework-7"><span class="toc-number">1.</span> <span class="toc-text">Homework 7</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Part-1-Hog-Representation-10-points"><span class="toc-number">2.</span> <span class="toc-text">Part 1: Hog Representation (10 points)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Part-2-Sliding-Window-30-points"><span class="toc-number">3.</span> <span class="toc-text">Part 2: Sliding Window (30 points)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Part-3-Image-Pyramids-30-points"><span class="toc-number">4.</span> <span class="toc-text">Part 3: Image Pyramids (30 points)</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#3-1-Image-Pyramid-10-points"><span class="toc-number">4.0.1.</span> <span class="toc-text">3.1 Image Pyramid (10 points)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-2-Pyramid-Score-20-points"><span class="toc-number">4.0.2.</span> <span class="toc-text">3.2 Pyramid Score (20 points)</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Part-4-Deformable-Parts-Detection"><span class="toc-number">5.</span> <span class="toc-text">Part 4: Deformable Parts Detection</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Part-5-Human-Parts-Location-10-points"><span class="toc-number">6.</span> <span class="toc-text">Part 5: Human Parts Location (10 points)</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#Part-6-Gaussian-Filter-20-points"><span class="toc-number">7.</span> <span class="toc-text">Part 6: Gaussian Filter (20 points)</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Part-6-1-Gaussian-Filter"><span class="toc-number">7.1.</span> <span class="toc-text">Part 6.1 Gaussian Filter</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#6-2-Result-Analysis-10-points"><span class="toc-number">7.2.</span> <span class="toc-text">6.2 Result Analysis (10 points)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Extra-Credit-1-point"><span class="toc-number">7.3.</span> <span class="toc-text">Extra Credit (1 point)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%A1%A3%E6%A1%88"><span class="toc-number">8.</span> <span class="toc-text">代码档案</span></a></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url('https://i.loli.net/2020/12/27/i76rSB5RH4k8eEW.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2021 By SHEN Xiaohai</div><div class="footer_custom_text">欢迎👏</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="algolia-search"><div class="search-dialog"><div class="search-dialog__title" id="algolia-search-title">Algolia</div><div id="algolia-input-panel"><div id="algolia-search-input"></div></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-stats"></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'BE79lHe3JGlIH9QbzBILVo3I-MdYXbMMI',
+      appKey: 'a5zH6018czqOEie43oSIDWxC',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: true,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign(initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config-diff',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: true,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', 'UA-74360128-2', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

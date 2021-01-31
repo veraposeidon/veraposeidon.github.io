@@ -1,0 +1,382 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SSD 论文阅读笔记 | SHEN's BLOG</title><meta name="keywords" content="计算机视觉,深度学习,论文笔记,SSD"><meta name="author" content="SHEN Xiaohai"><meta name="copyright" content="SHEN Xiaohai"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="目标检测论文 《Single Shot MultiBox Detector》的笔记">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SSD 论文阅读笔记">
+<meta property="og:url" content="https://shenxiaohai.me/2018/11/24/paper-SSD/index.html">
+<meta property="og:site_name" content="SHEN&#39;s BLOG">
+<meta property="og:description" content="目标检测论文 《Single Shot MultiBox Detector》的笔记">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/09/07/lS8PjzikfnFsrIV.jpg">
+<meta property="article:published_time" content="2018-11-23T22:48:36.000Z">
+<meta property="article:modified_time" content="2018-11-23T15:03:52.000Z">
+<meta property="article:author" content="SHEN Xiaohai">
+<meta property="article:tag" content="计算机视觉">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="论文笔记">
+<meta property="article:tag" content="SSD">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/09/07/lS8PjzikfnFsrIV.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://shenxiaohai.me/2018/11/24/paper-SSD/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.js" defer></script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-74360128-2"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-74360128-2');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: {"appId":"TA1T7F3R2E","apiKey":"c4d8bb07ab3fa68ab573e9bf8f264e0c","indexName":"SHENBLOG","hits":{"per_page":15},"languages":{"input_placeholder":"搜索文章","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":600,"position":"top","messagePrev":"距离我扯这篇文章已经","messageNext":"天了，内容可能跟不上时代了，对不住了各位老铁。注意自己搜搜新的材料对照着看。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":600,"languages":{"author":"作者: SHEN Xiaohai","link":"链接: ","source":"来源: SHEN's BLOG","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2018-11-23 15:03:52'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const now = new Date()
+          const hour = now.getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://i.loli.net/2020/09/07/lS8PjzikfnFsrIV.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">SHEN's BLOG</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">SSD 论文阅读笔记</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-11-23T22:48:36.000Z" title="发表于 2018-11-23 22:48:36">2018-11-23</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2018-11-23T15:03:52.000Z" title="更新于 2018-11-23 15:03:52">2018-11-23</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/">论文笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.7k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>5分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="SSD-论文阅读笔记"><a href="#SSD-论文阅读笔记" class="headerlink" title="SSD 论文阅读笔记"></a>SSD 论文阅读笔记</h1><h2 id="资料"><a href="#资料" class="headerlink" title="资料"></a>资料</h2><p>​    <a target="_blank" rel="noopener" href="https://arxiv.org/abs/1512.02325">SSD: Single Shot MultiBox Detector</a></p>
+<p>​    原文下载：<a target="_blank" rel="noopener" href="https://arxiv.org/pdf/1512.02325">PDF</a></p>
+<p>​    中文翻译：<a target="_blank" rel="noopener" href="https://blog.csdn.net/xunan003/article/details/78436429">SSD: Single Shot MultiBox Detector翻译（包括正式版和预印版）（对原文作部分理解性修改）</a></p>
+<p>​    参考PPT ：<a target="_blank" rel="noopener" href="https://link.jianshu.com/?t=https://docs.google.com/presentation/d/1rtfeV_VmdGdZD5ObVVpPDPIODSDxKnFSU0bsN_rgZXc/pub?start=false&loop=false&delayms=3000&slide=id.g179f601b72_0_51">一份俄语PPT</a></p>
+<h2 id="笔记"><a href="#笔记" class="headerlink" title="笔记"></a>笔记</h2><p>​    SSD，Single Shot MultiBox Detector，单发多框检测，属于one stage范畴。比YOLO(V1)快又准，比Faster R-CNN准确度相当。</p>
+<p>​    SSD使用的是anchor机制（论文中称之为default box），在主干网络（原始网络截断分类层）的特征图上，使用卷积滤波器预测anchor box的分类置信度和目标边界框的偏移量。</p>
+<h3 id="SSD的模型"><a href="#SSD的模型" class="headerlink" title="SSD的模型"></a>SSD的模型</h3><p>​    论文中的SSD模型结构和YOLO模型结构的对比图：</p>
+<p><img src= "/img/loading.gif" data-lazy-src="SSD_YOLO.png" alt="SSD-YOLO区别"></p>
+<p>​    俄语PPT中的SSD-300模型图，我认为更直观反映SSD的多尺度检测和NMS选择：</p>
+<p><img src= "/img/loading.gif" data-lazy-src="SSD_model.png" alt="PPT SSD Model"></p>
+<p>模型中的几个关键点：</p>
+<h4 id="多尺度的特征图检测"><a href="#多尺度的特征图检测" class="headerlink" title="多尺度的特征图检测"></a>多尺度的特征图检测</h4><p>​    如上图SSD 300的模型图，在几个特征图上（即主干网络之后的卷积特征层），依次划分了38x38、19x19、10x10、5x5、3x3和1x1个grid cell（cell对应default box/anchor），每个anchor用于预测分类和目标边界框。如38x38、19x19，每个单元的感受野较小，更适合检测尺寸较小的目标，反之，如5x5、3x3等，每个单元的感受野较大，更适合检测尺寸较大的目标。</p>
+<h4 id="使用卷积滤波器进行检测："><a href="#使用卷积滤波器进行检测：" class="headerlink" title="使用卷积滤波器进行检测："></a>使用卷积滤波器进行检测：</h4><p>​    如上图SSD 300的模型图，在每一个特征图上（设大小 m*n，通道为p），使用3x3xp的卷积核进行滤波，则在进行核运算的每点，都得到一个输出值，要么用于分类置信度，要么用于目标边界框的偏移量。下图举例说明，中间的3x3卷积核用于目标边界框的回归预测，右侧的3x3卷积核用于目标分类预测。</p>
+<p><img src= "/img/loading.gif" data-lazy-src="featureMap%E6%93%8D%E4%BD%9C.png" alt="特征图上的操作"></p>
+<h4 id="默认框（anchor）与宽高比"><a href="#默认框（anchor）与宽高比" class="headerlink" title="默认框（anchor）与宽高比"></a>默认框（anchor）与宽高比</h4><blockquote>
+<p>默认框以卷积的方式平铺特征映射，以便每个框相对于其对应单元的位置是固定的。在每个特征映射单元中，我们预测相对于单元格中的默认框形状的偏移，以及指出这些框中每个框存在的详细类别的每类评分。具体来说，对于在给定位置的k个框中每个框，我们计算c类分数和相对于原始默认框的4个偏移量。这使得在特征图中的每个位置需要总共(c+4)·k个滤波器，对于m×n特征图产生(c+4)·k·m·n个输出。</p>
+</blockquote>
+<p>​    同时，采用不同宽高比的anchor，有效离散出可能的目标边界框形状空间，提升模型的性能。</p>
+<p>​    如上图左侧所示，5x5的特征图，可以有25个正常anchor（宽高比为1）；</p>
+<p>​    通过采用不同宽高比的anchor，如宽高比为2或0.5的anchor，则增加两类anchor，共计25·3=75个anchor。</p>
+<h3 id="SSD的训练"><a href="#SSD的训练" class="headerlink" title="SSD的训练"></a>SSD的训练</h3><p>训练中的几个关键点和细节：</p>
+<h4 id="匹配策略（匹配问题）"><a href="#匹配策略（匹配问题）" class="headerlink" title="匹配策略（匹配问题）"></a>匹配策略（匹配问题）</h4><p>​    匹配问题指的是，在训练过程中，将真值标签（Ground Truth，包含分类和边界框位置）合理地匹配给每个特征图的anchor boxes中，将真值标签分配好后，才可以进行训练的误差计算。</p>
+<p>​    论文提出了两步走的方式：计算真值标签与特征图中各个anchor的Jaccard值（也叫IoU/交并比）。第一步将真值标签分配给重叠最好的anchor，确保每个真值标签都有一个匹配的默认值；第二步，在剩余anchor中继续筛选，挑选出与真值标签Jaccard值高于阈值的anchor，将它与对应的真值标签相匹配；其余的anchor抛弃不管。</p>
+<h4 id="训练目标（损失函数）"><a href="#训练目标（损失函数）" class="headerlink" title="训练目标（损失函数）"></a>训练目标（损失函数）</h4><p>​    目标检测的损失函数分为两个：一个是分类损失，一般用二分类交叉熵损失函数(BCE)；一个是边界框的定位损失，这是个回归问题，一般使用L1 Loss或者平滑L1 Loss(Smooth L1 Loss)。对每个anchor进行计算loss，累加，并反向传播。</p>
+<h4 id="默认框（anchor）的尺度和宽高比选择"><a href="#默认框（anchor）的尺度和宽高比选择" class="headerlink" title="默认框（anchor）的尺度和宽高比选择"></a>默认框（anchor）的尺度和宽高比选择</h4><p>​    如上节所说，采用不同宽高比的anchor，能有效离散出可能的目标边界框形状空间，提升模型的性能。</p>
+<p>​    同时，不同特征图的anchor具有不同的感受野，通过组合许多特征图在各个位置的不同尺寸和不同宽高比的anchor的预测，增加了更多样化的预测集合，覆盖到更多的输入对象输入尺寸和形状，增强模型的泛化性能。</p>
+<p>​    论文推荐了如下的anchor比例计算的方式，原文：</p>
+<p><img src= "/img/loading.gif" data-lazy-src="scale.png" alt="scale"></p>
+<p>​    翻译摘抄自《SSD: Single Shot MultiBox Detector翻译》：</p>
+<p><img src= "/img/loading.gif" data-lazy-src="scaleCN.png" alt="scale-CN"></p>
+<h4 id="Hard-negative-mining（硬负挖掘？？）"><a href="#Hard-negative-mining（硬负挖掘？？）" class="headerlink" title="Hard negative mining（硬负挖掘？？）"></a>Hard negative mining（硬负挖掘？？）</h4><p>​    在之前的匹配策略之后，许多anchor是负样本，没有匹配到目标（即背景），特别是当不同尺寸和宽高比增加anchor数目之后，负样本的比例会很大。正负样本之间的不平衡会影响训练效果。但是SSD的机制是，不采用所有的负样本，而是通过置信度来排序，删除置信度低的样本，这样能维持正负样本的比例在1:3之间。</p>
+<h4 id="数据增强"><a href="#数据增强" class="headerlink" title="数据增强"></a>数据增强</h4><p>​    论文在训练小节和实验分析小节都强调了数据增强的至关重要的作用。论文采用了如下的增强的步骤。为了使模型对于各种输入对象大小和形状更加鲁棒，每个训练图像通过以下选项之一随机采样：</p>
+<ul>
+<li>使用整个原始输入图像</li>
+<li>采样一个片段，使对象最小的jaccard重叠值为0.1,0.3,0.5,0.7或0.9。</li>
+<li>随机采样一个片段</li>
+</ul>
+<p>每个采样片段的大小为原始图像大小的[0.1，1]，横宽比在1/2和2之间。如果真实标签框中心在采样片段内，则保留重叠部分。在上述采样步骤之后，还采用一些光度失真操作，将每个采样片段调整为固定大小并以0.5的概率水平翻转。</p>
+<h3 id="SSD-与-小目标"><a href="#SSD-与-小目标" class="headerlink" title="SSD 与 小目标"></a>SSD 与 小目标</h3><p>论文中也提到了SSD适合检测大目标，在小目标的检测准确率上比不上Faster R-CNN。</p>
+<p>解决方式之一就是提高输入图像的分辨率，让anchor的感受野更小。</p>
+<p>解决方式之二就是数据增强步骤中，采用zoom out（缩小）操作。</p>
+<h2 id="参考："><a href="#参考：" class="headerlink" title="参考："></a>参考：</h2><p><a target="_blank" rel="noopener" href="https://blog.csdn.net/xunan003/article/details/78436429">SSD: Single Shot MultiBox Detector翻译（包括正式版和预印版）（对原文作部分理解性修改）</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/db1d606d13d3">论文阅读《SSD: Single Shot MultiBox Detector》</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/35642094">SSD 系列论文总结</a></p>
+<p><a target="_blank" rel="noopener" href="https://zh.gluon.ai/chapter_computer-vision/ssd.html">单发多框检测（SSD）</a></p>
+<p>文中图像来自论文原文和开头指出的俄语PPT（不知道出处）。</p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">SHEN Xiaohai</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://shenxiaohai.me/2018/11/24/paper-SSD/">https://shenxiaohai.me/2018/11/24/paper-SSD/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://shenxiaohai.me" target="_blank">SHEN's BLOG</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/">计算机视觉</a><a class="post-meta__tags" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a><a class="post-meta__tags" href="/tags/%E8%AE%BA%E6%96%87%E7%AC%94%E8%AE%B0/">论文笔记</a><a class="post-meta__tags" href="/tags/SSD/">SSD</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/09/07/lS8PjzikfnFsrIV.jpg" data-sites="wechat,weibo,qq,facebook,twitter"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2018/11/29/cifar10-pytorch/"><img class="prev-cover" data-lazy-src="https://i.loli.net/2020/09/07/lS8PjzikfnFsrIV.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">PyTorch在CIFAR-10数据集上的训练及测试过程</div></div></a></div><div class="next-post pull-right"><a href="/2018/11/22/fast.ai-9-objctDetctMulti/"><img class="next-cover" data-lazy-src="https://i.loli.net/2020/12/27/32nULvbiuOVYt4S.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">在PASCAL VOC数据集上的多目标检测</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2019/02/22/bag-freebies/" title="目标检测训练技巧集锦（论文笔记）"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/MxZdhpHiAb8Q6GP.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-02-22</div><div class="title">目标检测训练技巧集锦（论文笔记）</div></div></a></div><div><a href="/2019/01/11/bag-tricks/" title="CNN图像分类技巧集锦（论文笔记）"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/vFRKH1glEzJdNAw.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-01-11</div><div class="title">CNN图像分类技巧集锦（论文笔记）</div></div></a></div><div><a href="/2018/12/05/paper-yolo-v1/" title="YOLO v1 论文阅读笔记"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/urJiLKEadBCIcH7.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-12-04</div><div class="title">YOLO v1 论文阅读笔记</div></div></a></div><div><a href="/2018/11/22/fast.ai-9-objctDetctMulti/" title="在PASCAL VOC数据集上的多目标检测"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/32nULvbiuOVYt4S.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-11-22</div><div class="title">在PASCAL VOC数据集上的多目标检测</div></div></a></div><div><a href="/2018/11/12/fast.ai-8-objctDetct/" title="在PASCAL VOC数据集上的单目标检测"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/07/cNiFhq45XRySBKP.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-11-12</div><div class="title">在PASCAL VOC数据集上的单目标检测</div></div></a></div><div><a href="/2019/02/27/lr_find/" title="寻找最优学习率的方法以及周期性学习率更新策略(论文笔记)"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/07/24sU9ERClSfMWb3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-02-26</div><div class="title">寻找最优学习率的方法以及周期性学习率更新策略(论文笔记)</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">SHEN Xiaohai</div><div class="author-info__description">我的心愿是没有蛀牙</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/veraposeidon"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/veraposeidon" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:veraposeidon@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">右下角设置可以切换 Dark Mode / Light Mode</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#SSD-%E8%AE%BA%E6%96%87%E9%98%85%E8%AF%BB%E7%AC%94%E8%AE%B0"><span class="toc-number">1.</span> <span class="toc-text">SSD 论文阅读笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B5%84%E6%96%99"><span class="toc-number">1.1.</span> <span class="toc-text">资料</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%AC%94%E8%AE%B0"><span class="toc-number">1.2.</span> <span class="toc-text">笔记</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#SSD%E7%9A%84%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.1.</span> <span class="toc-text">SSD的模型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%A4%9A%E5%B0%BA%E5%BA%A6%E7%9A%84%E7%89%B9%E5%BE%81%E5%9B%BE%E6%A3%80%E6%B5%8B"><span class="toc-number">1.2.1.1.</span> <span class="toc-text">多尺度的特征图检测</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E5%8D%B7%E7%A7%AF%E6%BB%A4%E6%B3%A2%E5%99%A8%E8%BF%9B%E8%A1%8C%E6%A3%80%E6%B5%8B%EF%BC%9A"><span class="toc-number">1.2.1.2.</span> <span class="toc-text">使用卷积滤波器进行检测：</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E6%A1%86%EF%BC%88anchor%EF%BC%89%E4%B8%8E%E5%AE%BD%E9%AB%98%E6%AF%94"><span class="toc-number">1.2.1.3.</span> <span class="toc-text">默认框（anchor）与宽高比</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSD%E7%9A%84%E8%AE%AD%E7%BB%83"><span class="toc-number">1.2.2.</span> <span class="toc-text">SSD的训练</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%8C%B9%E9%85%8D%E7%AD%96%E7%95%A5%EF%BC%88%E5%8C%B9%E9%85%8D%E9%97%AE%E9%A2%98%EF%BC%89"><span class="toc-number">1.2.2.1.</span> <span class="toc-text">匹配策略（匹配问题）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E7%9B%AE%E6%A0%87%EF%BC%88%E6%8D%9F%E5%A4%B1%E5%87%BD%E6%95%B0%EF%BC%89"><span class="toc-number">1.2.2.2.</span> <span class="toc-text">训练目标（损失函数）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E9%BB%98%E8%AE%A4%E6%A1%86%EF%BC%88anchor%EF%BC%89%E7%9A%84%E5%B0%BA%E5%BA%A6%E5%92%8C%E5%AE%BD%E9%AB%98%E6%AF%94%E9%80%89%E6%8B%A9"><span class="toc-number">1.2.2.3.</span> <span class="toc-text">默认框（anchor）的尺度和宽高比选择</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Hard-negative-mining%EF%BC%88%E7%A1%AC%E8%B4%9F%E6%8C%96%E6%8E%98%EF%BC%9F%EF%BC%9F%EF%BC%89"><span class="toc-number">1.2.2.4.</span> <span class="toc-text">Hard negative mining（硬负挖掘？？）</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%A2%9E%E5%BC%BA"><span class="toc-number">1.2.2.5.</span> <span class="toc-text">数据增强</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SSD-%E4%B8%8E-%E5%B0%8F%E7%9B%AE%E6%A0%87"><span class="toc-number">1.2.3.</span> <span class="toc-text">SSD 与 小目标</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%EF%BC%9A"><span class="toc-number">1.3.</span> <span class="toc-text">参考：</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url('https://i.loli.net/2020/09/07/lS8PjzikfnFsrIV.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2021 By SHEN Xiaohai</div><div class="footer_custom_text">欢迎👏</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="algolia-search"><div class="search-dialog"><div class="search-dialog__title" id="algolia-search-title">Algolia</div><div id="algolia-input-panel"><div id="algolia-search-input"></div></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-stats"></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'BE79lHe3JGlIH9QbzBILVo3I-MdYXbMMI',
+      appKey: 'a5zH6018czqOEie43oSIDWxC',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: true,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign(initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config-diff',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: true,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', 'UA-74360128-2', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

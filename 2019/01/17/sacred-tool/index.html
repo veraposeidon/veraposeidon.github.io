@@ -1,0 +1,368 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sacred 深度学习实验管理工具 | SHEN's BLOG</title><meta name="keywords" content="工具,深度学习"><meta name="author" content="SHEN Xiaohai"><meta name="copyright" content="SHEN Xiaohai"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="介绍一款名为sacred的工具，如何安装，如何用于深度学习试验管理">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Sacred 深度学习实验管理工具">
+<meta property="og:url" content="https://shenxiaohai.me/2019/01/17/sacred-tool/index.html">
+<meta property="og:site_name" content="SHEN&#39;s BLOG">
+<meta property="og:description" content="介绍一款名为sacred的工具，如何安装，如何用于深度学习试验管理">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/12/27/vdGRVrTB31fhs9w.jpg">
+<meta property="article:published_time" content="2019-01-16T19:43:54.000Z">
+<meta property="article:modified_time" content="2019-01-16T13:32:54.000Z">
+<meta property="article:author" content="SHEN Xiaohai">
+<meta property="article:tag" content="工具">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/12/27/vdGRVrTB31fhs9w.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://shenxiaohai.me/2019/01/17/sacred-tool/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.js" defer></script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-74360128-2"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-74360128-2');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: {"appId":"TA1T7F3R2E","apiKey":"c4d8bb07ab3fa68ab573e9bf8f264e0c","indexName":"SHENBLOG","hits":{"per_page":15},"languages":{"input_placeholder":"搜索文章","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":600,"position":"top","messagePrev":"距离我扯这篇文章已经","messageNext":"天了，内容可能跟不上时代了，对不住了各位老铁。注意自己搜搜新的材料对照着看。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":600,"languages":{"author":"作者: SHEN Xiaohai","link":"链接: ","source":"来源: SHEN's BLOG","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2019-01-16 13:32:54'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const now = new Date()
+          const hour = now.getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://i.loli.net/2020/12/27/vdGRVrTB31fhs9w.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">SHEN's BLOG</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">Sacred 深度学习实验管理工具</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2019-01-16T19:43:54.000Z" title="发表于 2019-01-16 19:43:54">2019-01-16</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2019-01-16T13:32:54.000Z" title="更新于 2019-01-16 13:32:54">2019-01-16</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E5%B7%A5%E5%85%B7/">工具</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>8分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="深度学习实验管理"><a href="#深度学习实验管理" class="headerlink" title="深度学习实验管理"></a>深度学习实验管理</h1><blockquote><p><em>Every experiment is sacred</em></p>
+<p><em>Every experiment is great</em></p>
+<p><em>If an experiment is wasted</em></p>
+<p><em>God gets quite irate</em></p>
+<footer><strong>Sacred</strong><cite><a target="_blank" rel="noopener" href="https://github.com/IDSIA/sacred">github.com/IDSIA/sacred</a></cite></footer></blockquote>
+
+
+
+<p>最近研究深度学习在目标检测领域的应用，在测试调整检测框架以及炼丹调参的情况时，常有的困惑就是如何保留每一次实验的实验数据，因为每次实验小意思就三四个小时，中等意思就两三天，每次跑下来的数据都应当保存下来留作后续分析，而不是看它效果不行，就直接删除了。注意这里的实验数据并不仅仅包括代码和训练结果，还应当包括</p>
+<ul>
+<li>实验的参数配置</li>
+<li>实验运行的环境<ul>
+<li>GPU信息</li>
+<li>python 依赖</li>
+<li>主机信息</li>
+</ul>
+</li>
+<li>实验过程的各类指标变化信息</li>
+<li>实验的输出</li>
+</ul>
+<p>日常使用中，要改的东西主要集中在代码[模型结构和训练流程]+参数[各类超参]，对于代码改进，勤用Git进行版本管理；对于参数设置，统一管理在配置文件中；上面其他的实验数据除了养成良好的习惯进行手动保存备份之外，似乎没有更方便的方式了。</p>
+<p>最近找到一个名为<strong>Sacred</strong>的工具，用于记录实验的配置、组织、日志和复现。我今天测试了一下，Sacred主要的工作在于将每次实验的输入-过程-输出保存到数据库中，并利用Web将历史实验数据进行了可视化，方便我们查看历史实验，并进行参数配置和实验结果的比较。</p>
+<p>下面记录一下Sacred的安装过程和使用案例。</p>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>Github 主页： <a target="_blank" rel="noopener" href="https://github.com/IDSIA/sacred">Sacred</a></p>
+<p>Sacred 文档：<a target="_blank" rel="noopener" href="https://sacred.readthedocs.io/en/latest/">Welcome to Sacred’s documentation!</a></p>
+<p>Sacred的使用有两部分：</p>
+<ul>
+<li>Sacred + MongoDB：实验记录和保存</li>
+<li>Ominiboard：可视化管理</li>
+</ul>
+<p>备注：</p>
+<ul>
+<li>Sacred的数据保存后端有多种形式：Mongo Observer、File Storage Observer、TinyDB Observer、Telegram Observer等，我选择第一种Mongo Observer。其他的方式可以查看文档。</li>
+<li>Sacred的可视化前端也支持多种形式：Omniboard、Sacredboard、SacredBrowser等，我选择第一种Omniboard。其他的方式可以在<a target="_blank" rel="noopener" href="https://github.com/IDSIA/sacred#frontends">Github主页</a>上找到入口。</li>
+</ul>
+<h2 id="Sacred"><a href="#Sacred" class="headerlink" title="Sacred"></a>Sacred</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 主角</span></span><br><span class="line">pip install sacred</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用于数据库连接</span></span><br><span class="line">pip install numpy pymongo</span><br></pre></td></tr></table></figure>
+
+<h2 id="MongoDB"><a href="#MongoDB" class="headerlink" title="MongoDB"></a>MongoDB</h2><p>MongoDB是一个数据库管理系统，这里用作Sacred的存储后端。</p>
+<p>在ubuntu上的MongoDB安装可以参考<a target="_blank" rel="noopener" href="https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/">Install MongoDB Community Edition on Ubuntu</a>，其他系统也可以在该网站上找到对应的安装方式。</p>
+<p>这里重复一下安装的过程：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 1. Import the public key used by the package management system.</span></span><br><span class="line">sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4</span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. Create a list file for MongoDB.</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.0 multiverse&quot;</span> | sudo tee /etc/apt/sources.list.d/mongodb-org-4.0.list</span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. Reload local package database.</span></span><br><span class="line">sudo apt-get update</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. Install the MongoDB packages.</span></span><br><span class="line">sudo apt-get install -y mongodb-org</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4.1 prevent MongoDB upgrades when use apt-get</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;mongodb-org hold&quot;</span> | sudo dpkg --set-selections</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;mongodb-org-server hold&quot;</span> | sudo dpkg --set-selections</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;mongodb-org-shell hold&quot;</span> | sudo dpkg --set-selections</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;mongodb-org-mongos hold&quot;</span> | sudo dpkg --set-selections</span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;mongodb-org-tools hold&quot;</span> | sudo dpkg --set-selections</span><br></pre></td></tr></table></figure>
+
+<p>友情提醒：按这种方式，下载比较缓慢。</p>
+<p>我是用梯子安装的，网络条件不好的话，可以参考清华大学开源软件镜像站的<a target="_blank" rel="noopener" href="https://mirror.tuna.tsinghua.edu.cn/help/mongodb/">MongoDB 镜像使用帮助</a>。</p>
+<p>Tips：MongoDB的日常使用：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 启动</span></span><br><span class="line">sudo service mongod start</span><br><span class="line"></span><br><span class="line"><span class="comment"># 停止</span></span><br><span class="line">sudo service mongod stop</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重启</span></span><br><span class="line">sudo service mongod restart</span><br><span class="line"></span><br><span class="line"><span class="comment"># 进入MongoDB</span></span><br><span class="line">mongo</span><br></pre></td></tr></table></figure>
+
+<p>创建一个名为sacred的数据库，用作sacred工具的后端存储：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 进入MongoDB</span></span><br><span class="line">mongo</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建sacred数据库。use命令切换数据库，没有该数据就会自动创建一个</span></span><br><span class="line">use sacred</span><br></pre></td></tr></table></figure>
+
+<h2 id="Omniboard"><a href="#Omniboard" class="headerlink" title="Omniboard"></a>Omniboard</h2><p>Omniboard效果图：</p>
+<p><img src= "/img/loading.gif" data-lazy-src="https://raw.githubusercontent.com/vivekratnavel/omniboard/master/docs/assets/screenshots/table.png" alt="Omniboard"></p>
+<p>Github Repo: <a target="_blank" rel="noopener" href="https://github.com/vivekratnavel/omniboard">Omniboard</a></p>
+<p>安装指导：<a target="_blank" rel="noopener" href="https://vivekratnavel.github.io/omniboard/#/quick-start">Omniboard: Quick Start</a></p>
+<p>Guide上有两种方式：NPM 和 Docker，我用第一种npm的方式。</p>
+<p>第一步，在Ubuntu机器上安装版本≥v8的Node.js，系统默认apt 安装的版本不够，需要手动安装，以下是安装步骤：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 0. 从官网下载编译好的node.js</span></span><br><span class="line">wget https://nodejs.org/dist/v10.15.0/node-v10.15.0-linux-x64.tar.xz</span><br><span class="line"></span><br><span class="line"><span class="comment"># 1. 解压到 /usr/local/lib/nodejs, 注意VERSION是版本号，此处是v10.15.0</span></span><br><span class="line">VERSION=v10.15.0</span><br><span class="line">DISTRO=linux-x64</span><br><span class="line">sudo mkdir /usr/<span class="built_in">local</span>/lib/nodejs</span><br><span class="line">sudo tar -xJvf node-<span class="variable">$VERSION</span>-<span class="variable">$DISTRO</span>.tar.xz -C /usr/<span class="built_in">local</span>/lib/nodejs </span><br><span class="line">sudo mv /usr/<span class="built_in">local</span>/lib/nodejs/node-<span class="variable">$VERSION</span>-<span class="variable">$DISTRO</span> /usr/<span class="built_in">local</span>/lib/nodejs/node-<span class="variable">$VERSION</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 2. 设置环境变量，打开 ~/.profile, 追加如下信息</span></span><br><span class="line"><span class="comment"># Nodejs</span></span><br><span class="line"><span class="built_in">export</span> NODEJS_HOME=/usr/<span class="built_in">local</span>/lib/nodejs/node-<span class="variable">$VERSION</span>/bin</span><br><span class="line"><span class="built_in">export</span> PATH=<span class="variable">$NODEJS_HOME</span>:<span class="variable">$PATH</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 3. 刷新</span></span><br><span class="line">. ~/.profile</span><br><span class="line"></span><br><span class="line"><span class="comment"># 4. 测试安装版本信息</span></span><br><span class="line">node -v</span><br><span class="line">npm version</span><br><span class="line">npx -v</span><br><span class="line"></span><br><span class="line"><span class="comment"># 创建sudo链接</span></span><br><span class="line">sudo ln -s /usr/<span class="built_in">local</span>/lib/nodejs/node-<span class="variable">$VERSION</span>/bin/node /usr/bin/node</span><br><span class="line">sudo ln -s /usr/<span class="built_in">local</span>/lib/nodejs/node-<span class="variable">$VERSION</span>/bin/npm /usr/bin/npm</span><br><span class="line">sudo ln -s /usr/<span class="built_in">local</span>/lib/nodejs/node-<span class="variable">$VERSION</span>/bin/npx /usr/bin/npx</span><br></pre></td></tr></table></figure>
+
+<p>第二步，npm 安装omniboard</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">npm install -g omniboard</span><br></pre></td></tr></table></figure>
+
+<p>第三步，开启omniboard服务。平时也是用该命令开启omniboard可视化前端</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 开启用法</span></span><br><span class="line">omniboard -m hostname:port:database</span><br><span class="line"></span><br><span class="line"><span class="comment"># 默认情况下如下，其中27017是MongoDB的端口</span></span><br><span class="line">omniboard -m localhost:27017:sacred</span><br></pre></td></tr></table></figure>
+
+<p>第四步，打开 <a target="_blank" rel="noopener" href="http://localhost:9000/">http://localhost:9000</a> 来查看前端，并进行管理。</p>
+<h1 id="使用案例"><a href="#使用案例" class="headerlink" title="使用案例"></a>使用案例</h1><p>使用yunjey的一个pytorch教程作为演示，代码是演示用pytorch实现基于CNN的MINIST手写数字识别。</p>
+<p>根据Sacred文档稍作修改，就可以演示如何进行实验的记录。</p>
+<p>更多用法请去看Sacred 文档：<a target="_blank" rel="noopener" href="https://sacred.readthedocs.io/en/latest/">Welcome to Sacred’s documentation!</a>。内容超丰富，功能超级多。</p>
+<p>代码：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> sacred <span class="keyword">import</span> Experiment</span><br><span class="line"><span class="keyword">from</span> sacred.observers <span class="keyword">import</span> MongoObserver</span><br><span class="line"><span class="keyword">from</span> sacred.utils <span class="keyword">import</span> apply_backspaces_and_linefeeds</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torchvision</span><br><span class="line"><span class="keyword">import</span> torchvision.transforms <span class="keyword">as</span> transforms</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">ex = Experiment(<span class="string">&quot;mnist_cnn&quot;</span>)</span><br><span class="line">ex.observers.append(MongoObserver.create(url=<span class="string">&#x27;localhost:27017&#x27;</span>,</span><br><span class="line">                                         db_name=<span class="string">&#x27;sacred&#x27;</span>))</span><br><span class="line">ex.captured_out_filter = apply_backspaces_and_linefeeds</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># 超参数设置</span></span><br><span class="line"><span class="meta">@ex.config</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">myconfig</span>():</span></span><br><span class="line">    <span class="comment"># Device configuration</span></span><br><span class="line">    device = torch.device(<span class="string">&#x27;cuda:0&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Hyper parameters</span></span><br><span class="line">    num_epochs = <span class="number">5</span></span><br><span class="line">    num_classes = <span class="number">10</span></span><br><span class="line">    batch_size = <span class="number">100</span></span><br><span class="line">    learning_rate = <span class="number">0.001</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Convolutional neural network (two convolutional layers)</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">ConvNet</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, num_classes=<span class="number">10</span></span>):</span></span><br><span class="line">        <span class="built_in">super</span>(ConvNet, self).__init__()</span><br><span class="line">        self.layer1 = nn.Sequential(</span><br><span class="line">            nn.Conv2d(<span class="number">1</span>, <span class="number">16</span>, kernel_size=<span class="number">5</span>, stride=<span class="number">1</span>, padding=<span class="number">2</span>),</span><br><span class="line">            nn.BatchNorm2d(<span class="number">16</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(kernel_size=<span class="number">2</span>, stride=<span class="number">2</span>))</span><br><span class="line">        self.layer2 = nn.Sequential(</span><br><span class="line">            nn.Conv2d(<span class="number">16</span>, <span class="number">32</span>, kernel_size=<span class="number">5</span>, stride=<span class="number">1</span>, padding=<span class="number">2</span>),</span><br><span class="line">            nn.BatchNorm2d(<span class="number">32</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(kernel_size=<span class="number">2</span>, stride=<span class="number">2</span>))</span><br><span class="line">        self.fc = nn.Linear(<span class="number">7</span> * <span class="number">7</span> * <span class="number">32</span>, num_classes)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x</span>):</span></span><br><span class="line">        out = self.layer1(x)</span><br><span class="line">        out = self.layer2(out)</span><br><span class="line">        out = out.reshape(out.size(<span class="number">0</span>), -<span class="number">1</span>)</span><br><span class="line">        out = self.fc(out)</span><br><span class="line">        <span class="keyword">return</span> out</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># notice how we can access the message here by taking it as an argument</span></span><br><span class="line"><span class="meta">@ex.automain</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span>(<span class="params">device,num_epochs,num_classes,batch_size,learning_rate </span>):</span></span><br><span class="line">    <span class="comment"># MNIST dataset</span></span><br><span class="line">    train_dataset = torchvision.datasets.MNIST(root=<span class="string">&#x27;/home/ubuntu/Datasets/MINIST/&#x27;</span>,</span><br><span class="line">                                               train=<span class="literal">True</span>,</span><br><span class="line">                                               transform=transforms.ToTensor(),</span><br><span class="line">                                               download=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    test_dataset = torchvision.datasets.MNIST(root=<span class="string">&#x27;/home/ubuntu/Datasets/MINIST/&#x27;</span>,</span><br><span class="line">                                              train=<span class="literal">False</span>,</span><br><span class="line">                                              transform=transforms.ToTensor())</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Data loader</span></span><br><span class="line">    train_loader = torch.utils.data.DataLoader(dataset=train_dataset,</span><br><span class="line">                                               batch_size=batch_size,</span><br><span class="line">                                               shuffle=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">    test_loader = torch.utils.data.DataLoader(dataset=test_dataset,</span><br><span class="line">                                              batch_size=batch_size,</span><br><span class="line">                                              shuffle=<span class="literal">False</span>)</span><br><span class="line"></span><br><span class="line">    model = ConvNet(num_classes).to(device)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Loss and optimizer</span></span><br><span class="line">    criterion = nn.CrossEntropyLoss()</span><br><span class="line">    optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Train the model</span></span><br><span class="line">    total_step = <span class="built_in">len</span>(train_loader)</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">        <span class="keyword">for</span> i, (images, labels) <span class="keyword">in</span> <span class="built_in">enumerate</span>(train_loader):</span><br><span class="line">            images = images.to(device)</span><br><span class="line">            labels = labels.to(device)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Forward pass</span></span><br><span class="line">            outputs = model(images)</span><br><span class="line">            loss = criterion(outputs, labels)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Backward and optimize</span></span><br><span class="line">            optimizer.zero_grad()</span><br><span class="line">            loss.backward()</span><br><span class="line">            optimizer.step()</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (i + <span class="number">1</span>) % <span class="number">100</span> == <span class="number">0</span>:</span><br><span class="line">                print(<span class="string">&#x27;Epoch [&#123;&#125;/&#123;&#125;], Step [&#123;&#125;/&#123;&#125;], Loss: &#123;:.4f&#125;&#x27;</span></span><br><span class="line">                      .<span class="built_in">format</span>(epoch + <span class="number">1</span>, num_epochs, i + <span class="number">1</span>, total_step, loss.item()))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Test the model</span></span><br><span class="line">    model.<span class="built_in">eval</span>()  <span class="comment"># eval mode (batchnorm uses moving mean/variance instead of mini-batch mean/variance)</span></span><br><span class="line">    <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">        correct = <span class="number">0</span></span><br><span class="line">        total = <span class="number">0</span></span><br><span class="line">        <span class="keyword">for</span> images, labels <span class="keyword">in</span> test_loader:</span><br><span class="line">            images = images.to(device)</span><br><span class="line">            labels = labels.to(device)</span><br><span class="line">            outputs = model(images)</span><br><span class="line">            _, predicted = torch.<span class="built_in">max</span>(outputs.data, <span class="number">1</span>)</span><br><span class="line">            total += labels.size(<span class="number">0</span>)</span><br><span class="line">            correct += (predicted == labels).<span class="built_in">sum</span>().item()</span><br><span class="line"></span><br><span class="line">        print(<span class="string">&#x27;Test Accuracy of the model on the 10000 test images: &#123;&#125; %&#x27;</span>.<span class="built_in">format</span>(<span class="number">100</span> * correct / total))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Save the model checkpoint</span></span><br><span class="line">    torch.save(model.state_dict(), <span class="string">&#x27;model.ckpt&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>执行完该程序后，可以打开omniboard前端  <a target="_blank" rel="noopener" href="http://localhost:9000/">http://localhost:9000</a> ，效果如图：</p>
+<p><img src= "/img/loading.gif" data-lazy-src="sacred.png" alt="sacred"></p>
+<p><img src= "/img/loading.gif" data-lazy-src="sacred_output.png" alt="sacred_output"></p>
+<p><img src= "/img/loading.gif" data-lazy-src="sacred_details.png" alt="sacred_details"></p>
+<p><img src= "/img/loading.gif" data-lazy-src="sacred_config.png" alt="sacred_config"></p>
+<p>有啥问题欢迎讨论啊。</p>
+<h2 id="参考资源"><a href="#参考资源" class="headerlink" title="参考资源"></a>参考资源</h2><p><a target="_blank" rel="noopener" href="https://www.hhllcks.de/blog/2018/5/4/version-your-machine-learning-models-with-sacred">Version your machine learning models with Sacred</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/02-intermediate/convolutional_neural_network/main.py">pytorch-tutorial: convolutional neural network</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">SHEN Xiaohai</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://shenxiaohai.me/2019/01/17/sacred-tool/">https://shenxiaohai.me/2019/01/17/sacred-tool/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://shenxiaohai.me" target="_blank">SHEN's BLOG</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E5%B7%A5%E5%85%B7/">工具</a><a class="post-meta__tags" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/12/27/vdGRVrTB31fhs9w.jpg" data-sites="wechat,weibo,qq,facebook,twitter"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2019/01/19/visualizer-tool/"><img class="prev-cover" data-lazy-src="https://i.loli.net/2020/09/08/wlIgch92XytUPxm.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">常用和不常用的可视化工具</div></div></a></div><div class="next-post pull-right"><a href="/2019/01/11/bag-tricks/"><img class="next-cover" data-lazy-src="https://i.loli.net/2020/09/08/vFRKH1glEzJdNAw.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">CNN图像分类技巧集锦（论文笔记）</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2019/12/09/labelme2Datasets/" title="labelme2Datasets"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/dX7TsVlDAUPGy1N.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-12-09</div><div class="title">labelme2Datasets</div></div></a></div><div><a href="/2019/01/19/visualizer-tool/" title="常用和不常用的可视化工具"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/wlIgch92XytUPxm.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-01-18</div><div class="title">常用和不常用的可视化工具</div></div></a></div><div><a href="/2018/02/21/shadowsocks-qt5/" title="Ubuntu14.04下编译shadowsocks-qt5以支持chacha20-ietf-poly1305加密方式"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/07/24sU9ERClSfMWb3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-02-20</div><div class="title">Ubuntu14.04下编译shadowsocks-qt5以支持chacha20-ietf-poly1305加密方式</div></div></a></div><div><a href="/2018/03/15/caj-to-pdf/" title="如何将CAJ文档转换成带书签的PDF"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/dX7TsVlDAUPGy1N.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-03-14</div><div class="title">如何将CAJ文档转换成带书签的PDF</div></div></a></div><div><a href="/2018/02/20/autonomous-platforms/" title="无人驾驶开源仿真平台整理"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/OYac4EyhXMxbFei.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-02-20</div><div class="title">无人驾驶开源仿真平台整理</div></div></a></div><div><a href="/2019/02/22/bag-freebies/" title="目标检测训练技巧集锦（论文笔记）"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/MxZdhpHiAb8Q6GP.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2019-02-22</div><div class="title">目标检测训练技巧集锦（论文笔记）</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">SHEN Xiaohai</div><div class="author-info__description">我的心愿是没有蛀牙</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/veraposeidon"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/veraposeidon" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:veraposeidon@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">右下角设置可以切换 Dark Mode / Light Mode</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E5%AE%9E%E9%AA%8C%E7%AE%A1%E7%90%86"><span class="toc-number">1.</span> <span class="toc-text">深度学习实验管理</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%85"><span class="toc-number">2.</span> <span class="toc-text">安装</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Sacred"><span class="toc-number">2.1.</span> <span class="toc-text">Sacred</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MongoDB"><span class="toc-number">2.2.</span> <span class="toc-text">MongoDB</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Omniboard"><span class="toc-number">2.3.</span> <span class="toc-text">Omniboard</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="toc-number">3.</span> <span class="toc-text">使用案例</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E8%80%83%E8%B5%84%E6%BA%90"><span class="toc-number">3.1.</span> <span class="toc-text">参考资源</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url('https://i.loli.net/2020/12/27/vdGRVrTB31fhs9w.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2021 By SHEN Xiaohai</div><div class="footer_custom_text">欢迎👏</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="algolia-search"><div class="search-dialog"><div class="search-dialog__title" id="algolia-search-title">Algolia</div><div id="algolia-input-panel"><div id="algolia-search-input"></div></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-stats"></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'BE79lHe3JGlIH9QbzBILVo3I-MdYXbMMI',
+      appKey: 'a5zH6018czqOEie43oSIDWxC',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: true,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign(initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config-diff',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: true,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', 'UA-74360128-2', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

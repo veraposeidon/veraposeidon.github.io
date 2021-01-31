@@ -1,0 +1,471 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>PyTorch 中级篇（5）：语言模型（Language Model (RNN-LM)） | SHEN's BLOG</title><meta name="keywords" content="深度学习,PyTorch,循环神经网络,LSTM,语言模型"><meta name="author" content="SHEN Xiaohai"><meta name="copyright" content="SHEN Xiaohai"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Pytorch中级S02E05：语言模型（Language Model (RNN-LM)）。循环神经网络语言模型RNN+PBT">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch 中级篇（5）：语言模型（Language Model (RNN-LM)）">
+<meta property="og:url" content="https://shenxiaohai.me/2018/10/20/pytorch-tutorial-intermediate-05/index.html">
+<meta property="og:site_name" content="SHEN&#39;s BLOG">
+<meta property="og:description" content="Pytorch中级S02E05：语言模型（Language Model (RNN-LM)）。循环神经网络语言模型RNN+PBT">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/12/27/HLhkAu352arYpj9.jpg">
+<meta property="article:published_time" content="2018-10-19T16:30:39.000Z">
+<meta property="article:modified_time" content="2018-11-24T12:02:58.000Z">
+<meta property="article:author" content="SHEN Xiaohai">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="循环神经网络">
+<meta property="article:tag" content="LSTM">
+<meta property="article:tag" content="语言模型">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/12/27/HLhkAu352arYpj9.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://shenxiaohai.me/2018/10/20/pytorch-tutorial-intermediate-05/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.js" defer></script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-74360128-2"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-74360128-2');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: {"appId":"TA1T7F3R2E","apiKey":"c4d8bb07ab3fa68ab573e9bf8f264e0c","indexName":"SHENBLOG","hits":{"per_page":15},"languages":{"input_placeholder":"搜索文章","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":600,"position":"top","messagePrev":"距离我扯这篇文章已经","messageNext":"天了，内容可能跟不上时代了，对不住了各位老铁。注意自己搜搜新的材料对照着看。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":600,"languages":{"author":"作者: SHEN Xiaohai","link":"链接: ","source":"来源: SHEN's BLOG","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2018-11-24 12:02:58'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const now = new Date()
+          const hour = now.getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://i.loli.net/2020/12/27/HLhkAu352arYpj9.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">SHEN's BLOG</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">PyTorch 中级篇（5）：语言模型（Language Model (RNN-LM)）</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-10-19T16:30:39.000Z" title="发表于 2018-10-19 16:30:39">2018-10-19</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2018-11-24T12:02:58.000Z" title="更新于 2018-11-24 12:02:58">2018-11-24</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6/">深度学习框架</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">1.8k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>10分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p><img src= "/img/loading.gif" data-lazy-src="pytorch_logo_2018.svg" alt="PyTorch"></p>
+<h1 id="PyTorch-中级篇（5）：语言模型（Language-Model-RNN-LM-）"><a href="#PyTorch-中级篇（5）：语言模型（Language-Model-RNN-LM-）" class="headerlink" title="PyTorch 中级篇（5）：语言模型（Language Model (RNN-LM)）"></a>PyTorch 中级篇（5）：语言模型（Language Model (RNN-LM)）</h1><blockquote>
+<p>参考代码</p>
+<p><strong>yunjey的 <a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/02-intermediate/language_model/main.py">pytorch tutorial系列</a></strong></p>
+</blockquote>
+<h2 id="语言模型-学习资料"><a href="#语言模型-学习资料" class="headerlink" title="语言模型 学习资料"></a>语言模型 学习资料</h2><p>语言模型这一块不是很想接触。就照着yunjey的代码，一带而过吧。</p>
+<blockquote>
+<p><strong>博客</strong></p>
+<p><a target="_blank" rel="noopener" href="https://wugh.github.io/posts/2016/03/cs224d-notes4-recurrent-neural-networks/?utm_source=tuicool&utm_medium=referral">CS224d笔记4——语言模型和循环神经网络（Recurrent Neural Network, RNN）</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/79574b0f2959">浅谈神经网络中的梯度爆炸问题</a></p>
+</blockquote>
+<h2 id="PyTorch-实现"><a href="#PyTorch-实现" class="headerlink" title="PyTorch 实现"></a>PyTorch 实现</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils <span class="keyword">import</span> clip_grad_norm</span><br><span class="line"><span class="keyword">from</span> data_utils <span class="keyword">import</span> Dictionary, Corpus </span><br><span class="line"></span><br><span class="line"><span class="comment">#data_utils代码在https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/02-intermediate/language_model/data_utils.py</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设备配置</span></span><br><span class="line"><span class="comment"># Device configuration</span></span><br><span class="line">torch.cuda.set_device(<span class="number">1</span>) <span class="comment"># 这句用来设置pytorch在哪块GPU上运行</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 超参数设置</span></span><br><span class="line"><span class="comment"># Hyper-parameters</span></span><br><span class="line">embed_size = <span class="number">128</span></span><br><span class="line">hidden_size = <span class="number">1024</span></span><br><span class="line">num_layers = <span class="number">1</span></span><br><span class="line">num_epochs = <span class="number">5</span></span><br><span class="line">num_samples = <span class="number">1000</span>     <span class="comment"># number of words to be sampled</span></span><br><span class="line">batch_size = <span class="number">20</span></span><br><span class="line">seq_length = <span class="number">30</span></span><br><span class="line">learning_rate = <span class="number">0.002</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="Penn-Treebank-数据集"><a href="#Penn-Treebank-数据集" class="headerlink" title="Penn Treebank 数据集"></a>Penn Treebank 数据集</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">corpus = Corpus()</span><br><span class="line">ids = corpus.get_data(<span class="string">&#x27;data/train.txt&#x27;</span>, batch_size)</span><br><span class="line">vocab_size = <span class="built_in">len</span>(corpus.dictionary)</span><br><span class="line">num_batches = ids.size(<span class="number">1</span>) // seq_length</span><br></pre></td></tr></table></figure>
+
+<h3 id="基于RNN的语言模型"><a href="#基于RNN的语言模型" class="headerlink" title="基于RNN的语言模型"></a>基于RNN的语言模型</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">RNNLM</span>(<span class="params">nn.Module</span>):</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span>(<span class="params">self, vocab_size, embed_size, hidden_size, num_layers</span>):</span></span><br><span class="line">        <span class="built_in">super</span>(RNNLM, self).__init__()</span><br><span class="line">        self.embed = nn.Embedding(vocab_size, embed_size)</span><br><span class="line">        self.lstm = nn.LSTM(embed_size, hidden_size, num_layers, batch_first=<span class="literal">True</span>)</span><br><span class="line">        self.linear = nn.Linear(hidden_size, vocab_size)</span><br><span class="line">        </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">forward</span>(<span class="params">self, x, h</span>):</span></span><br><span class="line">        <span class="comment"># Embed word ids to vectors</span></span><br><span class="line">        x = self.embed(x)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Forward propagate LSTM</span></span><br><span class="line">        out, (h, c) = self.lstm(x, h)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Reshape output to (batch_size*sequence_length, hidden_size)</span></span><br><span class="line">        out = out.reshape(out.size(<span class="number">0</span>)*out.size(<span class="number">1</span>), out.size(<span class="number">2</span>))</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Decode hidden states of all time steps</span></span><br><span class="line">        out = self.linear(out)</span><br><span class="line">        <span class="keyword">return</span> out, (h, c)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实例化一个模型</span></span><br><span class="line">model = RNNLM(vocab_size, embed_size, hidden_size, num_layers).to(device)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义损失函数和优化器</span></span><br><span class="line">criterion = nn.CrossEntropyLoss()</span><br><span class="line">optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义函数：截断反向传播</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">detach</span>(<span class="params">states</span>):</span></span><br><span class="line">    <span class="keyword">return</span> [state.detach() <span class="keyword">for</span> state <span class="keyword">in</span> states] </span><br></pre></td></tr></table></figure>
+
+<h3 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">    <span class="comment"># 初始化隐状态和细胞状态</span></span><br><span class="line">    states = ( torch.zeros(num_layers, batch_size, hidden_size).to(device),</span><br><span class="line">                    torch.zeros(num_layers, batch_size, hidden_size).to(device) )</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">0</span>, ids.size(<span class="number">1</span>) - seq_length, seq_length):</span><br><span class="line">        <span class="comment"># Get mini-batch inputs and targets</span></span><br><span class="line">        inputs = ids[:, i:i+seq_length].to(device)</span><br><span class="line">        targets = ids[:, (i+<span class="number">1</span>):(i+<span class="number">1</span>)+seq_length].to(device)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Forward pass</span></span><br><span class="line">        states = detach(states)</span><br><span class="line">        outputs, states = model(inputs, states)</span><br><span class="line">        loss = criterion(outputs, targets.reshape(-<span class="number">1</span>))</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># Backward and optimize</span></span><br><span class="line">        model.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        clip_grad_norm(model.parameters(), <span class="number">0.5</span>)</span><br><span class="line">        optimizer.step()</span><br><span class="line"></span><br><span class="line">        step = (i+<span class="number">1</span>) // seq_length</span><br><span class="line">        <span class="keyword">if</span> step % <span class="number">100</span> == <span class="number">0</span>:</span><br><span class="line">            <span class="built_in">print</span> (<span class="string">&#x27;Epoch [&#123;&#125;/&#123;&#125;], Step[&#123;&#125;/&#123;&#125;], Loss: &#123;:.4f&#125;, Perplexity: &#123;:5.2f&#125;&#x27;</span></span><br><span class="line">                   .<span class="built_in">format</span>(epoch+<span class="number">1</span>, num_epochs, step, num_batches, loss.item(), np.exp(loss.item())))</span><br></pre></td></tr></table></figure>
+
+<pre><code>/home/ubuntu/anaconda3/lib/python3.6/site-packages/ipykernel_launcher.py:19: UserWarning: torch.nn.utils.clip_grad_norm is now deprecated in favor of torch.nn.utils.clip_grad_norm_.
+
+
+Epoch [1/5], Step[0/1549], Loss: 9.2070, Perplexity: 9966.60
+Epoch [1/5], Step[100/1549], Loss: 5.9989, Perplexity: 402.99
+Epoch [1/5], Step[200/1549], Loss: 5.9188, Perplexity: 371.96
+Epoch [1/5], Step[300/1549], Loss: 5.7725, Perplexity: 321.35
+Epoch [1/5], Step[400/1549], Loss: 5.6823, Perplexity: 293.63
+Epoch [1/5], Step[500/1549], Loss: 5.1482, Perplexity: 172.12
+Epoch [1/5], Step[600/1549], Loss: 5.1709, Perplexity: 176.07
+Epoch [1/5], Step[700/1549], Loss: 5.3420, Perplexity: 208.93
+Epoch [1/5], Step[800/1549], Loss: 5.1762, Perplexity: 177.00
+Epoch [1/5], Step[900/1549], Loss: 5.0525, Perplexity: 156.42
+Epoch [1/5], Step[1000/1549], Loss: 5.0810, Perplexity: 160.94
+Epoch [1/5], Step[1100/1549], Loss: 5.3304, Perplexity: 206.52
+Epoch [1/5], Step[1200/1549], Loss: 5.1753, Perplexity: 176.85
+Epoch [1/5], Step[1300/1549], Loss: 5.1375, Perplexity: 170.29
+Epoch [1/5], Step[1400/1549], Loss: 4.8377, Perplexity: 126.18
+Epoch [1/5], Step[1500/1549], Loss: 5.1570, Perplexity: 173.65
+Epoch [2/5], Step[0/1549], Loss: 5.4297, Perplexity: 228.07
+Epoch [2/5], Step[100/1549], Loss: 4.5487, Perplexity: 94.51
+Epoch [2/5], Step[200/1549], Loss: 4.6870, Perplexity: 108.53
+Epoch [2/5], Step[300/1549], Loss: 4.6928, Perplexity: 109.15
+Epoch [2/5], Step[400/1549], Loss: 4.4732, Perplexity: 87.64
+Epoch [2/5], Step[500/1549], Loss: 4.1760, Perplexity: 65.11
+Epoch [2/5], Step[600/1549], Loss: 4.4682, Perplexity: 87.20
+Epoch [2/5], Step[700/1549], Loss: 4.4156, Perplexity: 82.73
+Epoch [2/5], Step[800/1549], Loss: 4.3548, Perplexity: 77.85
+Epoch [2/5], Step[900/1549], Loss: 4.1930, Perplexity: 66.22
+Epoch [2/5], Step[1000/1549], Loss: 4.3182, Perplexity: 75.05
+Epoch [2/5], Step[1100/1549], Loss: 4.4739, Perplexity: 87.70
+Epoch [2/5], Step[1200/1549], Loss: 4.4112, Perplexity: 82.37
+Epoch [2/5], Step[1300/1549], Loss: 4.2890, Perplexity: 72.90
+Epoch [2/5], Step[1400/1549], Loss: 4.0021, Perplexity: 54.71
+Epoch [2/5], Step[1500/1549], Loss: 4.3473, Perplexity: 77.27
+Epoch [3/5], Step[0/1549], Loss: 6.7676, Perplexity: 869.23
+Epoch [3/5], Step[100/1549], Loss: 3.8664, Perplexity: 47.77
+Epoch [3/5], Step[200/1549], Loss: 4.0332, Perplexity: 56.44
+Epoch [3/5], Step[300/1549], Loss: 3.9715, Perplexity: 53.06
+Epoch [3/5], Step[400/1549], Loss: 3.8199, Perplexity: 45.60
+Epoch [3/5], Step[500/1549], Loss: 3.4156, Perplexity: 30.44
+Epoch [3/5], Step[600/1549], Loss: 3.9293, Perplexity: 50.87
+Epoch [3/5], Step[700/1549], Loss: 3.8010, Perplexity: 44.75
+Epoch [3/5], Step[800/1549], Loss: 3.6944, Perplexity: 40.22
+Epoch [3/5], Step[900/1549], Loss: 3.4924, Perplexity: 32.87
+Epoch [3/5], Step[1000/1549], Loss: 3.6192, Perplexity: 37.31
+Epoch [3/5], Step[1100/1549], Loss: 3.7801, Perplexity: 43.82
+Epoch [3/5], Step[1200/1549], Loss: 3.7905, Perplexity: 44.28
+Epoch [3/5], Step[1300/1549], Loss: 3.4920, Perplexity: 32.85
+Epoch [3/5], Step[1400/1549], Loss: 3.2644, Perplexity: 26.17
+Epoch [3/5], Step[1500/1549], Loss: 3.6106, Perplexity: 36.99
+Epoch [4/5], Step[0/1549], Loss: 4.5910, Perplexity: 98.59
+Epoch [4/5], Step[100/1549], Loss: 3.3086, Perplexity: 27.35
+Epoch [4/5], Step[200/1549], Loss: 3.4173, Perplexity: 30.49
+Epoch [4/5], Step[300/1549], Loss: 3.3424, Perplexity: 28.29
+Epoch [4/5], Step[400/1549], Loss: 3.3040, Perplexity: 27.22
+Epoch [4/5], Step[500/1549], Loss: 2.9707, Perplexity: 19.51
+Epoch [4/5], Step[600/1549], Loss: 3.4324, Perplexity: 30.95
+Epoch [4/5], Step[700/1549], Loss: 3.2762, Perplexity: 26.48
+Epoch [4/5], Step[800/1549], Loss: 3.1982, Perplexity: 24.49
+Epoch [4/5], Step[900/1549], Loss: 2.9825, Perplexity: 19.74
+Epoch [4/5], Step[1000/1549], Loss: 3.1104, Perplexity: 22.43
+Epoch [4/5], Step[1100/1549], Loss: 3.2339, Perplexity: 25.38
+Epoch [4/5], Step[1200/1549], Loss: 3.2937, Perplexity: 26.94
+Epoch [4/5], Step[1300/1549], Loss: 3.0448, Perplexity: 21.00
+Epoch [4/5], Step[1400/1549], Loss: 2.8098, Perplexity: 16.61
+Epoch [4/5], Step[1500/1549], Loss: 3.1238, Perplexity: 22.73
+Epoch [5/5], Step[0/1549], Loss: 3.6842, Perplexity: 39.81
+Epoch [5/5], Step[100/1549], Loss: 2.8963, Perplexity: 18.11
+Epoch [5/5], Step[200/1549], Loss: 3.1310, Perplexity: 22.90
+Epoch [5/5], Step[300/1549], Loss: 3.0674, Perplexity: 21.49
+Epoch [5/5], Step[400/1549], Loss: 2.9441, Perplexity: 18.99
+Epoch [5/5], Step[500/1549], Loss: 2.6322, Perplexity: 13.90
+Epoch [5/5], Step[600/1549], Loss: 3.0877, Perplexity: 21.93
+Epoch [5/5], Step[700/1549], Loss: 2.8889, Perplexity: 17.97
+Epoch [5/5], Step[800/1549], Loss: 2.9450, Perplexity: 19.01
+Epoch [5/5], Step[900/1549], Loss: 2.6752, Perplexity: 14.52
+Epoch [5/5], Step[1000/1549], Loss: 2.8156, Perplexity: 16.70
+Epoch [5/5], Step[1100/1549], Loss: 2.8724, Perplexity: 17.68
+Epoch [5/5], Step[1200/1549], Loss: 2.9378, Perplexity: 18.87
+Epoch [5/5], Step[1300/1549], Loss: 2.6900, Perplexity: 14.73
+Epoch [5/5], Step[1400/1549], Loss: 2.4771, Perplexity: 11.91
+Epoch [5/5], Step[1500/1549], Loss: 2.8465, Perplexity: 17.23
+</code></pre>
+<h3 id="测试和保存模型"><a href="#测试和保存模型" class="headerlink" title="测试和保存模型"></a>测试和保存模型</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(<span class="string">&#x27;sample.txt&#x27;</span>, <span class="string">&#x27;w&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        <span class="comment"># 初始化隐状态和细胞状态</span></span><br><span class="line">        state = (torch.zeros(num_layers, <span class="number">1</span>, hidden_size).to(device),</span><br><span class="line">                         torch.zeros(num_layers, <span class="number">1</span>, hidden_size).to(device))</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 随机选择一个单词</span></span><br><span class="line">        prob = torch.ones(vocab_size)</span><br><span class="line">        <span class="built_in">input</span> = torch.multinomial(prob, num_samples=<span class="number">1</span>).unsqueeze(<span class="number">1</span>).to(device)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(num_samples):</span><br><span class="line">            <span class="comment"># Forward propagate RNN </span></span><br><span class="line">            output, state = model(<span class="built_in">input</span>, state)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Sample a word id</span></span><br><span class="line">            prob = output.exp()</span><br><span class="line">            word_id = torch.multinomial(prob, num_samples=<span class="number">1</span>).item()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># Fill input with sampled word id for the next time step</span></span><br><span class="line">            <span class="built_in">input</span>.fill_(word_id)</span><br><span class="line"></span><br><span class="line">            <span class="comment"># File write</span></span><br><span class="line">            word = corpus.dictionary.idx2word[word_id]</span><br><span class="line">            word = <span class="string">&#x27;\n&#x27;</span> <span class="keyword">if</span> word == <span class="string">&#x27;&lt;eos&gt;&#x27;</span> <span class="keyword">else</span> word + <span class="string">&#x27; &#x27;</span></span><br><span class="line">            f.write(word)</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (i+<span class="number">1</span>) % <span class="number">100</span> == <span class="number">0</span>:</span><br><span class="line">                print(<span class="string">&#x27;Sampled [&#123;&#125;/&#123;&#125;] words and save to &#123;&#125;&#x27;</span>.<span class="built_in">format</span>(i+<span class="number">1</span>, num_samples, <span class="string">&#x27;sample.txt&#x27;</span>))</span><br></pre></td></tr></table></figure>
+
+<pre><code>Sampled [100/1000] words and save to sample.txt
+Sampled [200/1000] words and save to sample.txt
+Sampled [300/1000] words and save to sample.txt
+Sampled [400/1000] words and save to sample.txt
+Sampled [500/1000] words and save to sample.txt
+Sampled [600/1000] words and save to sample.txt
+Sampled [700/1000] words and save to sample.txt
+Sampled [800/1000] words and save to sample.txt
+Sampled [900/1000] words and save to sample.txt
+Sampled [1000/1000] words and save to sample.txt
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 保存模型</span></span><br><span class="line">torch.save(model.state_dict(), <span class="string">&#x27;model.ckpt&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>对于整个流程一脸懵逼，结果也不是很懂</strong></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">SHEN Xiaohai</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://shenxiaohai.me/2018/10/20/pytorch-tutorial-intermediate-05/">https://shenxiaohai.me/2018/10/20/pytorch-tutorial-intermediate-05/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://shenxiaohai.me" target="_blank">SHEN's BLOG</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/">深度学习</a><a class="post-meta__tags" href="/tags/PyTorch/">PyTorch</a><a class="post-meta__tags" href="/tags/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/">循环神经网络</a><a class="post-meta__tags" href="/tags/LSTM/">LSTM</a><a class="post-meta__tags" href="/tags/%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B/">语言模型</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/12/27/HLhkAu352arYpj9.jpg" data-sites="wechat,weibo,qq,facebook,twitter"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2018/10/20/pytorch-tutorial-advanced-01/"><img class="prev-cover" data-lazy-src="https://i.loli.net/2020/12/27/xEJQqO6IkK9pycv.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">PyTorch 高级篇（1）：生成对抗网络（Generative Adversarial Networks）</div></div></a></div><div class="next-post pull-right"><a href="/2018/10/19/pytorch-tutorial-intermediate-04/"><img class="next-cover" data-lazy-src="https://i.loli.net/2020/09/08/eMvrld9nsix1fXq.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">PyTorch 中级篇（4）：双向循环神经网络（Bidirectional Recurrent Neural Network）</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2018/10/19/pytorch-tutorial-intermediate-03/" title="PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network）"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/3VaovLTqZR4AMHK.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-19</div><div class="title">PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network）</div></div></a></div><div><a href="/2018/10/19/pytorch-tutorial-intermediate-04/" title="PyTorch 中级篇（4）：双向循环神经网络（Bidirectional Recurrent Neural Network）"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/eMvrld9nsix1fXq.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-19</div><div class="title">PyTorch 中级篇（4）：双向循环神经网络（Bidirectional Recurrent Neural Network）</div></div></a></div><div><a href="/2018/10/22/pytorch-tutorial-advanced-04/" title="PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)）"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/CniyQWvekqZHRG4.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-22</div><div class="title">PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)）</div></div></a></div><div><a href="/2018/11/29/cifar10-pytorch/" title="PyTorch在CIFAR-10数据集上的训练及测试过程"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/07/lS8PjzikfnFsrIV.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-11-29</div><div class="title">PyTorch在CIFAR-10数据集上的训练及测试过程</div></div></a></div><div><a href="/2018/10/20/pytorch-tutorial-advanced-02/" title="PyTorch 高级篇（2）：变分自编码器（Variational Auto-Encoder）"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/n2bmqx8kOTit3Nf.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-20</div><div class="title">PyTorch 高级篇（2）：变分自编码器（Variational Auto-Encoder）</div></div></a></div><div><a href="/2018/10/21/pytorch-tutorial-advanced-03/" title="PyTorch 高级篇（3）：神经风格迁移（Neural Style Transfer）"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/MxZdhpHiAb8Q6GP.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-20</div><div class="title">PyTorch 高级篇（3）：神经风格迁移（Neural Style Transfer）</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">SHEN Xiaohai</div><div class="author-info__description">我的心愿是没有蛀牙</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/veraposeidon"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/veraposeidon" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:veraposeidon@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">右下角设置可以切换 Dark Mode / Light Mode</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#PyTorch-%E4%B8%AD%E7%BA%A7%E7%AF%87%EF%BC%885%EF%BC%89%EF%BC%9A%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B%EF%BC%88Language-Model-RNN-LM-%EF%BC%89"><span class="toc-number">1.</span> <span class="toc-text">PyTorch 中级篇（5）：语言模型（Language Model (RNN-LM)）</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B-%E5%AD%A6%E4%B9%A0%E8%B5%84%E6%96%99"><span class="toc-number">1.1.</span> <span class="toc-text">语言模型 学习资料</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#PyTorch-%E5%AE%9E%E7%8E%B0"><span class="toc-number">1.2.</span> <span class="toc-text">PyTorch 实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Penn-Treebank-%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="toc-number">1.2.1.</span> <span class="toc-text">Penn Treebank 数据集</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9F%BA%E4%BA%8ERNN%E7%9A%84%E8%AF%AD%E8%A8%80%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.2.</span> <span class="toc-text">基于RNN的语言模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.3.</span> <span class="toc-text">训练模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B5%8B%E8%AF%95%E5%92%8C%E4%BF%9D%E5%AD%98%E6%A8%A1%E5%9E%8B"><span class="toc-number">1.2.4.</span> <span class="toc-text">测试和保存模型</span></a></li></ol></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url('https://i.loli.net/2020/12/27/HLhkAu352arYpj9.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2021 By SHEN Xiaohai</div><div class="footer_custom_text">欢迎👏</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="algolia-search"><div class="search-dialog"><div class="search-dialog__title" id="algolia-search-title">Algolia</div><div id="algolia-input-panel"><div id="algolia-search-input"></div></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-stats"></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'BE79lHe3JGlIH9QbzBILVo3I-MdYXbMMI',
+      appKey: 'a5zH6018czqOEie43oSIDWxC',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: true,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign(initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config-diff',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: true,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', 'UA-74360128-2', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

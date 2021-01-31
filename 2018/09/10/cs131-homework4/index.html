@@ -1,0 +1,716 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CS131,Homewrok4,Resizing-SeamCarving | SHEN's BLOG</title><meta name="keywords" content="计算机视觉,CS131,图像缩放,Seam Carving,动态规划,图像感知"><meta name="author" content="SHEN Xiaohai"><meta name="copyright" content="SHEN Xiaohai"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="CS131 Computer Vision： Foundations and Applications，Homework4：Resizing SeamCarving。 复现Seam Carving（接缝拼接）算法，实现基于内容感知的图像智能缩放，并且实现图像中目标的移除，了解图像能量图、动态编程。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS131,Homewrok4,Resizing-SeamCarving">
+<meta property="og:url" content="https://shenxiaohai.me/2018/09/10/cs131-homework4/index.html">
+<meta property="og:site_name" content="SHEN&#39;s BLOG">
+<meta property="og:description" content="CS131 Computer Vision： Foundations and Applications，Homework4：Resizing SeamCarving。 复现Seam Carving（接缝拼接）算法，实现基于内容感知的图像智能缩放，并且实现图像中目标的移除，了解图像能量图、动态编程。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/12/27/qTeUEj58FYLZvx4.jpg">
+<meta property="article:published_time" content="2018-09-09T16:07:44.000Z">
+<meta property="article:modified_time" content="2018-09-09T08:15:16.000Z">
+<meta property="article:author" content="SHEN Xiaohai">
+<meta property="article:tag" content="计算机视觉">
+<meta property="article:tag" content="CS131">
+<meta property="article:tag" content="图像缩放">
+<meta property="article:tag" content="Seam Carving">
+<meta property="article:tag" content="动态规划">
+<meta property="article:tag" content="图像感知">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/12/27/qTeUEj58FYLZvx4.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://shenxiaohai.me/2018/09/10/cs131-homework4/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.js" defer></script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-74360128-2"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-74360128-2');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: {"appId":"TA1T7F3R2E","apiKey":"c4d8bb07ab3fa68ab573e9bf8f264e0c","indexName":"SHENBLOG","hits":{"per_page":15},"languages":{"input_placeholder":"搜索文章","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":600,"position":"top","messagePrev":"距离我扯这篇文章已经","messageNext":"天了，内容可能跟不上时代了，对不住了各位老铁。注意自己搜搜新的材料对照着看。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":600,"languages":{"author":"作者: SHEN Xiaohai","link":"链接: ","source":"来源: SHEN's BLOG","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2018-09-09 08:15:16'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const now = new Date()
+          const hour = now.getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://i.loli.net/2020/12/27/qTeUEj58FYLZvx4.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">SHEN's BLOG</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">CS131,Homewrok4,Resizing-SeamCarving</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-09-09T16:07:44.000Z" title="发表于 2018-09-09 16:07:44">2018-09-09</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2018-09-09T08:15:16.000Z" title="更新于 2018-09-09 08:15:16">2018-09-09</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/">计算机视觉</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">5.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>29分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="Seam-Carving"><a href="#Seam-Carving" class="headerlink" title="Seam Carving"></a>Seam Carving</h1><p>The material presented here is inspired from:</p>
+<ul>
+<li>paper on seam carving: <a target="_blank" rel="noopener" href="http://graphics.cs.cmu.edu/courses/15-463/2007_fall/hw/proj2/imret.pdf">http://graphics.cs.cmu.edu/courses/15-463/2007_fall/hw/proj2/imret.pdf</a></li>
+<li>tutorial: <a target="_blank" rel="noopener" href="http://cs.brown.edu/courses/cs129/results/proj3/taox">http://cs.brown.edu/courses/cs129/results/proj3/taox</a></li>
+<li>tutorial: <a target="_blank" rel="noopener" href="http://www.cs.cmu.edu/afs/andrew/scs/cs/15-463/f07/proj2/www/wwedler/">http://www.cs.cmu.edu/afs/andrew/scs/cs/15-463/f07/proj2/www/wwedler/</a></li>
+</ul>
+<p>Don’t hesitate to check these links if you have any doubt on the seam carving process.</p>
+<p>The whole seam carving process was covered in <a target="_blank" rel="noopener" href="http://vision.stanford.edu/teaching/cs131_fall1718/files/08_seam_carving.pdf">lecture 8</a>, please refer to the slides for more details to the different concepts introduced here.</p>
+<p><strong>这份作业的主题是实现SeamCarving(接缝裁剪)的算法，即基于图像内容感知的图像缩放算法。</strong></p>
+<ul>
+<li>实现图像裁剪</li>
+<li>实现图像扩大</li>
+<li>其他实验</li>
+</ul>
+<blockquote>
+<p><strong>博客推荐</strong></p>
+<p>这篇专栏讲了如何用Python实现Seam carving算法，原理讲解的挺清楚的，看不懂英文可以看这个。</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/38974520">如何用Python实现神奇切图算法Seam Carving ？</a></p>
+</blockquote>
+<p><strong>Sean Carving 的基本思路</strong></p>
+<ol>
+<li>计算图像能量图</li>
+<li>寻找最小能量线</li>
+<li>移除得到的最小能量线，让图片的宽度缩小一个像素</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Setup</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> matplotlib <span class="keyword">import</span> rc</span><br><span class="line"><span class="keyword">from</span> skimage <span class="keyword">import</span> color</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">from</span> IPython.display <span class="keyword">import</span> HTML</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> print_function</span><br><span class="line"></span><br><span class="line">%matplotlib inline</span><br><span class="line">plt.rcParams[<span class="string">&#x27;figure.figsize&#x27;</span>] = (<span class="number">15.0</span>, <span class="number">12.0</span>) <span class="comment"># set default size of plots</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;image.interpolation&#x27;</span>] = <span class="string">&#x27;nearest&#x27;</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;image.cmap&#x27;</span>] = <span class="string">&#x27;gray&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># for auto-reloading extenrnal modules</span></span><br><span class="line">%load_ext autoreload</span><br><span class="line">%autoreload <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<pre><code>The autoreload extension is already loaded. To reload it, use:
+  %reload_ext autoreload
+</code></pre>
+<h2 id="Image-Reducing-using-Seam-Carving"><a href="#Image-Reducing-using-Seam-Carving" class="headerlink" title="Image Reducing using Seam Carving"></a>Image Reducing using Seam Carving</h2><p>Seam carving is an algorithm for content-aware image resizing.<br>To understand all the concepts in this homework, make sure to read again the slides from lecture 8: <a target="_blank" rel="noopener" href="http://vision.stanford.edu/teaching/cs131_fall1718/files/08_seam_carving.pdf">http://vision.stanford.edu/teaching/cs131_fall1718/files/08_seam_carving.pdf</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> skimage <span class="keyword">import</span> io, util</span><br><span class="line"></span><br><span class="line"><span class="comment"># Load image</span></span><br><span class="line">img = io.imread(<span class="string">&#x27;imgs/broadway_tower.jpg&#x27;</span>)</span><br><span class="line">img = util.img_as_float(img)</span><br><span class="line"></span><br><span class="line">plt.title(<span class="string">&#x27;Original Image&#x27;</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_6_0.png" alt="png"></p>
+<h3 id="Energy-function-5-points"><a href="#Energy-function-5-points" class="headerlink" title="Energy function (5 points)"></a>Energy function (5 points)</h3><p>We will now implemented the <code>energy_function</code> to compute the energy of the image.<br>The energy at each pixel is the sum of:</p>
+<ul>
+<li>absolute value of the gradient in the $x$ direction</li>
+<li>absolute value of the gradient in the $y$ direction</li>
+</ul>
+<p>The function should take around 0.01 to 0.1 seconds to compute.</p>
+<p>图像能量图此处定义为图像每个像素的两方向梯度幅值之和，当然能量也可以是别的定义方式：梯度幅度、熵图、显著图等等。</p>
+<p>计算梯度要注意转换为灰度图再进行。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> energy_function</span><br><span class="line"></span><br><span class="line">test_img = np.array([[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">1.5</span>],</span><br><span class="line">                     [<span class="number">3.0</span>, <span class="number">1.0</span>, <span class="number">2.0</span>],</span><br><span class="line">                     [<span class="number">4.0</span>, <span class="number">0.5</span>, <span class="number">3.0</span>]])</span><br><span class="line">test_img = np.stack([test_img] * <span class="number">3</span>, axis=<span class="number">2</span>)</span><br><span class="line"><span class="keyword">assert</span> test_img.shape == (<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Compute energy function</span></span><br><span class="line">test_energy = energy_function(test_img)</span><br><span class="line"></span><br><span class="line">solution_energy = np.array([[<span class="number">3.0</span>, <span class="number">1.25</span>,  <span class="number">1.0</span>],</span><br><span class="line">                            [<span class="number">3.5</span>, <span class="number">1.25</span>, <span class="number">1.75</span>],</span><br><span class="line">                            [<span class="number">4.5</span>,  <span class="number">1.0</span>,  <span class="number">3.5</span>]])</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Image (channel 0):&quot;</span>)</span><br><span class="line">print(test_img[:, :, <span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Energy:&quot;</span>)</span><br><span class="line">print(test_energy)</span><br><span class="line">print(<span class="string">&quot;Solution energy:&quot;</span>)</span><br><span class="line">print(solution_energy)</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> np.allclose(test_energy, solution_energy)</span><br></pre></td></tr></table></figure>
+
+<pre><code>Image (channel 0):
+[[1.  2.  1.5]
+ [3.  1.  2. ]
+ [4.  0.5 3. ]]
+Energy:
+[[3.   1.25 1.  ]
+ [3.5  1.25 1.75]
+ [4.5  1.   3.5 ]]
+Solution energy:
+[[3.   1.25 1.  ]
+ [3.5  1.25 1.75]
+ [4.5  1.   3.5 ]]
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Compute energy function</span></span><br><span class="line">start = time()</span><br><span class="line">energy = energy_function(img)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Computing energy function: %f seconds.&quot;</span> % (end - start))</span><br><span class="line"></span><br><span class="line">plt.title(<span class="string">&#x27;Energy&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.imshow(energy)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Computing energy function: 0.007591 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_10_1.png" alt="png"></p>
+<p>跑出来的时间是0.009955 seconds，满足题目要求的0.01 to 0.1 seconds的时间范围。</p>
+<h3 id="Compute-cost-10-points"><a href="#Compute-cost-10-points" class="headerlink" title="Compute cost (10 points)"></a>Compute cost (10 points)</h3><p>Now implement the function <code>compute_cost</code>.<br>Starting from the energy map, we’ll go from the first row of the image to the bottom and compute the minimal cost at each pixel.</p>
+<p>We’ll use dynamic programming to compute the cost line by line starting from the first row.</p>
+<p>The function should take around 0.05 seconds to complete.</p>
+<p>此处要求使用动态规划计算整幅图的cost图，用于第三步寻找最小能量线。</p>
+<p>此处动态规划的意思是从图像的最上面一行开始，计算能量的最小累加路线，cost图中每一行的每个像素从它八相邻的上一行的三个像素中取最小cost值的元素进行累加。</p>
+<p>直到累加到最后一行，同时在计算过程中保留每个像素的累加路径，即像素的cost值是从上一行哪一个元素相加得到的（用-1,0,1表示上左，上中，上右）。</p>
+<p>题目中要求只用一个循环实现，则需要用向量化的形式进行计算。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> compute_cost</span><br><span class="line"></span><br><span class="line"><span class="comment"># Let&#x27;s first test with a small example</span></span><br><span class="line"></span><br><span class="line">test_energy = np.array([[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">1.5</span>],</span><br><span class="line">                        [<span class="number">3.0</span>, <span class="number">1.0</span>, <span class="number">2.0</span>],</span><br><span class="line">                        [<span class="number">4.0</span>, <span class="number">0.5</span>, <span class="number">3.0</span>]])</span><br><span class="line"></span><br><span class="line">solution_cost = np.array([[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">1.5</span>],</span><br><span class="line">                          [<span class="number">4.0</span>, <span class="number">2.0</span>, <span class="number">3.5</span>],</span><br><span class="line">                          [<span class="number">6.0</span>, <span class="number">2.5</span>, <span class="number">5.0</span>]])</span><br><span class="line"></span><br><span class="line">solution_paths = np.array([[ <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>],</span><br><span class="line">                           [ <span class="number">0</span>, -<span class="number">1</span>,  <span class="number">0</span>],</span><br><span class="line">                           [ <span class="number">1</span>,  <span class="number">0</span>, -<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Vertical Cost Map</span></span><br><span class="line">vcost, vpaths = compute_cost(_, test_energy, axis=<span class="number">1</span>)  <span class="comment"># don&#x27;t need the first argument for compute_cost</span></span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Energy:&quot;</span>)</span><br><span class="line">print(test_energy)</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Cost:&quot;</span>)</span><br><span class="line">print(vcost)</span><br><span class="line">print(<span class="string">&quot;Solution cost:&quot;</span>)</span><br><span class="line">print(solution_cost)</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Paths:&quot;</span>)</span><br><span class="line">print(vpaths)</span><br><span class="line">print(<span class="string">&quot;Solution paths:&quot;</span>)</span><br><span class="line">print(solution_paths)</span><br></pre></td></tr></table></figure>
+
+<pre><code>Energy:
+[[1.  2.  1.5]
+ [3.  1.  2. ]
+ [4.  0.5 3. ]]
+Cost:
+[[1.  2.  1.5]
+ [4.  2.  3.5]
+ [6.  2.5 5. ]]
+Solution cost:
+[[1.  2.  1.5]
+ [4.  2.  3.5]
+ [6.  2.5 5. ]]
+Paths:
+[[ 0  0  0]
+ [ 0 -1  0]
+ [ 1  0 -1]]
+Solution paths:
+[[ 0  0  0]
+ [ 0 -1  0]
+ [ 1  0 -1]]
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Vertical Cost Map</span></span><br><span class="line">start = time()</span><br><span class="line">vcost, _ = compute_cost(_, energy, axis=<span class="number">1</span>)  <span class="comment"># don&#x27;t need the first argument for compute_cost</span></span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Computing vertical cost map: %f seconds.&quot;</span> % (end - start))</span><br><span class="line"></span><br><span class="line">plt.title(<span class="string">&#x27;Vertical Cost Map&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.imshow(vcost, cmap=<span class="string">&#x27;inferno&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Computing vertical cost map: 0.051953 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_15_1.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Horizontal Cost Map</span></span><br><span class="line">start = time()</span><br><span class="line">hcost, _ = compute_cost(_, energy, axis=<span class="number">0</span>)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Computing horizontal cost map: %f seconds.&quot;</span> % (end - start))</span><br><span class="line"></span><br><span class="line">plt.title(<span class="string">&#x27;Horizontal Cost Map&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.imshow(hcost, cmap=<span class="string">&#x27;inferno&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Computing horizontal cost map: 0.049583 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_16_1.png" alt="png"></p>
+<h2 id="Finding-optimal-seams"><a href="#Finding-optimal-seams" class="headerlink" title="Finding optimal seams"></a>Finding optimal seams</h2><p>Using the cost maps we found above, we can determine the seam with the lowest energy in the image.<br>We can then remove this optimal seam, and repeat the process until we obtain a desired width.</p>
+<p>由于上面计算能量cost图时，已经保存了每个像素点的叠加路径，因此可以在最后一行找到最小的cost，并从该点开始，向上溯源，找到一条最佳的接缝，即最小的能量线。</p>
+<h3 id="Backtrack-seam-5-points"><a href="#Backtrack-seam-5-points" class="headerlink" title="Backtrack seam (5 points)"></a>Backtrack seam (5 points)</h3><p>Implement function <code>backtrack_seam</code>.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> backtrack_seam</span><br><span class="line"></span><br><span class="line"><span class="comment"># Let&#x27;s first test with a small example</span></span><br><span class="line">cost = np.array([[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">1.5</span>],</span><br><span class="line">                 [<span class="number">4.0</span>, <span class="number">2.0</span>, <span class="number">3.5</span>],</span><br><span class="line">                 [<span class="number">6.0</span>, <span class="number">2.5</span>, <span class="number">5.0</span>]])</span><br><span class="line"></span><br><span class="line">paths = np.array([[ <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>],</span><br><span class="line">                  [ <span class="number">0</span>, -<span class="number">1</span>,  <span class="number">0</span>],</span><br><span class="line">                  [ <span class="number">1</span>,  <span class="number">0</span>, -<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Vertical Backtracking</span></span><br><span class="line"></span><br><span class="line">end = np.argmin(cost[-<span class="number">1</span>])</span><br><span class="line">seam_energy = cost[-<span class="number">1</span>, end]</span><br><span class="line">seam = backtrack_seam(vpaths, end)</span><br><span class="line"></span><br><span class="line">print(<span class="string">&#x27;Seam Energy:&#x27;</span>, seam_energy)</span><br><span class="line">print(<span class="string">&#x27;Seam:&#x27;</span>, seam)</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> seam_energy == <span class="number">2.5</span></span><br><span class="line"><span class="keyword">assert</span> np.allclose(seam, [<span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>])</span><br></pre></td></tr></table></figure>
+
+<pre><code>Seam Energy: 2.5
+Seam: [0 1 1]
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">vcost, vpaths = compute_cost(img, energy)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Vertical Backtracking</span></span><br><span class="line">start = time()</span><br><span class="line">end = np.argmin(vcost[-<span class="number">1</span>])</span><br><span class="line">seam_energy = vcost[-<span class="number">1</span>, end]</span><br><span class="line">seam = backtrack_seam(vpaths, end)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Backtracking optimal seam: %f seconds.&quot;</span> % (end - start))</span><br><span class="line">print(<span class="string">&#x27;Seam Energy:&#x27;</span>, seam_energy)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Visualize seam</span></span><br><span class="line">vseam = np.copy(img)</span><br><span class="line"><span class="keyword">for</span> row <span class="keyword">in</span> <span class="built_in">range</span>(vseam.shape[<span class="number">0</span>]):</span><br><span class="line">    vseam[row, seam[row], :] = np.array([<span class="number">1.0</span>, <span class="number">0</span>, <span class="number">0</span>])</span><br><span class="line"></span><br><span class="line">plt.title(<span class="string">&#x27;Vertical Seam&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.imshow(vseam)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Backtracking optimal seam: 0.000705 seconds.
+Seam Energy: 2.443948431372548
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_21_1.png" alt="png"></p>
+<p>到此，就实现了一条接缝的查找，接下来移除它就可以实现一个像素宽度的缩小。</p>
+<p>In the image above, the optimal vertical seam (minimal cost) goes through the portion of sky without any cloud, which yields the lowest energy.</p>
+<hr>
+<h3 id="Reduce-25-points"><a href="#Reduce-25-points" class="headerlink" title="Reduce (25 points)"></a>Reduce (25 points)</h3><p>We can now use the function <code>backtrack</code> and <code>remove_seam</code> iteratively to reduce the size of the image through <strong>seam carving</strong>.</p>
+<p>Each reduce can take around 10 seconds to compute, depending on your implementation.<br>If it’s too long, try to vectorize your code in <code>compute_cost</code> to only use one loop.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> reduce</span><br><span class="line"></span><br><span class="line"><span class="comment"># Let&#x27;s first test with a small example</span></span><br><span class="line">test_img = np.arange(<span class="number">9</span>, dtype=np.float64).reshape((<span class="number">3</span>, <span class="number">3</span>))</span><br><span class="line">test_img = np.stack([test_img, test_img, test_img], axis=<span class="number">2</span>)</span><br><span class="line"><span class="keyword">assert</span> test_img.shape == (<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">cost = np.array([[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">1.5</span>],</span><br><span class="line">                 [<span class="number">4.0</span>, <span class="number">2.0</span>, <span class="number">3.5</span>],</span><br><span class="line">                 [<span class="number">6.0</span>, <span class="number">2.5</span>, <span class="number">5.0</span>]])</span><br><span class="line"></span><br><span class="line">paths = np.array([[ <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>],</span><br><span class="line">                  [ <span class="number">0</span>, -<span class="number">1</span>,  <span class="number">0</span>],</span><br><span class="line">                  [ <span class="number">1</span>,  <span class="number">0</span>, -<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Reduce image width</span></span><br><span class="line">W_new = <span class="number">2</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># We force the cost and paths to our values</span></span><br><span class="line">out = reduce(test_img, W_new, cfunc=<span class="keyword">lambda</span> x, y: (cost, paths))</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Original image (channel 0):&quot;</span>)</span><br><span class="line">print(test_img[:, :, <span class="number">0</span>])</span><br><span class="line">print(<span class="string">&quot;Reduced image (channel 0): we see that seam [0, 4, 7] is removed&quot;</span>)</span><br><span class="line">print(out[:, :, <span class="number">0</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> np.allclose(out[:, :, <span class="number">0</span>], np.array([[<span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">5</span>], [<span class="number">6</span>, <span class="number">8</span>]]))</span><br></pre></td></tr></table></figure>
+
+<pre><code>Original image (channel 0):
+[[0. 1. 2.]
+ [3. 4. 5.]
+ [6. 7. 8.]]
+Reduced image (channel 0): we see that seam [0, 4, 7] is removed
+[[1. 2.]
+ [3. 5.]
+ [6. 8.]]
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Reduce image width</span></span><br><span class="line">H, W, _ = img.shape</span><br><span class="line">W_new = <span class="number">400</span></span><br><span class="line"></span><br><span class="line">start = time()</span><br><span class="line">out = reduce(img, W_new)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Reducing width from %d to %d: %f seconds.&quot;</span> % (W, W_new, end - start))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Original&#x27;</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Resized&#x27;</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Reducing width from 640 to 400: 9.738185 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_25_1.png" alt="png"></p>
+<p>裁剪部分我是按照每一行删除一个元素的方式去实现的。</p>
+<p>能够达到题目要求的10s左右的时间要求。</p>
+<p>We observe that resizing from width 640 to width 400 conserves almost all the important part of the image (the person and the castle), where a standard resizing would have compressed everything.</p>
+<p>All the vertical seams removed avoid the person and the castle.</p>
+<p>程序同样可以缩减高度，程序中对于另一个维度的裁剪做了判断，</p>
+<p>只需要seam carving流程走之前旋转图像，走完流程之后再将裁剪宽度的图像旋转回来就成了裁剪高度了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Reduce image height</span></span><br><span class="line">H, W, _ = img.shape</span><br><span class="line">H_new = <span class="number">300</span></span><br><span class="line"></span><br><span class="line">start = time()</span><br><span class="line">out = reduce(img, H_new, axis=<span class="number">0</span>)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Reducing height from %d to %d: %f seconds.&quot;</span> % (H, H_new, end - start))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Original&#x27;</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Resized&#x27;</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Reducing height from 434 to 300: 7.296496 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_29_1.png" alt="png"></p>
+<p>For reducing the height, we observe that the result does not look as nice.</p>
+<p>The issue here is that the castle is on all the height of the image, so most horizontal seams will go through it.<br>Interestingly, we observe that most of the grass is not removed. This is because the grass has small variation between neighboring pixels (in a kind of noisy pattern) that make it high energy.<br>The seams removed go through the sky on the left, go under the castle to remove some grass and then back up in the low energy blue sky.</p>
+<p>虽然实现了高度的裁剪，但是图像看起来怪怪的，这是可以从图像上做分析的。</p>
+<p>城堡明显具有很强的能量，详见第一步能量图计算，因此裁剪高度时，每一条最小能量线都会越过它。</p>
+<p>草坪看起来其实跟噪声一样，每个像素点与相邻像素都有或大或小的差异，因此梯度也是较大的，因此能量也较高，不会首先裁剪草坪而是更平滑的蓝天，</p>
+<p>而城堡下面的草坪凹陷是因为城堡上方的蓝天已被裁剪光了，最小能量线无法从上方穿过时才从城堡下方的草坪开始裁剪的。</p>
+<h2 id="Image-Enlarging"><a href="#Image-Enlarging" class="headerlink" title="Image Enlarging"></a>Image Enlarging</h2><h3 id="Enlarge-naive-10-points"><a href="#Enlarge-naive-10-points" class="headerlink" title="Enlarge naive (10 points)"></a>Enlarge naive (10 points)</h3><p>We now want to tackle the reverse problem of enlarging an image.<br>One naive way to approach the problem would be to duplicate the optimal seam iteratively until we reach the desired size.</p>
+<p>图像扩大的一种方式是直接在最小能量线的地方复制它。</p>
+<p>在enlarge_naive函数中实现它。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> enlarge_naive</span><br><span class="line"></span><br><span class="line"><span class="comment"># Let&#x27;s first test with a small example</span></span><br><span class="line">test_img = np.arange(<span class="number">9</span>, dtype=np.float64).reshape((<span class="number">3</span>, <span class="number">3</span>))</span><br><span class="line">test_img = np.stack([test_img, test_img, test_img], axis=<span class="number">2</span>)</span><br><span class="line"><span class="keyword">assert</span> test_img.shape == (<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">cost = np.array([[<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">1.5</span>],</span><br><span class="line">                 [<span class="number">4.0</span>, <span class="number">2.0</span>, <span class="number">3.5</span>],</span><br><span class="line">                 [<span class="number">6.0</span>, <span class="number">2.5</span>, <span class="number">5.0</span>]])</span><br><span class="line"></span><br><span class="line">paths = np.array([[ <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>],</span><br><span class="line">                  [ <span class="number">0</span>, -<span class="number">1</span>,  <span class="number">0</span>],</span><br><span class="line">                  [ <span class="number">1</span>,  <span class="number">0</span>, -<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Increase image width</span></span><br><span class="line">W_new = <span class="number">4</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># We force the cost and paths to our values</span></span><br><span class="line">out = enlarge_naive(test_img, W_new, cfunc=<span class="keyword">lambda</span> x, y: (cost, paths))</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Original image (channel 0):&quot;</span>)</span><br><span class="line">print(test_img[:, :, <span class="number">0</span>])</span><br><span class="line">print(<span class="string">&quot;Enlarged image (channel 0): we see that seam [0, 4, 7] is duplicated&quot;</span>)</span><br><span class="line">print(out[:, :, <span class="number">0</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> np.allclose(out[:, :, <span class="number">0</span>], np.array([[<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">4</span>, <span class="number">4</span>, <span class="number">5</span>], [<span class="number">6</span>, <span class="number">7</span>, <span class="number">7</span>, <span class="number">8</span>]]))</span><br></pre></td></tr></table></figure>
+
+<pre><code>Original image (channel 0):
+[[0. 1. 2.]
+ [3. 4. 5.]
+ [6. 7. 8.]]
+Enlarged image (channel 0): we see that seam [0, 4, 7] is duplicated
+[[0. 0. 1. 2.]
+ [3. 4. 4. 5.]
+ [6. 7. 7. 8.]]
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">W_new = <span class="number">800</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># This is a naive implementation of image enlarging</span></span><br><span class="line"><span class="comment"># which iteratively computes energy function, finds optimal seam</span></span><br><span class="line"><span class="comment"># and duplicates it.</span></span><br><span class="line"><span class="comment"># This process will a stretching artifact by choosing the same seam</span></span><br><span class="line">start = time()</span><br><span class="line">enlarged = enlarge_naive(img, W_new)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Can take around 20 seconds</span></span><br><span class="line">print(<span class="string">&quot;Enlarging(naive) height from %d to %d: %f seconds.&quot;</span> \</span><br><span class="line">      % (W, W_new, end - start))</span><br><span class="line"></span><br><span class="line">plt.imshow(enlarged)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Enlarging(naive) height from 640 to 800: 8.824498 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_35_1.png" alt="png"></p>
+<p>The issue with <code>enlarge_naive</code> is that the same seam will be selected again and again, so this low energy seam will be the only to be duplicated.</p>
+<p>Another way to get k different seams is to apply the process we used in function <code>reduce</code>, and keeping track of the seams we delete progressively.<br>The function <code>find_seams(image, k)</code> will find the top k seams for removal iteratively.</p>
+<p>The inner workings of the function are a bit tricky so we’ve implemented it for you, but you should go into the code and understand how it works.<br>This should also help you for the implementation of <code>enlarge</code>.</p>
+<p>直接复制的方式明显有问题：在最小能量线的地方不停的迭代复制（复制同一个地方），会造成该区域的不自然。</p>
+<p>作业已经帮忙实现了：查找k条不同的接缝，这样就可以根据k条接缝来轮流进行删除了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> find_seams</span><br><span class="line"></span><br><span class="line"><span class="comment"># Alternatively, find k seams for removal and duplicate them.</span></span><br><span class="line">start = time()</span><br><span class="line">seams = find_seams(img, W_new - W)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Can take around 10 seconds</span></span><br><span class="line">print(<span class="string">&quot;Finding %d seams: %f seconds.&quot;</span> % (W_new - W, end - start))</span><br><span class="line"></span><br><span class="line">plt.imshow(seams, cmap=<span class="string">&#x27;viridis&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Finding 160 seams: 7.296915 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_38_1.png" alt="png"></p>
+<p>不同的颜色是因为按照排序，给每条路线的标记的值不同。</p>
+<h3 id="Enlarge-25-points"><a href="#Enlarge-25-points" class="headerlink" title="Enlarge (25 points)"></a>Enlarge (25 points)</h3><p>We can see that all the seams found are different, and they avoid the castle and the person.</p>
+<p>One issue we can mention is that we cannot enlarge more than we can reduce. Because of our process, the maximum enlargement is the width of the image <code>W</code> because we first need to find <code>W</code> different seams in the image.</p>
+<p>One effect we can see on this image is that the blue sky at the right of the castle can only be enlarged x2. The concentration of seams in this area is very strong.<br>We can also note that the seams at the right of the castle have a blue color, which means they have low value and were removed in priority in the seam selection process.</p>
+<p>值得注意的是，对于图像能放大的像素宽度肯定不会超过图像能缩减的像素宽度，毕竟最小能量线就只有那么多条。</p>
+<p>实现enlarge函数。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> enlarge</span><br><span class="line"></span><br><span class="line"><span class="comment"># Let&#x27;s first test with a small example</span></span><br><span class="line">test_img = np.array([[<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">3.0</span>],</span><br><span class="line">                     [<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">3.0</span>],</span><br><span class="line">                     [<span class="number">0.0</span>, <span class="number">1.0</span>, <span class="number">3.0</span>]])</span><br><span class="line"><span class="comment">#test_img = np.arange(9, dtype=np.float64).reshape((3, 3))</span></span><br><span class="line">test_img = np.stack([test_img, test_img, test_img], axis=<span class="number">2</span>)</span><br><span class="line"><span class="keyword">assert</span> test_img.shape == (<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Increase image width</span></span><br><span class="line">W_new = <span class="number">5</span></span><br><span class="line"></span><br><span class="line">out_naive = enlarge_naive(test_img, W_new)</span><br><span class="line">out = enlarge(test_img, W_new)</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Original image (channel 0):&quot;</span>)</span><br><span class="line">print(test_img[:, :, <span class="number">0</span>])</span><br><span class="line">print(<span class="string">&quot;Enlarged naive image (channel 0): first seam is duplicated twice.&quot;</span>)</span><br><span class="line">print(out_naive[:, :, <span class="number">0</span>])</span><br><span class="line">print(<span class="string">&quot;Enlarged image (channel 0): first and second seam are each duplicated once.&quot;</span>)</span><br><span class="line">print(out[:, :, <span class="number">0</span>])</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> np.allclose(out[:, :, <span class="number">0</span>], np.array([[<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">3</span>], [<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">3</span>], [<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="number">3</span>]]))</span><br></pre></td></tr></table></figure>
+
+<pre><code>Original image (channel 0):
+[[0. 1. 3.]
+ [0. 1. 3.]
+ [0. 1. 3.]]
+Enlarged naive image (channel 0): first seam is duplicated twice.
+[[0. 0. 0. 1. 3.]
+ [0. 0. 0. 1. 3.]
+ [0. 0. 0. 1. 3.]]
+Enlarged image (channel 0): first and second seam are each duplicated once.
+[[0. 0. 1. 1. 3.]
+ [0. 0. 1. 1. 3.]
+ [0. 0. 1. 1. 3.]]
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">W_new = <span class="number">800</span></span><br><span class="line"></span><br><span class="line">start = time()</span><br><span class="line">out = enlarge(img, W_new)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Can take around 20 seconds</span></span><br><span class="line">print(<span class="string">&quot;Enlarging width from %d to %d: %f seconds.&quot;</span> \</span><br><span class="line">      % (W, W_new, end - start))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Original&#x27;</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Resized&#x27;</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Enlarging width from 640 to 800: 10.235673 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_43_1.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Map of the seams for horizontal seams.</span></span><br><span class="line">start = time()</span><br><span class="line">seams = find_seams(img, W_new - W, axis=<span class="number">0</span>)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Can take around 15 seconds</span></span><br><span class="line">print(<span class="string">&quot;Finding %d seams: %f seconds.&quot;</span> % (W_new - W, end - start))</span><br><span class="line"></span><br><span class="line">plt.imshow(seams, cmap=<span class="string">&#x27;viridis&#x27;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Finding 160 seams: 9.089754 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_44_1.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">H_new = <span class="number">600</span></span><br><span class="line"></span><br><span class="line">start = time()</span><br><span class="line">out = enlarge(img, H_new, axis=<span class="number">0</span>)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Can take around 20 seconds</span></span><br><span class="line">print(<span class="string">&quot;Enlarging height from %d to %d: %f seconds.&quot;</span> \</span><br><span class="line">      % (H, H_new, end - start))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Original&#x27;</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Resized&#x27;</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Enlarging height from 434 to 600: 14.027314 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_45_1.png" alt="png"></p>
+<p>As you can see in the example above, the sky above the castle has doubled in size, the grass below has doubled in size but we still can’t reach a height of 600.<br>The algorithm then needs to enlarge the castle itself, while trying to avoid enlarging the windows for instance.</p>
+<h2 id="Other-experiments-on-the-image"><a href="#Other-experiments-on-the-image" class="headerlink" title="Other experiments on the image"></a>Other experiments on the image</h2><p>Feel free to experiment more on this image, try different sizes to enlarge or reduce, or check what seams are chosen…</p>
+<p>Reducing by a 2x factor often leads to weird patterns.<br>Enlarging by more than 2x is impossible since we only duplicate seams. One solution is to enlarge in mutliple steps (enlarge x1.4, enlarge again x1.4…)</p>
+<p>放大两倍或者缩小二分之一图像会变得很奇怪。</p>
+<p>这里提出一个方式就是进行多次Resize步骤，每次x1.4倍，x1.4倍这样的方式来放大，缩小同理。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Reduce image width</span></span><br><span class="line">H, W, _ = img.shape</span><br><span class="line">W_new = <span class="number">200</span></span><br><span class="line"></span><br><span class="line">start = time()</span><br><span class="line">out = reduce(img, W_new)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Reducing width from %d to %d: %f seconds.&quot;</span> % (W, W_new, end - start))</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Original&#x27;</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Resized&#x27;</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Reducing width from 640 to 200: 16.882833 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_49_1.png" alt="png"></p>
+<h2 id="Faster-reduce-extra-credit-0-5"><a href="#Faster-reduce-extra-credit-0-5" class="headerlink" title="Faster reduce (extra credit 0.5%)"></a>Faster <code>reduce</code> (extra credit 0.5%)</h2><p>Implement a faster version of <code>reduce</code> called <code>reduce_fast</code> in the file <code>seam_carving.py</code>.</p>
+<p>We will have a leaderboard on gradescope with the performance of students.  </p>
+<p>The autograder tests will check that the outputs match, and run the <code>reduce_fast</code> function on a set of images with varying shapes (say between 200 and 800).</p>
+<p><strong>思路</strong></p>
+<p>怎么能实现更快地裁剪呢？</p>
+<p>题目的提示是：<strong>do we really need to compute the whole cost map again at each iteration?</strong></p>
+<p>分析了一下reduce的过程，的确有一块是可以改进的。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">while</span> out.shape[<span class="number">1</span>] &gt; size:</span><br><span class="line">    energy = efunc(out)</span><br><span class="line">    cost, paths = cfunc(out, energy)</span><br><span class="line">    end = np.argmin(cost[-<span class="number">1</span>])</span><br><span class="line">    seam = backtrack_seam(paths, end)</span><br><span class="line">    out = remove_seam(out, seam)</span><br></pre></td></tr></table></figure>
+<p>就是计算energy能量图这一步，因为能量图的计算其实就是梯度的计算。</p>
+<p>如果一个区域内的图像像素不变动的话，那这个区域内的梯度应该也不会放生改变，基于这一点，可以对计算能量图的步骤进行改进。</p>
+<p>只需要对上一次optical seam最小能量线覆盖宽度内的区域进行梯度的重新更新，两侧区域的能量值不需要变动。</p>
+<p>比如接缝最左边为left，则left-1处像素不变，梯度改变，left-2处及之前像素不变梯度不变。</p>
+<p>比如接缝最右边为right，则right+1处像素不变，梯度改变，left+2处及之后像素不变梯度不变。</p>
+<p>然后考虑特殊情况。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> reduce_fast</span><br><span class="line"></span><br><span class="line"><span class="comment"># Reduce image width</span></span><br><span class="line">H, W, _ = img.shape</span><br><span class="line">W_new = <span class="number">400</span></span><br><span class="line"></span><br><span class="line">start = time()</span><br><span class="line">out = reduce(img, W_new)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Normal reduce width from %d to %d: %f seconds.&quot;</span> % (W, W_new, end - start))</span><br><span class="line"></span><br><span class="line">start = time()</span><br><span class="line">out_fast = reduce_fast(img, W_new)</span><br><span class="line">end = time()</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Faster reduce width from %d to %d: %f seconds.&quot;</span> % (W, W_new, end - start))</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> np.allclose(out, out_fast), <span class="string">&quot;Outputs don&#x27;t match.&quot;</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Original&#x27;</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Resized&#x27;</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Faster resized&#x27;</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Normal reduce width from 640 to 400: 9.237779 seconds.
+Faster reduce width from 640 to 400: 8.685472 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_52_1.png" alt="png"></p>
+<h2 id="Reducing-and-enlarging-on-another-image"><a href="#Reducing-and-enlarging-on-another-image" class="headerlink" title="Reducing and enlarging on another image"></a>Reducing and enlarging on another image</h2><p>Also check these outputs with another image.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Load image</span></span><br><span class="line">img2 = io.imread(<span class="string">&#x27;imgs/wave.jpg&#x27;</span>)</span><br><span class="line">img2 = util.img_as_float(img2)</span><br><span class="line"></span><br><span class="line">plt.title(<span class="string">&#x27;Original Image&#x27;</span>)</span><br><span class="line">plt.imshow(img2)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_54_0.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">out = reduce(img2, <span class="number">300</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_55_0.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">out = enlarge(img2, <span class="number">800</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_56_0.png" alt="png"></p>
+<h2 id="Forward-Energy-20-points"><a href="#Forward-Energy-20-points" class="headerlink" title="Forward Energy (20 points)"></a>Forward Energy (20 points)</h2><p>Forward energy is a solution to some artifacts that appear when images have curves for instance.</p>
+<p>Implement the function <code>compute_forward_cost</code>. This function will replace the <code>compute_cost</code> we have been using until now.</p>
+<p>基本的seam carving 会影响物体的原有结构，比如曲线啊。</p>
+<p>因此提出了Forward Energy这个方法。</p>
+<p>详见 CS131 Lecture8 的PPT P76-P86。</p>
+<p>介绍上说的是 <strong>Instead of removing the seam of least energy, remove the seam that inserts the least energy to the image !</strong></p>
+<p>之前的做法是去除掉具有最小能量的接缝，而Forward Energy的做法是去除掉给整张图像带来最小能量的接缝。</p>
+<p>具体的可视化解释在PPT中，这里就放公式了。</p>
+<p>之前的能量图定义为</p>
+
+$$
+M(i,j) = E(i,j) + min 
+\left\{
+                                    \begin{array}{lr}
+                                    M(i-1,j-1) \\
+                                    M(i-1,j) \\
+                                    M(i-1,j+1)
+                                    \end{array}
+\right.
+$$
+
+<p>Forward能量图的定义为</p>
+
+$$
+M(i,j) = E(i,j) + min 
+\left\{
+                                    \begin{array}{lr}
+                                    M(i-1,j-1) + C_L(i,j), & C_L(i,j) = |I(i,j+1) - I(i,j-1)| + |I(i-1,j) - I(i,j-1)|\\
+                                    M(i-1,j) + C_V(i,j), & C_V(i,j) = |I(i,j+1) - I(i,j-1)| \\
+                                    M(i-1,j+1)+C_R(i,j), , & C_R(i,j) = |I(i,j+1) - I(i,j-1)| + |I(i-1,j) - I(i,j+1)|\
+                                    \end{array}
+\right.
+$$
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Load image</span></span><br><span class="line">img_yolo = io.imread(<span class="string">&#x27;imgs/yolo.jpg&#x27;</span>)</span><br><span class="line">img_yolo = util.img_as_float(img_yolo)</span><br><span class="line"></span><br><span class="line">plt.title(<span class="string">&#x27;Original Image&#x27;</span>)</span><br><span class="line">plt.imshow(img_yolo)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_59_0.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> compute_forward_cost</span><br><span class="line"></span><br><span class="line"><span class="comment"># Let&#x27;s first test with a small example</span></span><br><span class="line">img_test = np.array([[<span class="number">1.0</span>, <span class="number">1.0</span>, <span class="number">2.0</span>],</span><br><span class="line">                     [<span class="number">0.5</span>, <span class="number">0.0</span>, <span class="number">0.0</span>],</span><br><span class="line">                     [<span class="number">1.0</span>, <span class="number">0.5</span>, <span class="number">2.0</span>]])</span><br><span class="line">img_test = np.stack([img_test]*<span class="number">3</span>, axis=<span class="number">2</span>)</span><br><span class="line"><span class="keyword">assert</span> img_test.shape == (<span class="number">3</span>, <span class="number">3</span>, <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">energy = energy_function(img_test)</span><br><span class="line"></span><br><span class="line">solution_cost = np.array([[<span class="number">0.5</span>, <span class="number">2.5</span>, <span class="number">3.0</span>],</span><br><span class="line">                          [<span class="number">1.0</span>, <span class="number">2.0</span>, <span class="number">3.0</span>],</span><br><span class="line">                          [<span class="number">2.0</span>, <span class="number">4.0</span>, <span class="number">6.0</span>]])</span><br><span class="line"></span><br><span class="line">solution_paths = np.array([[ <span class="number">0</span>,  <span class="number">0</span>,  <span class="number">0</span>],</span><br><span class="line">                           [ <span class="number">0</span>, -<span class="number">1</span>,  <span class="number">0</span>],</span><br><span class="line">                           [ <span class="number">0</span>, -<span class="number">1</span>, -<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Vertical Cost Map</span></span><br><span class="line">vcost, vpaths = compute_forward_cost(img_test, energy)  <span class="comment"># don&#x27;t need the first argument for compute_cost</span></span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Image:&quot;</span>)</span><br><span class="line">print(color.rgb2grey(img_test))</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Energy:&quot;</span>)</span><br><span class="line">print(energy)</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Cost:&quot;</span>)</span><br><span class="line">print(vcost)</span><br><span class="line">print(<span class="string">&quot;Solution cost:&quot;</span>)</span><br><span class="line">print(solution_cost)</span><br><span class="line"></span><br><span class="line">print(<span class="string">&quot;Paths:&quot;</span>)</span><br><span class="line">print(vpaths)</span><br><span class="line">print(<span class="string">&quot;Solution paths:&quot;</span>)</span><br><span class="line">print(solution_paths)</span><br><span class="line"></span><br><span class="line"><span class="keyword">assert</span> np.allclose(solution_cost, vcost)</span><br><span class="line"><span class="keyword">assert</span> np.allclose(solution_paths, vpaths)</span><br></pre></td></tr></table></figure>
+
+<pre><code>Image:
+[[1.  1.  2. ]
+ [0.5 0.  0. ]
+ [1.  0.5 2. ]]
+Energy:
+[[0.5 1.5 3. ]
+ [0.5 0.5 0. ]
+ [1.  1.  3.5]]
+Cost:
+[[0.5 2.5 3. ]
+ [1.  2.  3. ]
+ [2.  4.  6. ]]
+Solution cost:
+[[0.5 2.5 3. ]
+ [1.  2.  3. ]
+ [2.  4.  6. ]]
+Paths:
+[[ 0  0  0]
+ [ 0 -1  0]
+ [ 0 -1 -1]]
+Solution paths:
+[[ 0  0  0]
+ [ 0 -1  0]
+ [ 0 -1 -1]]
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> compute_forward_cost</span><br><span class="line"></span><br><span class="line">energy = energy_function(img_yolo)</span><br><span class="line"></span><br><span class="line">out, _ = compute_cost(img_yolo, energy)</span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>)</span><br><span class="line">plt.imshow(out, cmap=<span class="string">&#x27;inferno&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&quot;Normal cost function&quot;</span>)</span><br><span class="line"></span><br><span class="line">out, _ = compute_forward_cost(img_yolo, energy)</span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line">plt.imshow(out, cmap=<span class="string">&#x27;inferno&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&quot;Forward cost function&quot;</span>)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_61_0.png" alt="png"></p>
+<p>We observe that the forward energy insists more on the curved edges of the image.</p>
+<p>可以看到，Forward Energy方法在保留边缘曲线的结构上比原方法好。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> reduce</span><br><span class="line"></span><br><span class="line">start = time()</span><br><span class="line">out = reduce(img_yolo, <span class="number">200</span>, axis=<span class="number">0</span>)</span><br><span class="line">end = time()</span><br><span class="line">print(<span class="string">&quot;Old Solution: %f seconds.&quot;</span> % (end - start))</span><br><span class="line"></span><br><span class="line">plt.imshow(out)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<pre><code>Old Solution: 5.034606 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_64_1.png" alt="png"></p>
+<p>The issue with our standard <code>reduce</code> function is that it removes vertical seams without any concern for the energy introduced in the image.</p>
+<p>In the case of the dinosaure above, the continuity of the shape is broken. The head is totally wrong for instance, and the back of the dinosaure lacks continuity.</p>
+<p><strong>Forward energy</strong> will solve this issue by explicitely putting high energy on a seam that breaks this continuity and introduces energy.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># This step can take a very long time depending on your implementation.</span></span><br><span class="line">start = time()</span><br><span class="line">out = reduce(img_yolo, <span class="number">200</span>, axis=<span class="number">0</span>, cfunc=compute_forward_cost)</span><br><span class="line">end = time()</span><br><span class="line">print(<span class="string">&quot;Forward Energy Solution: %f seconds.&quot;</span> % (end - start))</span><br><span class="line"></span><br><span class="line">plt.imshow(out)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>Forward Energy Solution: 8.092415 seconds.
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_66_1.png" alt="png"></p>
+<h2 id="Object-removal-extra-credit-0-5"><a href="#Object-removal-extra-credit-0-5" class="headerlink" title="Object removal (extra credit 0.5%)"></a>Object removal (extra credit 0.5%)</h2><p>Object removal uses a binary mask of the object to be removed.</p>
+<p>Using the <code>reduce</code> and <code>enlarge</code> functions you wrote before, complete the function <code>remove_object</code> to output an image of the same shape but without the object to remove.</p>
+<p><strong>移除目标和保留目标</strong></p>
+<p>移除目标的思路应该很清晰，就是将图像中目标处的像素视为能量最小或最大，即可将目标去除了。</p>
+<p>两个问题：</p>
+<ul>
+<li>如何进行标记，从而每次删除能量线的时候，都能删到并且尽可能多的删到带有标记的能量线？同时坐标下标不会混乱。</li>
+<li>如何在删除目标之后保持和原图同样的尺寸</li>
+</ul>
+<p>解决方式也不难：</p>
+<ul>
+<li>判断最小能量线的时候，将mask区域乘上负数，自然找到的接缝能量会最小，并且穿过mask区域的像素点会更多。 </li>
+<li>做裁剪的时候，将mask根据接缝和图像一起进行裁剪，自然不会引起下标混乱。</li>
+<li>删除目标之后再调用之前的enlarge函数，进行图像的放大，放大到原图尺寸。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Load image</span></span><br><span class="line">image = io.imread(<span class="string">&#x27;imgs/wyeth.jpg&#x27;</span>)</span><br><span class="line">image = util.img_as_float(image)</span><br><span class="line"></span><br><span class="line">mask = io.imread(<span class="string">&#x27;imgs/wyeth_mask.jpg&#x27;</span>, as_grey=<span class="literal">True</span>)</span><br><span class="line">mask = util.img_as_bool(mask)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">1</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Original Image&#x27;</span>)</span><br><span class="line">plt.imshow(image)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">1</span>, <span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Mask of the object to remove&#x27;</span>)</span><br><span class="line">plt.imshow(mask)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>/home/ubuntu/anaconda3/lib/python3.6/site-packages/skimage/util/dtype.py:118: UserWarning: Possible sign loss when converting negative image of type float64 to positive image of type bool.
+  .format(dtypeobj_in, dtypeobj_out))
+/home/ubuntu/anaconda3/lib/python3.6/site-packages/skimage/util/dtype.py:122: UserWarning: Possible precision loss when converting from float64 to bool
+  .format(dtypeobj_in, dtypeobj_out))
+</code></pre>
+<p><img src= "/img/loading.gif" data-lazy-src="output_69_1.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Use your function to remove the object</span></span><br><span class="line"><span class="keyword">from</span> seam_carving <span class="keyword">import</span> remove_object</span><br><span class="line">out = remove_object(image, mask)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">2</span>, <span class="number">1</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Original Image&#x27;</span>)</span><br><span class="line">plt.imshow(image)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Mask of the object to remove&#x27;</span>)</span><br><span class="line">plt.imshow(mask)</span><br><span class="line"></span><br><span class="line">plt.subplot(<span class="number">2</span>, <span class="number">2</span>, <span class="number">3</span>)</span><br><span class="line">plt.title(<span class="string">&#x27;Image with object removed&#x27;</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img src= "/img/loading.gif" data-lazy-src="output_70_0.png" alt="png"></p>
+<h1 id="代码档案"><a href="#代码档案" class="headerlink" title="代码档案"></a>代码档案</h1><p><a target="_blank" rel="noopener" href="https://github.com/StanfordVL/CS131_release/tree/master/hw4_release">官方Repo作业材料</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/veraposeidon/CS131_Assignments/tree/master/hw4_release">个人Repo作业存档</a></p>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">SHEN Xiaohai</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://shenxiaohai.me/2018/09/10/cs131-homework4/">https://shenxiaohai.me/2018/09/10/cs131-homework4/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://shenxiaohai.me" target="_blank">SHEN's BLOG</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/">计算机视觉</a><a class="post-meta__tags" href="/tags/CS131/">CS131</a><a class="post-meta__tags" href="/tags/%E5%9B%BE%E5%83%8F%E7%BC%A9%E6%94%BE/">图像缩放</a><a class="post-meta__tags" href="/tags/Seam-Carving/">Seam Carving</a><a class="post-meta__tags" href="/tags/%E5%8A%A8%E6%80%81%E8%A7%84%E5%88%92/">动态规划</a><a class="post-meta__tags" href="/tags/%E5%9B%BE%E5%83%8F%E6%84%9F%E7%9F%A5/">图像感知</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/12/27/qTeUEj58FYLZvx4.jpg" data-sites="wechat,weibo,qq,facebook,twitter"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2018/09/11/cs131-homework5/"><img class="prev-cover" data-lazy-src="https://i.loli.net/2020/09/08/71eB5HR2UlyPEgv.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">CS131,Homewrok5,Segmentation-Clustering</div></div></a></div><div class="next-post pull-right"><a href="/2018/09/07/cs131-homework3/"><img class="next-cover" data-lazy-src="https://i.loli.net/2020/09/08/eMvrld9nsix1fXq.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">CS131,Homewrok3,Panorama-ImageStiching</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2018/04/15/cs131-homework0/" title="CS131, Homewrok0, Basics"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/PFYmvxWrsitkyb3.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-04-15</div><div class="title">CS131, Homewrok0, Basics</div></div></a></div><div><a href="/2018/04/15/cs131-homework1/" title="CS131, Homewrok1, Filters-Instagram"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/OB8qRKXtFemPDuc.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-04-15</div><div class="title">CS131, Homewrok1, Filters-Instagram</div></div></a></div><div><a href="/2018/04/16/cs131-homework2/" title="CS131, Homewrok2, Edges-Smart Car Lane Detection"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/S7kCainPZvpVJfj.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-04-15</div><div class="title">CS131, Homewrok2, Edges-Smart Car Lane Detection</div></div></a></div><div><a href="/2018/09/07/cs131-homework3/" title="CS131,Homewrok3,Panorama-ImageStiching"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/eMvrld9nsix1fXq.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-09-07</div><div class="title">CS131,Homewrok3,Panorama-ImageStiching</div></div></a></div><div><a href="/2018/09/11/cs131-homework5/" title="CS131,Homewrok5,Segmentation-Clustering"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/71eB5HR2UlyPEgv.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-09-11</div><div class="title">CS131,Homewrok5,Segmentation-Clustering</div></div></a></div><div><a href="/2018/10/07/cs131-homework7/" title="CS131,Homewrok7,Object-Detection"><img class="cover" data-lazy-src="https://i.loli.net/2020/12/27/i76rSB5RH4k8eEW.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-10-06</div><div class="title">CS131,Homewrok7,Object-Detection</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">SHEN Xiaohai</div><div class="author-info__description">我的心愿是没有蛀牙</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/veraposeidon"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/veraposeidon" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:veraposeidon@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">右下角设置可以切换 Dark Mode / Light Mode</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Seam-Carving"><span class="toc-number">1.</span> <span class="toc-text">Seam Carving</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Image-Reducing-using-Seam-Carving"><span class="toc-number">1.1.</span> <span class="toc-text">Image Reducing using Seam Carving</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Energy-function-5-points"><span class="toc-number">1.1.1.</span> <span class="toc-text">Energy function (5 points)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Compute-cost-10-points"><span class="toc-number">1.1.2.</span> <span class="toc-text">Compute cost (10 points)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Finding-optimal-seams"><span class="toc-number">1.2.</span> <span class="toc-text">Finding optimal seams</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Backtrack-seam-5-points"><span class="toc-number">1.2.1.</span> <span class="toc-text">Backtrack seam (5 points)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Reduce-25-points"><span class="toc-number">1.2.2.</span> <span class="toc-text">Reduce (25 points)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Image-Enlarging"><span class="toc-number">1.3.</span> <span class="toc-text">Image Enlarging</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Enlarge-naive-10-points"><span class="toc-number">1.3.1.</span> <span class="toc-text">Enlarge naive (10 points)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Enlarge-25-points"><span class="toc-number">1.3.2.</span> <span class="toc-text">Enlarge (25 points)</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Other-experiments-on-the-image"><span class="toc-number">1.4.</span> <span class="toc-text">Other experiments on the image</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Faster-reduce-extra-credit-0-5"><span class="toc-number">1.5.</span> <span class="toc-text">Faster reduce (extra credit 0.5%)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Reducing-and-enlarging-on-another-image"><span class="toc-number">1.6.</span> <span class="toc-text">Reducing and enlarging on another image</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Forward-Energy-20-points"><span class="toc-number">1.7.</span> <span class="toc-text">Forward Energy (20 points)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Object-removal-extra-credit-0-5"><span class="toc-number">1.8.</span> <span class="toc-text">Object removal (extra credit 0.5%)</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BB%A3%E7%A0%81%E6%A1%A3%E6%A1%88"><span class="toc-number">2.</span> <span class="toc-text">代码档案</span></a></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url('https://i.loli.net/2020/12/27/qTeUEj58FYLZvx4.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2021 By SHEN Xiaohai</div><div class="footer_custom_text">欢迎👏</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="algolia-search"><div class="search-dialog"><div class="search-dialog__title" id="algolia-search-title">Algolia</div><div id="algolia-input-panel"><div id="algolia-search-input"></div></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-stats"></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>if (!window.MathJax) {
+  window.MathJax = {
+    loader: {
+      source: {
+        '[tex]/amsCd': '[tex]/amscd'
+      }
+    },
+    tex: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"]],
+      tags: 'ams'
+    },
+    options: {
+      renderActions: {
+        findScript: [10, doc => {
+          for (const node of document.querySelectorAll('script[type^="math/tex"]')) {
+            const display = !!node.type.match(/; *mode=display/)
+            const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display)
+            const text = document.createTextNode('')
+            node.parentNode.replaceChild(text, node)
+            math.start = {node: text, delim: '', n: 0}
+            math.end = {node: text, delim: '', n: 0}
+            doc.math.push(math)
+          }
+        }, ''],
+        addClass: [200,() => {
+          document.querySelectorAll('mjx-container:not([display=\'true\']').forEach( node => {
+            const target = node.parentNode
+            if (!target.classList.contains('has-jax')) {
+              target.classList.add('mathjax-overflow')
+            }
+          })
+        }, '', false]
+      }
+    }
+  }
+  
+  const script = document.createElement('script')
+  script.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+  script.id = 'MathJax-script'
+  script.async = true
+  document.head.appendChild(script)
+} else {
+  MathJax.startup.document.state(0)
+  MathJax.texReset()
+  MathJax.typeset()
+}</script><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'BE79lHe3JGlIH9QbzBILVo3I-MdYXbMMI',
+      appKey: 'a5zH6018czqOEie43oSIDWxC',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: true,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign(initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config-diff',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: true,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', 'UA-74360128-2', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

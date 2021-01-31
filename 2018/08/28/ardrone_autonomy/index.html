@@ -1,0 +1,337 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ardrone_autonomy驱动相关 | SHEN's BLOG</title><meta name="keywords" content="ROS,AR.Drone,ardrone_autonomy"><meta name="author" content="SHEN Xiaohai"><meta name="copyright" content="SHEN Xiaohai"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="介绍一下无人机AR.Drone2代在ROS中的驱动ardrone_autonomy的常规用法。后面SLAM的研究，飞行器的控制就靠它了。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ardrone_autonomy驱动相关">
+<meta property="og:url" content="https://shenxiaohai.me/2018/08/28/ardrone_autonomy/index.html">
+<meta property="og:site_name" content="SHEN&#39;s BLOG">
+<meta property="og:description" content="介绍一下无人机AR.Drone2代在ROS中的驱动ardrone_autonomy的常规用法。后面SLAM的研究，飞行器的控制就靠它了。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://i.loli.net/2020/09/08/3UoNKBfMudsEDYb.jpg">
+<meta property="article:published_time" content="2018-08-28T11:50:44.000Z">
+<meta property="article:modified_time" content="2018-08-28T03:56:34.000Z">
+<meta property="article:author" content="SHEN Xiaohai">
+<meta property="article:tag" content="ROS">
+<meta property="article:tag" content="AR.Drone">
+<meta property="article:tag" content="ardrone_autonomy">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://i.loli.net/2020/09/08/3UoNKBfMudsEDYb.jpg"><link rel="shortcut icon" href="/img/favicon.png"><link rel="canonical" href="https://shenxiaohai.me/2018/08/28/ardrone_autonomy/"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//www.google-analytics.com" crossorigin=""/><link rel="preconnect" href="//fonts.googleapis.com" crossorigin=""/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.css" media="print" onload="this.media='all'"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/instantsearch.js@2.10.5/dist/instantsearch.min.js" defer></script><script async="async" src="https://www.googletagmanager.com/gtag/js?id=UA-74360128-2"></script><script>window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'UA-74360128-2');
+</script><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web&amp;display=swap" media="print" onload="this.media='all'"><script>const GLOBAL_CONFIG = { 
+  root: '/',
+  algolia: {"appId":"TA1T7F3R2E","apiKey":"c4d8bb07ab3fa68ab573e9bf8f264e0c","indexName":"SHENBLOG","hits":{"per_page":15},"languages":{"input_placeholder":"搜索文章","hits_empty":"找不到您查询的内容：${query}","hits_stats":"找到 ${hits} 条结果，用时 ${time} 毫秒"}},
+  localSearch: undefined,
+  translate: {"defaultEncoding":2,"translateDelay":0,"msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
+  noticeOutdate: {"limitDay":600,"position":"top","messagePrev":"距离我扯这篇文章已经","messageNext":"天了，内容可能跟不上时代了，对不住了各位老铁。注意自己搜搜新的材料对照着看。"},
+  highlight: {"plugin":"highlighjs","highlightCopy":true,"highlightLang":true},
+  copy: {
+    success: '复制成功',
+    error: '复制错误',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '天',
+  date_suffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: {"limitCount":600,"languages":{"author":"作者: SHEN Xiaohai","link":"链接: ","source":"来源: SHEN's BLOG","info":"著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。"}},
+  lightbox: 'fancybox',
+  Snackbar: {"chs_to_cht":"你已切换为繁体","cht_to_chs":"你已切换为简体","day_to_night":"你已切换为深色模式","night_to_day":"你已切换为浅色模式","bgLight":"#49b1f5","bgDark":"#121212","position":"bottom-left"},
+  source: {
+    jQuery: 'https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js',
+    justifiedGallery: {
+      js: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/js/jquery.justifiedGallery.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/justifiedGallery/dist/css/justifiedGallery.min.css'
+    },
+    fancybox: {
+      js: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js',
+      css: 'https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css'
+    }
+  },
+  isPhotoFigcaption: false,
+  islazyload: true,
+  isanchor: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = { 
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2018-08-28 03:56:34'
+}</script><noscript><style type="text/css">
+  #nav {
+    opacity: 1
+  }
+  .justified-gallery img {
+    opacity: 1
+  }
+
+  #recent-posts time,
+  #post-meta time {
+    display: inline !important
+  }
+</style></noscript><script>(win=>{
+    win.saveToLocal = {
+      set: function setWithExpiry(key, value, ttl) {
+        if (ttl === 0) return
+        const now = new Date()
+        const expiryDay = ttl * 86400000
+        const item = {
+          value: value,
+          expiry: now.getTime() + expiryDay,
+        }
+        localStorage.setItem(key, JSON.stringify(item))
+      },
+
+      get: function getWithExpiry(key) {
+        const itemStr = localStorage.getItem(key)
+
+        if (!itemStr) {
+          return undefined
+        }
+        const item = JSON.parse(itemStr)
+        const now = new Date()
+
+        if (now.getTime() > item.expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return item.value
+      }
+    }
+  
+    win.getScript = url => new Promise((resolve, reject) => {
+      const script = document.createElement('script')
+      script.src = url
+      script.async = true
+      script.onerror = reject
+      script.onload = script.onreadystatechange = function() {
+        const loadState = this.readyState
+        if (loadState && loadState !== 'loaded' && loadState !== 'complete') return
+        script.onload = script.onreadystatechange = null
+        resolve()
+      }
+      document.head.appendChild(script)
+    })
+  
+      win.activateDarkMode = function () {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      win.activateLightMode = function () {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+      const t = saveToLocal.get('theme')
+    
+          const now = new Date()
+          const hour = now.getHours()
+          const isNight = hour <= 6 || hour >= 18
+          if (t === undefined) isNight ? activateDarkMode() : activateLightMode()
+          else if (t === 'light') activateLightMode()
+          else activateDarkMode()
+        
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        if (asideStatus === 'hide') {
+          document.documentElement.classList.add('hide-aside')
+        } else {
+          document.documentElement.classList.remove('hide-aside')
+        }
+      }
+    })(window)</script><meta name="generator" content="Hexo 5.1.1"></head><body><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="author-avatar"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="site-data"><div class="data-item is-center"><div class="data-item-link"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div></div><div class="data-item is-center"><div class="data-item-link"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div></div></div><div class="post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url('https://i.loli.net/2020/09/08/3UoNKBfMudsEDYb.jpg')"><nav id="nav"><span id="blog_name"><a id="site-name" href="/">SHEN's BLOG</a></span><div id="menus"><div id="search-button"><a class="site-page social-icon search"><i class="fas fa-search fa-fw"></i><span> 搜索</span></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 首页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fas fa-tags"></i><span> 标签</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fas fa-folder-open"></i><span> 分类</span></a></div></div><div id="toggle-menu"><a class="site-page"><i class="fas fa-bars fa-fw"></i></a></div></div></nav><div id="post-info"><h1 class="post-title">ardrone_autonomy驱动相关</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2018-08-28T11:50:44.000Z" title="发表于 2018-08-28 11:50:44">2018-08-28</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2018-08-28T03:56:34.000Z" title="更新于 2018-08-28 03:56:34">2018-08-28</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/ROS/">ROS</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">字数总计:</span><span class="word-count">956</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>4分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><h1 id="ardrone-autonomy要点清单"><a href="#ardrone-autonomy要点清单" class="headerlink" title="ardrone_autonomy要点清单"></a>ardrone_autonomy要点清单</h1><p>刚学完《视觉SLAM十四讲》，想搭建一个平台用来测试一些开源SLAM库。</p>
+<p>正好寒假买了个二手AR.Drone2，性价比超高，有720P摄像头，又实现了飞控，还可以依靠ardrone_autonomy连接ROS,用来作为研究环境感知的平台超级合适，虽然旧了点。DJI的M100，M200根本买不动啊，Parrot还有Bepop2倒是可以指望。</p>
+<p>AR.Drone2上集成了很多传感器，ardrone_autonomy是一个ROS包，可以通过WiFi连接Drone,他的节点drone_driver可以作为一个驱动，供其他ROS包使用，包括传感器数据读取和飞行控制指令的发送。</p>
+<p>我把关于驱动这部分整理了一下，方便查看。</p>
+<h2 id="文档"><a href="#文档" class="headerlink" title="文档"></a>文档</h2><p><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/index.html">ardrone_autonomy 文档地址</a></p>
+<p><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/installation.html">安装步骤</a></p>
+<p>备注，ardrone_autonomy只能用于ROS Indigo/Hydro/Groovy版本。</p>
+<h2 id="用法"><a href="#用法" class="headerlink" title="用法"></a>用法</h2><p>驱动只有一个可执行节点就是ardrone_driver。</p>
+<p>运行 <code>rosrun ardrone_autonomy ardrone_driver</code> 进行启动，</p>
+<p>也可以通过写在launch文件中进行启动。</p>
+<h2 id="从AR-Drone读取"><a href="#从AR-Drone读取" class="headerlink" title="从AR-Drone读取"></a>从AR-Drone读取</h2><p><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/reading.html#update-frequencies">更新频率设定</a></p>
+<p><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/reading.html#legacy-navigation-data">导航数据参数</a></p>
+<p><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/reading.html#imu-data">IMU数据</a></p>
+<p><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/reading.html#imu-data">磁力计数据</a></p>
+<p><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/reading.html#odometry-data">测距数据</a></p>
+<p>视觉测距，是根据向下的摄像头用光流法估计的。</p>
+<p><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/reading.html#cameras">两个相机数据</a></p>
+<p>ardrone/image_raw，通过调用服务toggle camera进行切换。</p>
+<h2 id="发送命令到AR-Drone"><a href="#发送命令到AR-Drone" class="headerlink" title="发送命令到AR-Drone"></a>发送命令到AR-Drone</h2><p>发送空命令(<a target="_blank" rel="noopener" href="http://docs.ros.org/indigo/api/std_msgs/html/msg/Empty.html">std_msgs/Empty</a>)到以下topic，进行起降操作</p>
+<ul>
+<li>ardrone/takeoff ：起飞</li>
+<li>ardrone/land ： 降落</li>
+<li>ardrone/reset ：紧急状况</li>
+</ul>
+<p>发送（<a target="_blank" rel="noopener" href="http://www.ros.org/doc/api/geometry_msgs/html/msg/Twist.html">geometry_msgs::Twist</a> ）类型消息到cmd_vel的topic，进行飞行状态控制，消息格式：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">-linear.x: move backward</span><br><span class="line">+linear.x: move forward</span><br><span class="line">-linear.y: move right</span><br><span class="line">+linear.y: move left</span><br><span class="line">-linear.z: move down</span><br><span class="line">+linear.z: move up</span><br><span class="line"></span><br><span class="line">-angular.z: turn right</span><br><span class="line">+angular.z: turn left</span><br></pre></td></tr></table></figure>
+
+<h2 id="服务"><a href="#服务" class="headerlink" title="服务"></a>服务</h2><h3 id="切换相机"><a href="#切换相机" class="headerlink" title="切换相机"></a><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/services.html#toggle-camera">切换相机</a></h3><p><code>rosservice call /ardrone/togglecam</code></p>
+<h3 id="LED动作"><a href="#LED动作" class="headerlink" title="LED动作"></a><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/services.html#led-animations">LED动作</a></h3><p><code>rosservice call /ardrone/setledanimation type freq duration  </code></p>
+<ul>
+<li><code>uint8 type</code>: The <a target="_blank" rel="noopener" href="http://docs.ros.org/indigo/api/ardrone_autonomy/html/srv/LedAnim.html">type of animation</a> which is a number in range [0..13]</li>
+<li><code>float32 freq</code>: The frequency of the animation in Hz</li>
+<li><code>uint8 duration</code>: The duration of the animation in Seconds.</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 举例</span><br><span class="line">$ rosservice call &#x2F;ardrone&#x2F;setledanimation 1 4 5</span><br></pre></td></tr></table></figure>
+
+<h3 id="飞行动作"><a href="#飞行动作" class="headerlink" title="飞行动作"></a><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/services.html#flight-animations">飞行动作</a></h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rosservice call &#x2F;ardrone&#x2F;setflightanimation type duration</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><code>uint8 type</code>: The <a target="_blank" rel="noopener" href="http://docs.ros.org/indigo/api/ardrone_autonomy/html/srv/FlightAnim.html">type of flight animation</a>, a number in range [0..19]</li>
+<li><code>uint16 duration</code>: The duration of the animation. Use 0 for default duration (recommended)</li>
+</ul>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 举例</span><br><span class="line">$ rosservice call &#x2F;ardrone&#x2F;setflightanimation 1 0</span><br></pre></td></tr></table></figure>
+
+<h3 id="水平调整"><a href="#水平调整" class="headerlink" title="水平调整"></a><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/services.html#flat-trim">水平调整</a></h3><p>调用<code>ardrone/flattrim</code> 服务进行水平调整，注意切勿在飞行中和不平的平面上进行水平调整。</p>
+<h3 id="保存至USB存储设备"><a href="#保存至USB存储设备" class="headerlink" title="保存至USB存储设备"></a><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/services.html#record-to-usb-stick">保存至USB存储设备</a></h3><p>调用<code>ardrone/setrecord</code> 服务进行启用和禁用保存到USB存储设备这个功能。1 启用，0 禁用。</p>
+<h2 id="启动参数"><a href="#启动参数" class="headerlink" title="启动参数"></a><a target="_blank" rel="noopener" href="https://ardrone-autonomy.readthedocs.io/en/latest/parameters.html#parameters">启动参数</a></h2><p>启动参数，在写launch文件的时候比较重要。具体的参数设定可以参考ardrone_autonomy的launch文件示例。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br></pre></td><td class="code"><pre><span class="line">altitude (Default &#x3D; 0)</span><br><span class="line">altitude_max (Default &#x3D; 3000)</span><br><span class="line">altitude_min (Default &#x3D; 50)</span><br><span class="line">ardrone_name (Default &#x3D; My ARDrone)</span><br><span class="line">autonomous_flight (Default &#x3D; 0)</span><br><span class="line">bitrate (Default &#x3D; 1000)</span><br><span class="line">bitrate_ctrl_mode (Default &#x3D; 0)</span><br><span class="line">bitrate_storage (Default &#x3D; 4000)</span><br><span class="line">codec_fps (Default &#x3D; 0)</span><br><span class="line">com_watchdog (Default &#x3D; 2)</span><br><span class="line">control_iphone_tilt (Default &#x3D; (20000.0f * (MDEG_TO_RAD)) &#x3D; 0.349066)</span><br><span class="line">control_level (Default &#x3D; 0)</span><br><span class="line">control_vz_max (Default &#x3D; 700)</span><br><span class="line">control_yaw (Default &#x3D; (100000.0f * (MDEG_TO_RAD)) &#x3D; 1.745329)</span><br><span class="line">detect_type (Default &#x3D; CAD_TYPE_NONE &#x3D; 3)</span><br><span class="line">detections_select_h (Default &#x3D; 0)</span><br><span class="line">detections_select_v (Default &#x3D; 0)</span><br><span class="line">detections_select_v_hsync (Default &#x3D; 0)</span><br><span class="line">enemy_colors (Default &#x3D; (ARDRONE_DETECTION_COLOR_ORANGE_GREEN) &#x3D; 1)</span><br><span class="line">enemy_without_shell (Default &#x3D; 0)</span><br><span class="line">euler_angle_max (Default &#x3D; (12000.0f * (MDEG_TO_RAD)) &#x3D; 0.209440)</span><br><span class="line">flight_anim (Default &#x3D; 0,0)</span><br><span class="line">flight_without_shell (Default &#x3D; 0)</span><br><span class="line">flying_mode (Default &#x3D; 0)</span><br><span class="line">groundstripe_colors (Default &#x3D; (ARDRONE_DETECTION_COLOR_ARRACE_FINISH_LINE) &#x3D; 16)</span><br><span class="line">hovering_range (Default &#x3D; 1000)</span><br><span class="line">indoor_control_vz_max (Default &#x3D; 700)</span><br><span class="line">indoor_control_yaw (Default &#x3D; (100000.0f * (MDEG_TO_RAD)) &#x3D; 1.745329)</span><br><span class="line">indoor_euler_angle_max (Default &#x3D; (12000.0f * (MDEG_TO_RAD)) &#x3D; 0.209440)</span><br><span class="line">latitude (Default &#x3D; 500)</span><br><span class="line">leds_anim (Default &#x3D; 0,0,0)</span><br><span class="line">longitude (Default &#x3D; 500)</span><br><span class="line">manual_trim (Default &#x3D; 0)</span><br><span class="line">max_bitrate (Default &#x3D; 1000)</span><br><span class="line">max_size (Default &#x3D; 102400)</span><br><span class="line">navdata_demo (Default &#x3D; 0)</span><br><span class="line">navdata_options (Default &#x3D; ( ( 1 &lt;&lt; (NAVDATA_DEMO_TAG) )|( 1 &lt;&lt; (NAVDATA_VISION_DETECT_TAG) ) ) &#x3D; 65537)</span><br><span class="line">nb_files (Default &#x3D; 5)</span><br><span class="line">outdoor (Default &#x3D; 0)</span><br><span class="line">outdoor_control_vz_max (Default &#x3D; (1000.0f) &#x3D; 1000)</span><br><span class="line">outdoor_control_yaw (Default &#x3D; (200000.0f * (MDEG_TO_RAD)) &#x3D; 3.490659)</span><br><span class="line">outdoor_euler_angle_max (Default &#x3D; (20000.0f * (MDEG_TO_RAD)) &#x3D; 0.349066)</span><br><span class="line">output (Default &#x3D; (UART_PRINT|WIFI_PRINT|FLASH_PRINT) &#x3D; 7)</span><br><span class="line">owner_mac (Default &#x3D; 00:00:00:00:00:00)</span><br><span class="line">ssid_multi_player (Default &#x3D; ardronenetwork)</span><br><span class="line">ssid_single_player (Default &#x3D; ardronenetwork)</span><br><span class="line">travelling_enable (Default &#x3D; 0)</span><br><span class="line">travelling_mode (Default &#x3D; 0,10,1500,0,1000)</span><br><span class="line">ultrasound_freq (Default &#x3D; ADC_CMD_SELECT_ULTRASOUND_25Hz &#x3D; 8)</span><br><span class="line">ultrasound_watchdog (Default &#x3D; 3)</span><br><span class="line">userbox_cmd (Default &#x3D; 0)</span><br><span class="line">video_channel (Default &#x3D; 0)</span><br><span class="line">video_codec (Default &#x3D; (UVLC_CODEC) &#x3D; 32)</span><br><span class="line">video_enable (Default &#x3D; 1)</span><br><span class="line">video_file_index (Default &#x3D; 1)</span><br><span class="line">video_live_socket (Default &#x3D; 0)</span><br><span class="line">video_on_usb (Default &#x3D; 1)</span><br><span class="line">video_slices (Default &#x3D; 0)</span><br><span class="line">vision_enable (Default &#x3D; 1)</span><br><span class="line">wifi_mode (Default &#x3D; WIFI_MODE_INFRA &#x3D; 0)</span><br><span class="line">wifi_rate (Default &#x3D; 0)</span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">文章作者: </span><span class="post-copyright-info"><a href="mailto:undefined">SHEN Xiaohai</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">文章链接: </span><span class="post-copyright-info"><a href="https://shenxiaohai.me/2018/08/28/ardrone_autonomy/">https://shenxiaohai.me/2018/08/28/ardrone_autonomy/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来自 <a href="https://shenxiaohai.me" target="_blank">SHEN's BLOG</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/tags/ROS/">ROS</a><a class="post-meta__tags" href="/tags/AR-Drone/">AR.Drone</a><a class="post-meta__tags" href="/tags/ardrone-autonomy/">ardrone_autonomy</a></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/09/08/3UoNKBfMudsEDYb.jpg" data-sites="wechat,weibo,qq,facebook,twitter"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><div class="prev-post pull-left"><a href="/2018/08/29/ros-opencv/"><img class="prev-cover" data-lazy-src="https://i.loli.net/2020/09/08/ECmSl6NuGe2YbHF.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of previous post"><div class="pagination-info"><div class="label">上一篇</div><div class="prev_info">在ROS中使用OpenCV进行视觉编程（Python版本）</div></div></a></div><div class="next-post pull-right"><a href="/2018/07/20/boston-housing/"><img class="next-cover" data-lazy-src="https://i.loli.net/2020/09/07/bSGMhu8rnNvpBde.jpg" onerror="onerror=null;src='/img/404.jpg'" alt="cover of next post"><div class="pagination-info"><div class="label">下一篇</div><div class="next_info">波士顿房价预测</div></div></a></div></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span> 相关推荐</span></div><div class="relatedPosts-list"><div><a href="/2018/08/29/ros-opencv/" title="在ROS中使用OpenCV进行视觉编程（Python版本）"><img class="cover" data-lazy-src="https://i.loli.net/2020/09/08/ECmSl6NuGe2YbHF.jpg" alt="cover"><div class="content is-center"><div class="date"><i class="far fa-calendar-alt fa-fw"></i> 2018-08-28</div><div class="title">在ROS中使用OpenCV进行视觉编程（Python版本）</div></div></a></div></div></div><hr/><div id="post-comment"><div class="comment-head"><div class="comment-headline"><i class="fas fa-comments fa-fw"></i><span> 评论</span></div></div><div class="comment-wrap"><div><div class="vcomment" id="vcomment"></div></div></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info"><div class="card-info-avatar is-center"><img class="avatar-img" data-lazy-src="https://i.loli.net/2020/09/07/EB9SvrlPOFpoWTD.png" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">SHEN Xiaohai</div><div class="author-info__description">我的心愿是没有蛀牙</div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">66</div></a></div><div class="card-info-data-item is-center"><a href="/tags/"><div class="headline">标签</div><div class="length-num">119</div></a></div><div class="card-info-data-item is-center"><a href="/categories/"><div class="headline">分类</div><div class="length-num">15</div></a></div></div><a class="button--animated" id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/veraposeidon"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons is-center"><a class="social-icon" href="https://github.com/veraposeidon" target="_blank" title="Github"><i class="fab fa-github"></i></a><a class="social-icon" href="mailto:veraposeidon@gmail.com" target="_blank" title="Email"><i class="fas fa-envelope"></i></a></div></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn card-announcement-animation"></i><span>公告</span></div><div class="announcement_content">右下角设置可以切换 Dark Mode / Light Mode</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#ardrone-autonomy%E8%A6%81%E7%82%B9%E6%B8%85%E5%8D%95"><span class="toc-number">1.</span> <span class="toc-text">ardrone_autonomy要点清单</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%96%87%E6%A1%A3"><span class="toc-number">1.1.</span> <span class="toc-text">文档</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%94%A8%E6%B3%95"><span class="toc-number">1.2.</span> <span class="toc-text">用法</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%8EAR-Drone%E8%AF%BB%E5%8F%96"><span class="toc-number">1.3.</span> <span class="toc-text">从AR-Drone读取</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%91%E9%80%81%E5%91%BD%E4%BB%A4%E5%88%B0AR-Drone"><span class="toc-number">1.4.</span> <span class="toc-text">发送命令到AR-Drone</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1"><span class="toc-number">1.5.</span> <span class="toc-text">服务</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%88%87%E6%8D%A2%E7%9B%B8%E6%9C%BA"><span class="toc-number">1.5.1.</span> <span class="toc-text">切换相机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LED%E5%8A%A8%E4%BD%9C"><span class="toc-number">1.5.2.</span> <span class="toc-text">LED动作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%A3%9E%E8%A1%8C%E5%8A%A8%E4%BD%9C"><span class="toc-number">1.5.3.</span> <span class="toc-text">飞行动作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%B0%B4%E5%B9%B3%E8%B0%83%E6%95%B4"><span class="toc-number">1.5.4.</span> <span class="toc-text">水平调整</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BF%9D%E5%AD%98%E8%87%B3USB%E5%AD%98%E5%82%A8%E8%AE%BE%E5%A4%87"><span class="toc-number">1.5.5.</span> <span class="toc-text">保存至USB存储设备</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0"><span class="toc-number">1.6.</span> <span class="toc-text">启动参数</span></a></li></ol></li></ol></div></div></div></div></main><footer id="footer" style="background-image: url('https://i.loli.net/2020/09/08/3UoNKBfMudsEDYb.jpg')"><div id="footer-wrap"><div class="copyright">&copy;2018 - 2021 By SHEN Xiaohai</div><div class="footer_custom_text">欢迎👏</div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="translateLink" type="button" title="简繁转换">繁</button><button id="darkmode" type="button" title="浅色和深色模式转换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside_config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><a id="to_comment" href="#post-comment" title="直达评论"><i class="fas fa-comments"></i></a><button id="go-up" type="button" title="回到顶部"><i class="fas fa-arrow-up"></i></button></div></div><div id="algolia-search"><div class="search-dialog"><div class="search-dialog__title" id="algolia-search-title">Algolia</div><div id="algolia-input-panel"><div id="algolia-search-input"></div></div><hr/><div id="algolia-search-results"><div id="algolia-hits"></div><div id="algolia-pagination"></div><div id="algolia-stats"></div></div><span class="search-close-button"><i class="fas fa-times"></i></span></div><div id="search-mask"></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/vanilla-lazyload/dist/lazyload.iife.min.js"></script><script src="https://cdn.jsdelivr.net/npm/node-snackbar/dist/snackbar.min.js"></script><script>function panguFn () {
+  if (typeof pangu === 'object') pangu.autoSpacingPage()
+  else {
+    getScript('https://cdn.jsdelivr.net/npm/pangu/dist/browser/pangu.min.js')
+      .then(() => {
+        pangu.autoSpacingPage()
+      })
+  }
+}
+
+function panguInit () {
+  if (false){
+    GLOBAL_CONFIG_SITE.isPost && panguFn()
+  } else {
+    panguFn()
+  }
+}
+
+document.addEventListener('DOMContentLoaded', panguInit)</script><script src="/js/search/algolia.js"></script><div class="js-pjax"><script>function loadValine () {
+  function initValine () {
+    let initData = {
+      el: '#vcomment',
+      appId: 'BE79lHe3JGlIH9QbzBILVo3I-MdYXbMMI',
+      appKey: 'a5zH6018czqOEie43oSIDWxC',
+      placeholder: 'Please leave your footprints',
+      avatar: 'monsterid',
+      meta: 'nick,mail,link'.split(','),
+      pageSize: '10',
+      lang: 'zh-CN',
+      recordIP: true,
+      serverURLs: '',
+      emojiCDN: '',
+      emojiMaps: "",
+      enableQQ: false,
+      path: window.location.pathname,
+    }
+
+    if (true) { 
+      initData.requiredFields= ('nick,mail'.split(','))
+    }
+    
+    if (false) {
+      const otherData = false
+      initData = Object.assign(initData, otherData)
+    }
+    
+    const valine = new Valine(initData)
+  }
+
+  if (typeof Valine === 'function') initValine() 
+  else getScript('https://cdn.jsdelivr.net/npm/valine/dist/Valine.min.js').then(initValine)
+}
+
+if ('Valine' === 'Valine' || !true) {
+  if (true) btf.loadComment(document.getElementById('vcomment'),loadValine)
+  else setTimeout(loadValine, 0)
+} else {
+  function loadOtherComment () {
+    loadValine()
+  }
+}</script></div><script src="https://cdn.jsdelivr.net/npm/pjax/pjax.min.js"></script><script>let pjaxSelectors = [
+  'title',
+  '#config-diff',
+  '#body-wrap',
+  '#rightside-config-hide',
+  '#rightside-config-show',
+  '.js-pjax'
+]
+
+if (false) {
+  pjaxSelectors.unshift('meta[property="og:image"]', 'meta[property="og:title"]', 'meta[property="og:url"]')
+}
+
+var pjax = new Pjax({
+  elements: 'a:not([target="_blank"])',
+  selectors: pjaxSelectors,
+  cacheBust: false,
+  analytics: true,
+  scrollRestoration: false
+})
+
+document.addEventListener('pjax:complete', function () {
+  window.refreshFn()
+
+  document.querySelectorAll('script[data-pjax]').forEach(item => {
+    const newScript = document.createElement('script')
+    const content = item.text || item.textContent || item.innerHTML || ""
+    Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+    newScript.appendChild(document.createTextNode(content))
+    item.parentNode.replaceChild(newScript, item)
+  })
+
+  GLOBAL_CONFIG.islazyload && window.lazyLoadInstance.update()
+
+  typeof chatBtnFn === 'function' && chatBtnFn()
+  typeof panguInit === 'function' && panguInit()
+
+  if (typeof gtag === 'function') {
+    gtag('config', 'UA-74360128-2', {'page_path': window.location.pathname});
+  }
+
+  typeof loadMeting === 'function' && document.getElementsByClassName('aplayer').length && loadMeting()
+
+  // Analytics
+  if (false) {
+    MtaH5.pgv()
+  }
+
+  // prismjs
+  typeof Prism === 'object' && Prism.highlightAll()
+
+  typeof preloader === 'object' && preloader.endLoading()
+})
+
+
+document.addEventListener('pjax:send', function () {
+  typeof preloader === 'object' && preloader.initLoading()
+  
+  if (window.aplayers) {
+    for (let i = 0; i < window.aplayers.length; i++) {
+      if (!window.aplayers[i].options.fixed) {
+        window.aplayers[i].destroy()
+      }
+    }
+  }
+
+  typeof typed === 'object' && typed.destroy()
+
+  //reset readmode
+  const $bodyClassList = document.body.classList
+  $bodyClassList.contains('read-mode') && $bodyClassList.remove('read-mode')
+
+})
+
+document.addEventListener('pjax:error', (e) => {
+  if (e.request.status === 404) {
+    pjax.loadUrl('/404.html')
+  }
+})</script><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>
