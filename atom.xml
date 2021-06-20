@@ -6,7 +6,7 @@
   <link href="https://shenxiaohai.me/atom.xml" rel="self"/>
   
   <link href="https://shenxiaohai.me/"/>
-  <updated>2021-06-01T15:23:38.613Z</updated>
+  <updated>2021-06-20T11:11:04.958Z</updated>
   <id>https://shenxiaohai.me/</id>
   
   <author>
@@ -15,6 +15,29 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Tip-Review-Algorithm 第十一期</title>
+    <link href="https://shenxiaohai.me/2021/06/21/TRA-11/"/>
+    <id>https://shenxiaohai.me/2021/06/21/TRA-11/</id>
+    <published>2021-06-20T19:02:34.000Z</published>
+    <updated>2021-06-20T11:11:04.958Z</updated>
+    
+    
+    <summary type="html">1. jq. 2. 浏览器工作原理. 3. 双指针</summary>
+    
+    
+    
+    <category term="打卡记录" scheme="https://shenxiaohai.me/categories/%E6%89%93%E5%8D%A1%E8%AE%B0%E5%BD%95/"/>
+    
+    
+    <category term="TRA" scheme="https://shenxiaohai.me/tags/TRA/"/>
+    
+    <category term="LeetCode" scheme="https://shenxiaohai.me/tags/LeetCode/"/>
+    
+    <category term="Linux" scheme="https://shenxiaohai.me/tags/Linux/"/>
+    
+  </entry>
   
   <entry>
     <title>Tip-Review-Algorithm 第十期</title>
@@ -495,29 +518,6 @@
     
     
     
-    
-  </entry>
-  
-  <entry>
-    <title>常用和不常用的可视化工具</title>
-    <link href="https://shenxiaohai.me/2019/01/19/visualizer-tool/"/>
-    <id>https://shenxiaohai.me/2019/01/19/visualizer-tool/</id>
-    <published>2019-01-18T16:48:05.000Z</published>
-    <updated>2019-01-18T12:29:54.000Z</updated>
-    
-    <content type="html"><![CDATA[<h1 id="netdata"><a href="#netdata" class="headerlink" title="netdata"></a><a href="https://github.com/netdata/netdata">netdata</a></h1><p>netdata是一个用于服务器性能监控的开源工具，最大的特点就是酷炫和实时，当然安装也很方便。</p><p>我不是搞运维开发的，平时也不怎么用，就是偶尔打开服务器的监控页面赏心悦目一波。</p><p><img src= "/img/loading.gif" data-lazy-src="netdata.gif" alt="netdata"></p><h1 id="LXDUI"><a href="#LXDUI" class="headerlink" title="LXDUI"></a><a href="https://github.com/AdaptiveScale/lxdui">LXDUI</a></h1><p>lxdui是一个用于Linux容器技术LXD/LXC管理的Web UI工具。平时可以用来对容器进行管理，比如创建、克隆、移动、快照等等，还可以提供了容器信息查看、网络设置、快照管理、文件管理等功能，是挺方便的。</p><p>Tips：使用LXD建议写个脚本进行每周、每天和每时的快照备份。</p><p><img src= "/img/loading.gif" data-lazy-src="lxdui_containers.png" alt="LXD"></p><p><img src= "/img/loading.gif" data-lazy-src="lxdui_details.png" alt="LXD"></p><p><img src= "/img/loading.gif" data-lazy-src="lxdui_network.png" alt="LXD"></p><p><img src= "/img/loading.gif" data-lazy-src="lxdui_snapshot.png" alt="LXD"></p><h1 id="TensorBoard和tensorboardX"><a href="#TensorBoard和tensorboardX" class="headerlink" title="TensorBoard和tensorboardX"></a>TensorBoard和tensorboardX</h1><p><a href="https://www.tensorflow.org/guide/summaries_and_tensorboard?hl=zh-cn">TensorBoard</a></p><p><a href="https://github.com/lanpa/tensorboardX">tensorboardX</a></p><p>TensorBoard是TensorFlow配套的可视化工具，用于TensorFlow程序的理解、调试和优化，可以可视化许多深度学习训练过程中的变量，支持的可视化元素包括scalar、image、audio、text、histogram等。</p><p>tensorboardX可以看成是支持PyTorch的TensorBoard，通过tensorboardX的API，PyTorch程序也可以将scalar、Image、figure、histogram、audio、text、graph等等元素通过summary的形式保存为文件，并通过Tensorboard打开进行查看。效果几乎是等同的。</p><p>日常用PyTorch搭配tensorboardX还是挺好使的。</p><p><img src= "/img/loading.gif" data-lazy-src="tensorboard.png" alt="tensorboard"></p><h1 id="Visdom"><a href="#Visdom" class="headerlink" title="Visdom"></a><a href="https://github.com/facebookresearch/visdom">Visdom</a></h1><p>Visdom是FacebookResearch出的一个轻量和灵活的实时可视化工具，支持torch和numpy。</p><p>Visdom支持plotting（各种形式的数据图）、images、text的可视化。</p><p>Visdom我用过一两次，在别人的代码里也见过几次，就我的体验而言，Visdom的优点是：</p><ul><li>灵活：就跟MATLAB的plot窗口和OpenCV的imshow窗口一样，命名一个window，在window里实时显示信息即可。</li><li>实时性：实际上visdom应该就是实时显示数据，而tensorboard是通过读取写入文件来显示的，所以，visdom的实时性很高，而tensorboard则是由刷新间隔的。</li><li>支持的plot样式多：看git repo介绍，支持了好多诸如散点图（scatter）、line（线图）、heatmap（热度图）等好多样式的plot形式，这个很不错的，就等于有了MATLAB的可视化效果了。</li></ul><p>但我不想用visdom的原因如下：</p><ul><li>界面的每个窗口可以通过拖动来排布，但是排版很难调整，真的太难了，逼死强迫症。</li><li>虽然visdom支持了很多plotting样式，但是都是需要手动根据数据绘制的，很多情况下，我只是想看loss的曲线，tensorboard可以通过追加每次loss的方式来实现，而visdom则要通过记录loss历史，并绘制成曲线，才能通过像显示图像一样的形式显示曲线。有那么一丢丢的不优雅，可能是因为我懒，其实如果定义模板的话，绘图也不算难，归根到底还是上面那条窗口排布让我望而生畏。</li></ul><p><img src= "/img/loading.gif" data-lazy-src="visdom.gif" alt="visdom"></p><h1 id="Omniboard"><a href="#Omniboard" class="headerlink" title="Omniboard"></a><a href="https://github.com/vivekratnavel/omniboard">Omniboard</a></h1><p>我想想还有什么，还有就是上一篇讲的Sacred + Omniboard了。<a href="https://shenxiaohai.me/2019/01/17/sacred-tool/">Sacred 深度学习实验管理工具</a>。</p><p>Sacred用起来也没那么麻烦的：</p><ul><li>要是从头写训练的框架么，就更好了，按照Sacred的逻辑，注意一下API就好。</li><li>要是拿已有的框架来训练测试么，自己就重新定义一个程序入口，把参数用sacred记录一下，再重新跑到原来的程序入口上去，也就能够实现实验记录的效果了。</li></ul><p><img src= "/img/loading.gif" data-lazy-src="omniboard.png" alt="ominiboard"></p><h1 id="Ending"><a href="#Ending" class="headerlink" title="Ending"></a>Ending</h1><p>可视化工具就这么多了，平时跑服务器的话，调试代码就两个工具，也挺好使的：</p><ul><li>Jupyter Notebook</li><li>Pycharm + SSH</li></ul><p><strong>唉，工具折腾了一大堆，挺开心的，论文笔记就是不高兴老老实实写，懒啊，愁啊。</strong></p>]]></content>
-    
-    
-    <summary type="html">介绍一堆用过的可视化工具，用在服务器+深度学习上的。</summary>
-    
-    
-    
-    <category term="工具" scheme="https://shenxiaohai.me/categories/%E5%B7%A5%E5%85%B7/"/>
-    
-    
-    <category term="工具" scheme="https://shenxiaohai.me/tags/%E5%B7%A5%E5%85%B7/"/>
-    
-    <category term="深度学习" scheme="https://shenxiaohai.me/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/"/>
     
   </entry>
   
