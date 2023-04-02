@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.webp" color="#222">
+  <meta name="google-site-verification" content="Cj9oDgXxdJe6MoA_lEUQ2rmOouwJeTm5uJNqjhOv8Ng">
+  <meta name="msvalidate.01" content="E5D0AA8F5E012DFD9C5F3954DF8283B1">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,700,700italic%7CNoto+Serif+SC:300,300italic,400,400italic,700,700italic%7CSource+Code+Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shenxiaohai.me","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"twikoo","storage":true,"lazyload":false,"nav":null,"activeClass":"twikoo"},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="本文记录如何在Ubuntu14.04下通过源码编译生成shadowsocks-qt5，以支持最新的chacha20-ietf-poly1305加密协议。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Ubuntu14.04下编译shadowsocks-qt5以支持chacha20-ietf-poly1305加密方式">
+<meta property="og:url" content="https://shenxiaohai.me/shadowsocks-qt5/index.html">
+<meta property="og:site_name" content="SHEN&#39;s DevNotes">
+<meta property="og:description" content="本文记录如何在Ubuntu14.04下通过源码编译生成shadowsocks-qt5，以支持最新的chacha20-ietf-poly1305加密协议。">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-02-20T21:36:03.000Z">
+<meta property="article:modified_time" content="2023-03-11T10:33:20.060Z">
+<meta property="article:author" content="xiaohai">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="工具">
+<meta property="article:tag" content="教程">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://shenxiaohai.me/shadowsocks-qt5/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shenxiaohai.me/shadowsocks-qt5/","path":"shadowsocks-qt5/","title":"Ubuntu14.04下编译shadowsocks-qt5以支持chacha20-ietf-poly1305加密方式"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>Ubuntu14.04下编译shadowsocks-qt5以支持chacha20-ietf-poly1305加密方式 | SHEN's DevNotes</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YDT7F4NZP6"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-YDT7F4NZP6","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="SHEN's DevNotes" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">SHEN's DevNotes</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记，编程技巧，效率工具</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">131</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">18</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">74</span></a></li><li class="menu-item menu-item-碎碎念-|-memos"><a href="https://memos.shenxiaohai.me/" rel="section" target="_blank"><i class="fa fa-file-pen fa-fw"></i>碎碎念 | Memos</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%89%8D%E8%A8%80"><span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E6%AD%A5%E9%AA%A4"><span class="nav-text">编译步骤</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85-libsodium-dev%E5%92%8C%E5%85%B6%E4%BB%96%E4%BE%9D%E8%B5%96%E9%A1%B9"><span class="nav-text">安装 libsodium-dev和其他依赖项</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91libbotan-2-x%E4%BB%A5%E4%BE%9B%E8%B0%83%E7%94%A8"><span class="nav-text">编译libbotan-2.x以供调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9B%B4%E6%96%B0CMake%E7%89%88%E6%9C%AC"><span class="nav-text">更新CMake版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85g-6-gcc-6%E4%BB%A5%E6%94%AF%E6%8C%81c-14"><span class="nav-text">安装g++-6 gcc-6以支持c++14</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Qt-5"><span class="nav-text">安装Qt 5</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91libQtShadowsocks"><span class="nav-text">编译libQtShadowsocks</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%96%E8%AF%91%E5%AE%89%E8%A3%85shadowsocks-qt5"><span class="nav-text">编译安装shadowsocks-qt5</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C"><span class="nav-text">运行</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5"><span class="nav-text">参考链接</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xiaohai</p>
+  <div class="site-description" itemprop="description">我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/veraposeidon" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;veraposeidon" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/HiYoake" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;HiYoake" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shenxiaohai.me/shadowsocks-qt5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xiaohai">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SHEN's DevNotes">
+      <meta itemprop="description" content="我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="Ubuntu14.04下编译shadowsocks-qt5以支持chacha20-ietf-poly1305加密方式 | SHEN's DevNotes">
+      <meta itemprop="description" content="本文记录如何在Ubuntu14.04下通过源码编译生成shadowsocks-qt5，以支持最新的chacha20-ietf-poly1305加密协议。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Ubuntu14.04下编译shadowsocks-qt5以支持chacha20-ietf-poly1305加密方式
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-02-20 21:36:03" itemprop="dateCreated datePublished" datetime="2018-02-20T21:36:03Z">2018-02-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-11 10:33:20" itemprop="dateModified" datetime="2023-03-11T10:33:20Z">2023-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/Linux/" itemprop="url" rel="index"><span itemprop="name">Linux</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">本文记录如何在Ubuntu14.04下通过源码编译生成shadowsocks-qt5，以支持最新的chacha20-ietf-poly1305加密协议。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近因为折腾ROS和ARDrone，在笔记本上装了Ubuntu14.04，无法Google很是头疼。由于我的shadowsocks服务提供商使用的是较新的chacha20-ietf-poly1305加密协议，而通过PPA源安装的shadowsocks-qt5大概是长时间没有更新，不支持该协议，于是需要从源码编译安装。</p>
+<p>具体内容参考的是github上这个issue下的讨论 <a target="_blank" rel="noopener" href="https://github.com/shadowsocks/shadowsocks-qt5/issues/595">Add support for chacha20-ietf-poly1305</a> ，但是几个步骤走下来出了很多错误，因此把整个编译安装shadowsocks-qt5的步骤记录下来，供我以后参照，也供你参考。</p>
+<h1 id="编译步骤"><a href="#编译步骤" class="headerlink" title="编译步骤"></a>编译步骤</h1><h2 id="安装-libsodium-dev和其他依赖项"><a href="#安装-libsodium-dev和其他依赖项" class="headerlink" title="安装 libsodium-dev和其他依赖项"></a>安装 libsodium-dev和其他依赖项</h2><p>Ubuntu14.04中并没有搜索到libsodium-dev，所以通过PPA源安装。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository ppa:chris-lea/libsodium</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install libsodium-dev</span><br></pre></td></tr></table></figure>
+
+<p>安装其他依赖项</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install libzbar-dev libqrencode-dev  qtbase5-dev  qt5-default qt5-qmake</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译libbotan-2-x以供调用"><a href="#编译libbotan-2-x以供调用" class="headerlink" title="编译libbotan-2.x以供调用"></a>编译libbotan-2.x以供调用</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">wget https://botan.randombit.net/releases/Botan-2.3.0.tgz</span><br><span class="line">tar xvf Botan-2.3.0.tgz</span><br><span class="line">cd Botan-2.3.0</span><br><span class="line">./configure.py</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br><span class="line">sudo ldconfig</span><br></pre></td></tr></table></figure>
+<p>注意，一定要运行<code>ldconfig</code> 刷新配置。</p>
+<h2 id="更新CMake版本"><a href="#更新CMake版本" class="headerlink" title="更新CMake版本"></a>更新CMake版本</h2><p>Ubuntu14.04 默认CMake版本为version 2.8，编译libQtShadowsocks库需要最低version 3.1，厦门通过PPA源更新至version 3.2，参考<a target="_blank" rel="noopener" href="https://my.oschina.net/bobwei/blog/479366">Ubuntu 14.04 更新cmake版本到3.2</a> 。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository ppa:george-edison55/cmake-3.x</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install cmake # 从来没装过cmake</span><br><span class="line">sudo apt-get upgrade # 装过cmake</span><br><span class="line">cmake --version # 查看cmake 版本</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装g-6-gcc-6以支持c-14"><a href="#安装g-6-gcc-6以支持c-14" class="headerlink" title="安装g++-6 gcc-6以支持c++14"></a>安装g++-6 gcc-6以支持c++14</h2><p>libQtShadowsocks的编译需要c++14支持，而Ubuntu14.04默认gcc g++不支持，因此需要安装更高版本的gcc g++，作者安装的是g++-6，gcc-6，步骤如下：</p>
+<p>安装 gcc-6 g++-6 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">sudo add-apt-repository ppa:ubuntu-toolchain-r/test</span><br><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install g++-6</span><br><span class="line">sudo apt-get install gcc-6</span><br></pre></td></tr></table></figure>
+
+<p>添加gcc g++ 选项 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo update-alternatives –install /usr/bin/g++ g++ /usr/bin/g++-6 20</span><br><span class="line">sudo update-alternatives –install /usr/bin/gcc gcc /usr/bin/gcc-6 20</span><br></pre></td></tr></table></figure>
+
+<p>手动选择gcc g++ 版本 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo update-alternatives --config g++</span><br><span class="line">sudo update-alternatives --config gcc</span><br></pre></td></tr></table></figure>
+
+<p>查看gcc g++ 版本 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">g++ --version</span><br><span class="line">gcc --version</span><br></pre></td></tr></table></figure>
+
+<h2 id="安装Qt-5"><a href="#安装Qt-5" class="headerlink" title="安装Qt 5"></a>安装Qt 5</h2><p>编译需要用到Qt库，步骤如下:<br>下载，64位 </p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wget http://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-linux-x64-5.7.0.run</span><br></pre></td></tr></table></figure>
+
+<p>安装</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">chmod +x qt-opensource-linux-x64-5.7.0.run</span><br><span class="line">./qt-opensource-linux-x64-5.7.0.run</span><br></pre></td></tr></table></figure>
+
+<p>在<code>~/.bashrc</code>中追加下面Qt5的bin和lib路径，默认Qt安装在<code>/home/user/</code>下。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">PATH = /home/user/Qt/5.0/gcc_64/bin:PATH</span><br><span class="line">LD_LIBRARY_PATH = /home/user/Qt/5.0/gcc_64/lib:LD_LIBRARY_PATH</span><br></pre></td></tr></table></figure>
+<p>确保运行<code>source ~/.bashrc</code>刷新配置。</p>
+<h2 id="编译libQtShadowsocks"><a href="#编译libQtShadowsocks" class="headerlink" title="编译libQtShadowsocks"></a>编译libQtShadowsocks</h2><p>经验告诉我，master分支的版本不太好使，作者使用stable分支完成了编译。</p>
+<p>下载源码</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/shadowsocks/libQtShadowsocks.git</span><br><span class="line">cd libQtShadowsocks</span><br><span class="line">git checkout stable</span><br></pre></td></tr></table></figure>
+
+<p>修改CMakeLists.txt的第八行，将OFF改为ON</p>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">将</span><br><span class="line"><span class="keyword">option</span>(USE_BOTAN2 <span class="string">&quot;Build $&#123;PROJECT_NAME&#125; with Botan-2&quot;</span> <span class="keyword">OFF</span>)</span><br><span class="line">改为</span><br><span class="line"><span class="keyword">option</span>(USE_BOTAN2 <span class="string">&quot;Build $&#123;PROJECT_NAME&#125; with Botan-2&quot;</span> <span class="keyword">ON</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>编译前记得看代码Merge</strong>，具体看<a target="_blank" rel="noopener" href="https://github.com/shadowsocks/libQtShadowsocks/pull/143/commits/a42badb4094445351a2b906930ab90591c5baecf">Fix qToBigEndian compile error</a> 。</p>
+<p>即<code>lib/encryptor.cpp</code> 第141行，uint8_t和uint16_t的区别，我是在uint16_t下编译成功的。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qToBigEndian(inLen, reinterpret_cast&lt;uint16_t*&gt;(&amp;rawLength[0]));</span><br></pre></td></tr></table></figure>
+
+<p>编译</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">mkdir build</span><br><span class="line">cd build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h2 id="编译安装shadowsocks-qt5"><a href="#编译安装shadowsocks-qt5" class="headerlink" title="编译安装shadowsocks-qt5"></a>编译安装shadowsocks-qt5</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/shadowsocks/shadowsocks-qt5</span><br><span class="line">cd shadowsocks-qt5</span><br><span class="line">mkdir build</span><br><span class="line">cd build</span><br><span class="line">cmake ..</span><br><span class="line">make</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<h1 id="运行"><a href="#运行" class="headerlink" title="运行"></a>运行</h1><p>在Terminal运行<code>ss-qt5</code>还是<code>ss-qt</code>，具体哪个忘记了了，就能弹出shadowsocks-qt5界面。<br>然后就是设置PAC代理的事情了。</p>
+<h1 id="参考链接"><a href="#参考链接" class="headerlink" title="参考链接"></a>参考链接</h1><ol>
+<li><a target="_blank" rel="noopener" href="https://my.oschina.net/bobwei/blog/479366">Ubuntu 14.04 更新cmake版本到3.2</a> </li>
+<li><a target="_blank" rel="noopener" href="https://wiki.qt.io/Install_Qt_5_on_Ubuntu">Install Qt 5 on Ubuntu</a> </li>
+<li><a target="_blank" rel="noopener" href="https://github.com/JinnLynn/genpac">GenPAC</a></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>xiaohai
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://shenxiaohai.me/shadowsocks-qt5/" title="Ubuntu14.04下编译shadowsocks-qt5以支持chacha20-ietf-poly1305加密方式">https://shenxiaohai.me/shadowsocks-qt5/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a>
+              <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"><i class="fa fa-tag"></i> 工具</a>
+              <a href="/tags/%E6%95%99%E7%A8%8B/" rel="tag"><i class="fa fa-tag"></i> 教程</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/autonomous-platforms/" rel="prev" title="无人驾驶开源仿真平台整理">
+                  <i class="fa fa-chevron-left"></i> 无人驾驶开源仿真平台整理
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/caj-to-pdf/" rel="next" title="如何将CAJ文档转换成带书签的PDF">
+                  如何将CAJ文档转换成带书签的PDF <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments"><div id="twikoo-comments"></div></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-laptop"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohai</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/veraposeidon" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quicklink/2.3.0/quicklink.umd.js" integrity="sha256-yvJQOINiH9fWemHn0vCA5lsHWJaHs6/ZmO+1Ft04SvM=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://shenxiaohai.me/shadowsocks-qt5/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="twikoo" type="application/json">{"enable":true,"visitor":false,"envId":"https://twikoo-comment.shenxiaohai.me/","el":"#twikoo-comments"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.twikoo.el)
+    .then(() => NexT.utils.getScript(
+      CONFIG.twikoo.jsUrl || 'https://cdn.jsdelivr.net/npm/twikoo/dist/twikoo.all.min.js',
+      { condition: window.twikoo }
+    ))
+    .then(() => {
+      twikoo.init(CONFIG.twikoo);
+    });
+});
+</script>
+<style>
+.post-block, .comments {
+  overflow: visible;
+}
+.tk-owo-emotion {
+  display: inline-block;
+}
+</style>
+
+</body>
+</html>

@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.webp" color="#222">
+  <meta name="google-site-verification" content="Cj9oDgXxdJe6MoA_lEUQ2rmOouwJeTm5uJNqjhOv8Ng">
+  <meta name="msvalidate.01" content="E5D0AA8F5E012DFD9C5F3954DF8283B1">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,700,700italic%7CNoto+Serif+SC:300,300italic,400,400italic,700,700italic%7CSource+Code+Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shenxiaohai.me","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"twikoo","storage":true,"lazyload":false,"nav":null,"activeClass":"twikoo"},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Pytorch高级S03E04：图像标注（Image Captioning (CNN-RNN)）。图像标注CNN编码，RNN解码看图说话">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)）">
+<meta property="og:url" content="https://shenxiaohai.me/pytorch-tutorial-advanced-04/index.html">
+<meta property="og:site_name" content="SHEN&#39;s DevNotes">
+<meta property="og:description" content="Pytorch高级S03E04：图像标注（Image Captioning (CNN-RNN)）。图像标注CNN编码，RNN解码看图说话">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511100/blog/i3zethkspb35mca0m1pq.svg">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511102/blog/gyuy2prdsqwddzsvssms.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511103/blog/vvyusb0lspgdgxef5ug8.png">
+<meta property="article:published_time" content="2018-10-22T15:57:50.000Z">
+<meta property="article:modified_time" content="2023-03-11T05:05:03.585Z">
+<meta property="article:author" content="xiaohai">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="图像标注">
+<meta property="article:tag" content="ResNet-152">
+<meta property="article:tag" content="LSTM">
+<meta property="article:tag" content="特征向量">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511100/blog/i3zethkspb35mca0m1pq.svg">
+
+
+<link rel="canonical" href="https://shenxiaohai.me/pytorch-tutorial-advanced-04/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shenxiaohai.me/pytorch-tutorial-advanced-04/","path":"pytorch-tutorial-advanced-04/","title":"PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)） | SHEN's DevNotes</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YDT7F4NZP6"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-YDT7F4NZP6","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="SHEN's DevNotes" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">SHEN's DevNotes</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记，编程技巧，效率工具</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">131</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">18</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">74</span></a></li><li class="menu-item menu-item-碎碎念-|-memos"><a href="https://memos.shenxiaohai.me/" rel="section" target="_blank"><i class="fa fa-file-pen fa-fw"></i>碎碎念 | Memos</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PyTorch-%E9%AB%98%E7%BA%A7%E7%AF%87%EF%BC%884%EF%BC%89%EF%BC%9A%E5%9B%BE%E5%83%8F%E6%A0%87%E6%B3%A8%EF%BC%88Image-Captioning-CNN-RNN-%EF%BC%89"><span class="nav-text">PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E6%A0%87%E6%B3%A8-%E5%AD%A6%E4%B9%A0%E8%B5%84%E6%96%99"><span class="nav-text">图像标注 学习资料</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%BE%E5%83%8F%E6%A0%87%E6%B3%A8-%E7%AE%80%E4%BB%8B"><span class="nav-text">图像标注 简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E5%92%8C%E6%B5%8B%E8%AF%95-%E8%BF%87%E7%A8%8B%E4%BB%8B%E7%BB%8D"><span class="nav-text">训练和测试 过程介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E9%98%B6%E6%AE%B5"><span class="nav-text">训练阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E9%98%B6%E6%AE%B5"><span class="nav-text">测试阶段</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85COCO-PythonAPI-%E5%92%8C-%E4%B8%8B%E8%BD%BD%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-text">安装COCO PythonAPI 和 下载数据集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A2%84%E5%A4%84%E7%90%86"><span class="nav-text">预处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-%E6%9E%84%E5%BB%BA%E8%AF%8D%E6%B1%87%E8%A1%A8"><span class="nav-text">1. 构建词汇表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-%E5%9B%BE%E5%83%8FResize%E6%93%8D%E4%BD%9C"><span class="nav-text">2. 图像Resize操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-%E6%95%B0%E6%8D%AE%E9%9B%86%E5%8A%A0%E8%BD%BD%E5%87%BD%E6%95%B0"><span class="nav-text">3.  数据集加载函数</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E6%A8%A1%E5%9E%8B%EF%BC%88%E7%BC%96%E7%A0%81%E5%99%A8%E5%92%8C%E8%A7%A3%E7%A0%81%E5%99%A8-Encoder-and-Decoder%EF%BC%89"><span class="nav-text">创建模型（编码器和解码器 Encoder and Decoder）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-text">训练模型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E6%B5%8B%E8%AF%95"><span class="nav-text">模型测试</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xiaohai</p>
+  <div class="site-description" itemprop="description">我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/veraposeidon" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;veraposeidon" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/HiYoake" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;HiYoake" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shenxiaohai.me/pytorch-tutorial-advanced-04/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xiaohai">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SHEN's DevNotes">
+      <meta itemprop="description" content="我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)） | SHEN's DevNotes">
+      <meta itemprop="description" content="Pytorch高级S03E04：图像标注（Image Captioning (CNN-RNN)）。</br>图像标注</br>CNN编码，RNN解码</br>看图说话">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-10-22 15:57:50" itemprop="dateCreated datePublished" datetime="2018-10-22T15:57:50Z">2018-10-22</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-11 05:05:03" itemprop="dateModified" datetime="2023-03-11T05:05:03Z">2023-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">深度学习框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">Pytorch高级S03E04：图像标注（Image Captioning (CNN-RNN)）。</br>图像标注</br>CNN编码，RNN解码</br>看图说话</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511100/blog/i3zethkspb35mca0m1pq.svg" alt="PyTorch"></p>
+<h1 id="PyTorch-高级篇（4）：图像标注（Image-Captioning-CNN-RNN-）"><a href="#PyTorch-高级篇（4）：图像标注（Image-Captioning-CNN-RNN-）" class="headerlink" title="PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)）"></a>PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)）</h1><blockquote>
+<p>参考代码</p>
+<p><strong>yunjey的 <a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/tree/master/tutorials/03-advanced/image_captioning#image-captioning">pytorch tutorial系列</a></strong></p>
+<p>我的远程服务器没啥可视化界面可看，就把大神代码转到jupyter上看看效果</p>
+</blockquote>
+<h2 id="图像标注-学习资料"><a href="#图像标注-学习资料" class="headerlink" title="图像标注 学习资料"></a>图像标注 学习资料</h2><blockquote>
+<p><strong>相关论文</strong></p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1411.4555">Show and Tell: A Neural Image Caption Generator</a></p>
+</blockquote>
+<blockquote>
+<p><strong>相关博客</strong></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/22408033">看图说话的AI小朋友——图像标注趣谈（上）</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/27771046">「Show and Tell」——图像标注（Image Caption）任务技术综述</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/30893160">CVPR2017 Image Caption有关论文总结</a></p>
+</blockquote>
+<h2 id="图像标注-简介"><a href="#图像标注-简介" class="headerlink" title="图像标注 简介"></a>图像标注 简介</h2><p>图像标注也是牛逼轰轰的东西，今天就算搞不清楚，至少懂个大概也知足了。后面估计还是要涉足的。</p>
+<p>图像标注就是将<strong>输入的图像</strong>转换为<strong>自然语言描述</strong>。编码器-解码器（encoder-decoder）架构被广泛用于这项任务。</p>
+<p>图像编码器是一个卷积神经网络，这份代码里用的是<strong>resnet-152</strong>模型，它已经在 ILSVRC-2012-CLS 图像分类数据集上已经提前训练好了，</p>
+<p>解码器使用的是长短期记忆（<strong>LSTM</strong>）网络。</p>
+<p>图片来源：<a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/tree/master/tutorials/03-advanced/image_captioning#image-captioning">Image Captioning</a></p>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511102/blog/gyuy2prdsqwddzsvssms.png" alt="Image Caption流程"></p>
+<p>图像标注的流程可以从RNN开始拓展，在机器翻译任务中，输入输出是单词序列，通过Encoder-Decoder结构。其中Encoder得到的是特征序列，因此，在图像标注中，将Encoder部分替换为图像输入+CNN提取特征（视觉特征），同样得到的特征序列供Decoder解码，即可。</p>
+<p>当然，在上图的架构中，CNN使用的是resnet-152，Decoder部分使用了性能更好的LSTM。</p>
+<h2 id="训练和测试-过程介绍"><a href="#训练和测试-过程介绍" class="headerlink" title="训练和测试 过程介绍"></a>训练和测试 过程介绍</h2><h3 id="训练阶段"><a href="#训练阶段" class="headerlink" title="训练阶段"></a>训练阶段</h3><p>对于编码器部分，预训练好的CNN模型会从给定的输入图像中提取特征向量。将特征向量进行线性转换，使之与LSTM网络的输入具有相同的维度。</p>
+<p>对于解码器部分，源文本和目标文本已经预定义好。举例来说，如果图像的描述为”Giraffes standing next to each other”，那么源序列应该是一个集合，包含了 [‘<start>‘, ‘Giraffes’, ‘standing’, ‘next’, ‘to’, ‘each’, ‘other’] ，且目标序列应该是一个集合包含了[‘Giraffes’, ‘standing’, ‘next’, ‘to’, ‘each’, ‘other’, ‘<end>‘]. 使用这些源序列、目标序列和特征向量，可以将LSTM解码器训练为一个基于特征向量的语言模型。</p>
+<h3 id="测试阶段"><a href="#测试阶段" class="headerlink" title="测试阶段"></a>测试阶段</h3><p>在测试阶段，编码器部分几乎和训练阶段相同。唯一的区别就是批归一化层（batch norm layer）使用移动平均和方差，而不是mini-batch统计，<br>这个直接通过调用<code>encoder.eval()</code>就实现了。</p>
+<p>对于解码器部分，与训练阶段相比，明显的区别就是：在测试阶段，LSTM解码器不能看到图像的描述。为了解决这个问题，LSTM解码器将前一次生成的单词反馈作为下一次的输入。这个可以通过<code>for循环</code>实现。</p>
+<h2 id="安装COCO-PythonAPI-和-下载数据集"><a href="#安装COCO-PythonAPI-和-下载数据集" class="headerlink" title="安装COCO PythonAPI 和 下载数据集"></a>安装COCO PythonAPI 和 下载数据集</h2><p><strong>安装COCO API</strong><br>详情请咨询 <a target="_blank" rel="noopener" href="http://cocodataset.org/#home">COCO</a></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ git clone https://github.com/pdollar/coco.git</span><br><span class="line">$ cd coco/PythonAPI/</span><br><span class="line">$ make</span><br><span class="line">$ python setup.py build</span><br><span class="line">$ python setup.py install</span><br></pre></td></tr></table></figure>
+
+<p><strong>数据集下载</strong><br>下载脚本，运行脚本(十几个G略慢)</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ wget https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/image_captioning/download.sh</span><br><span class="line">$ chmod +x download.sh</span><br><span class="line">$ ./download.sh</span><br></pre></td></tr></table></figure>
+
+
+<h2 id="预处理"><a href="#预处理" class="headerlink" title="预处理"></a>预处理</h2><p>构建词汇表 和 图像大小缩放，适配数据集加载器Dataloader。</p>
+<h3 id="1-构建词汇表"><a href="#1-构建词汇表" class="headerlink" title="1. 构建词汇表"></a>1. 构建词汇表</h3><p><strong>refer</strong>: <a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/image_captioning/build_vocab.py">build_vocab.py</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包</span></span><br><span class="line"><span class="keyword">import</span> nltk</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> argparse</span><br><span class="line"><span class="keyword">from</span> collections <span class="keyword">import</span> Counter</span><br><span class="line"><span class="keyword">from</span> pycocotools.coco <span class="keyword">import</span> COCO</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义简单的词汇封装器</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Vocabulary</span>(<span class="title class_ inherited__">object</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Simple vocabulary wrapper.&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self</span>):</span><br><span class="line">        self.word2idx = &#123;&#125;</span><br><span class="line">        self.idx2word = &#123;&#125;</span><br><span class="line">        self.idx = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">add_word</span>(<span class="params">self, word</span>):</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> word <span class="keyword">in</span> self.word2idx:</span><br><span class="line">            self.word2idx[word] = self.idx</span><br><span class="line">            self.idx2word[self.idx] = word</span><br><span class="line">            self.idx += <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__call__</span>(<span class="params">self, word</span>):</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> word <span class="keyword">in</span> self.word2idx:</span><br><span class="line">            <span class="keyword">return</span> self.word2idx[<span class="string">&#x27;&lt;unk&gt;&#x27;</span>]</span><br><span class="line">        <span class="keyword">return</span> self.word2idx[word]</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.word2idx)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 函数：构建词汇</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">build_vocab</span>(<span class="params">json, threshold</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Build a simple vocabulary wrapper.&quot;&quot;&quot;</span></span><br><span class="line">    coco = COCO(json)</span><br><span class="line">    counter = Counter()</span><br><span class="line">    ids = coco.anns.keys()</span><br><span class="line">    <span class="keyword">for</span> i, <span class="built_in">id</span> <span class="keyword">in</span> <span class="built_in">enumerate</span>(ids):</span><br><span class="line">        caption = <span class="built_in">str</span>(coco.anns[<span class="built_in">id</span>][<span class="string">&#x27;caption&#x27;</span>])</span><br><span class="line">        tokens = nltk.tokenize.word_tokenize(caption.lower())</span><br><span class="line">        counter.update(tokens)</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (i+<span class="number">1</span>) % <span class="number">1000</span> == <span class="number">0</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&quot;[&#123;&#125;/&#123;&#125;] Tokenized the captions.&quot;</span>.<span class="built_in">format</span>(i+<span class="number">1</span>, <span class="built_in">len</span>(ids)))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># If the word frequency is less than &#x27;threshold&#x27;, then the word is discarded.</span></span><br><span class="line">    words = [word <span class="keyword">for</span> word, cnt <span class="keyword">in</span> counter.items() <span class="keyword">if</span> cnt &gt;= threshold]</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Create a vocab wrapper and add some special tokens.</span></span><br><span class="line">    vocab = Vocabulary()</span><br><span class="line">    vocab.add_word(<span class="string">&#x27;&lt;pad&gt;&#x27;</span>)</span><br><span class="line">    vocab.add_word(<span class="string">&#x27;&lt;start&gt;&#x27;</span>)</span><br><span class="line">    vocab.add_word(<span class="string">&#x27;&lt;end&gt;&#x27;</span>)</span><br><span class="line">    vocab.add_word(<span class="string">&#x27;&lt;unk&gt;&#x27;</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Add the words to the vocabulary.</span></span><br><span class="line">    <span class="keyword">for</span> i, word <span class="keyword">in</span> <span class="built_in">enumerate</span>(words):</span><br><span class="line">        vocab.add_word(word)</span><br><span class="line">    <span class="keyword">return</span> vocab</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义执行函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">build_vocab_main</span>(<span class="params">args</span>):</span><br><span class="line">    vocab = build_vocab(json=args.caption_path, threshold=args.threshold)</span><br><span class="line">    vocab_path = args.vocab_path</span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(vocab_path, <span class="string">&#x27;wb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        pickle.dump(vocab, f)</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Total vocabulary size: &#123;&#125;&quot;</span>.<span class="built_in">format</span>(<span class="built_in">len</span>(vocab)))</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Saved the vocabulary wrapper to &#x27;&#123;&#125;&#x27;&quot;</span>.<span class="built_in">format</span>(vocab_path))</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过argparse传参数，并运行构建词汇库 </span></span><br><span class="line"><span class="comment"># 注意指定数据集相关文件的路径</span></span><br><span class="line">parser = argparse.ArgumentParser()</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--caption_path&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, </span><br><span class="line">                    default=<span class="string">&#x27;/home/ubuntu/Datasets/coco/annotations/captions_train2014.json&#x27;</span>, </span><br><span class="line">                    <span class="built_in">help</span>=<span class="string">&#x27;path for train annotation file&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--vocab_path&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;/home/ubuntu/Datasets/coco/vocab.pkl&#x27;</span>, </span><br><span class="line">                    <span class="built_in">help</span>=<span class="string">&#x27;path for saving vocabulary wrapper&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--threshold&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span>, default=<span class="number">4</span>, </span><br><span class="line">                    <span class="built_in">help</span>=<span class="string">&#x27;minimum word count threshold&#x27;</span>)</span><br><span class="line">config = parser.parse_args(args=[])</span><br><span class="line">build_vocab_main(config)</span><br></pre></td></tr></table></figure>
+
+<pre><code>loading annotations into memory...
+Done (t=0.89s)
+creating index...
+index created!
+[1000/414113] Tokenized the captions.
+[2000/414113] Tokenized the captions.
+[3000/414113] Tokenized the captions.
+[4000/414113] Tokenized the captions.
+[5000/414113] Tokenized the captions.
+
+..........................
+
+[409000/414113] Tokenized the captions.
+[410000/414113] Tokenized the captions.
+[411000/414113] Tokenized the captions.
+[412000/414113] Tokenized the captions.
+[413000/414113] Tokenized the captions.
+[414000/414113] Tokenized the captions.
+Total vocabulary size: 9957
+Saved the vocabulary wrapper to &#39;/home/ubuntu/Datasets/coco/vocab.pkl&#39;
+</code></pre>
+<h3 id="2-图像Resize操作"><a href="#2-图像Resize操作" class="headerlink" title="2. 图像Resize操作"></a>2. 图像Resize操作</h3><p><strong>refer</strong>:<a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/image_captioning/resize.py">resize.py</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包</span></span><br><span class="line"><span class="keyword">import</span> argparse</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义函数 Resize图像</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">resize_image</span>(<span class="params">image, size</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Resize an image to the given size.&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">return</span> image.resize(size, Image.ANTIALIAS)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义函数 Resize 图像序列 </span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">resize_images</span>(<span class="params">image_dir, output_dir, size</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Resize the images in &#x27;image_dir&#x27; and save into &#x27;output_dir&#x27;.&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(output_dir):</span><br><span class="line">        os.makedirs(output_dir)</span><br><span class="line"></span><br><span class="line">    images = os.listdir(image_dir)</span><br><span class="line">    num_images = <span class="built_in">len</span>(images)</span><br><span class="line">    <span class="keyword">for</span> i, image <span class="keyword">in</span> <span class="built_in">enumerate</span>(images):</span><br><span class="line">        <span class="keyword">with</span> <span class="built_in">open</span>(os.path.join(image_dir, image), <span class="string">&#x27;r+b&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">            <span class="keyword">with</span> Image.<span class="built_in">open</span>(f) <span class="keyword">as</span> img:</span><br><span class="line">                img = resize_image(img, size)</span><br><span class="line">                img.save(os.path.join(output_dir, image), img.<span class="built_in">format</span>)</span><br><span class="line">        <span class="keyword">if</span> (i+<span class="number">1</span>) % <span class="number">100</span> == <span class="number">0</span>:</span><br><span class="line">            <span class="built_in">print</span> (<span class="string">&quot;[&#123;&#125;/&#123;&#125;] Resized the images and saved into &#x27;&#123;&#125;&#x27;.&quot;</span></span><br><span class="line">                   .<span class="built_in">format</span>(i+<span class="number">1</span>, num_images, output_dir))</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义主函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">resize_main</span>(<span class="params">args</span>):</span><br><span class="line">    image_dir = args.image_dir</span><br><span class="line">    output_dir = args.output_dir</span><br><span class="line">    image_size = [args.image_size, args.image_size]</span><br><span class="line">    resize_images(image_dir, output_dir, image_size)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 通过argparse传参数</span></span><br><span class="line"><span class="comment"># 注意指定数据集相关文件的路径</span></span><br><span class="line">parser = argparse.ArgumentParser()</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--image_dir&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;/home/ubuntu/Datasets/coco/train2014/&#x27;</span>,</span><br><span class="line">                    <span class="built_in">help</span>=<span class="string">&#x27;directory for train images&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--output_dir&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;/home/ubuntu/Datasets/coco/resized2014/&#x27;</span>,</span><br><span class="line">                    <span class="built_in">help</span>=<span class="string">&#x27;directory for saving resized images&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--image_size&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span>, default=<span class="number">256</span>,</span><br><span class="line">                    <span class="built_in">help</span>=<span class="string">&#x27;size for image after processing&#x27;</span>)</span><br><span class="line">config = parser.parse_args(args=[])</span><br><span class="line">resize_main(config)</span><br></pre></td></tr></table></figure>
+
+<pre><code>[100/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+[200/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+[300/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+[400/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+[500/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+[600/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+[700/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+[800/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+
+............................
+
+[82400/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+[82500/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+[82600/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+[82700/82783] Resized the images and saved into &#39;/home/ubuntu/Datasets/coco/resized2014/&#39;.
+</code></pre>
+<h3 id="3-数据集加载函数"><a href="#3-数据集加载函数" class="headerlink" title="3.  数据集加载函数"></a>3.  数据集加载函数</h3><p><strong>refer</strong>: <a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/image_captioning/data_loader.py">data_loader.py</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torchvision.transforms <span class="keyword">as</span> transforms</span><br><span class="line"><span class="keyword">import</span> torch.utils.data <span class="keyword">as</span> data</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> nltk</span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br><span class="line"><span class="comment"># from build_vocab import Vocabulary  # jupyter上已经定义好了函数</span></span><br><span class="line"><span class="keyword">from</span> pycocotools.coco <span class="keyword">import</span> COCO</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建CocoDataset类，以适配Pytorch的数据加载类</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">CocoDataset</span>(data.Dataset):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;COCO Custom Dataset compatible with torch.utils.data.DataLoader.&quot;&quot;&quot;</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, root, json, vocab, transform=<span class="literal">None</span></span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Set the path for images, captions and vocabulary wrapper.</span></span><br><span class="line"><span class="string">        </span></span><br><span class="line"><span class="string">        Args:</span></span><br><span class="line"><span class="string">            root: image directory.</span></span><br><span class="line"><span class="string">            json: coco annotation file path.</span></span><br><span class="line"><span class="string">            vocab: vocabulary wrapper.</span></span><br><span class="line"><span class="string">            transform: image transformer.</span></span><br><span class="line"><span class="string">        &quot;&quot;&quot;</span></span><br><span class="line">        self.root = root</span><br><span class="line">        self.coco = COCO(json)</span><br><span class="line">        self.ids = <span class="built_in">list</span>(self.coco.anns.keys())</span><br><span class="line">        self.vocab = vocab</span><br><span class="line">        self.transform = transform</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__getitem__</span>(<span class="params">self, index</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Returns one data pair (image and caption).&quot;&quot;&quot;</span></span><br><span class="line">        coco = self.coco</span><br><span class="line">        vocab = self.vocab</span><br><span class="line">        ann_id = self.ids[index]</span><br><span class="line">        caption = coco.anns[ann_id][<span class="string">&#x27;caption&#x27;</span>]</span><br><span class="line">        img_id = coco.anns[ann_id][<span class="string">&#x27;image_id&#x27;</span>]</span><br><span class="line">        path = coco.loadImgs(img_id)[<span class="number">0</span>][<span class="string">&#x27;file_name&#x27;</span>]</span><br><span class="line"></span><br><span class="line">        image = Image.<span class="built_in">open</span>(os.path.join(self.root, path)).convert(<span class="string">&#x27;RGB&#x27;</span>)</span><br><span class="line">        <span class="keyword">if</span> self.transform <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">            image = self.transform(image)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># Convert caption (string) to word ids.</span></span><br><span class="line">        <span class="comment"># 将描述（字符串）转换为单词ID</span></span><br><span class="line">        tokens = nltk.tokenize.word_tokenize(<span class="built_in">str</span>(caption).lower())</span><br><span class="line">        caption = []</span><br><span class="line">        caption.append(vocab(<span class="string">&#x27;&lt;start&gt;&#x27;</span>))</span><br><span class="line">        caption.extend([vocab(token) <span class="keyword">for</span> token <span class="keyword">in</span> tokens])</span><br><span class="line">        caption.append(vocab(<span class="string">&#x27;&lt;end&gt;&#x27;</span>))</span><br><span class="line">        target = torch.Tensor(caption)</span><br><span class="line">        <span class="keyword">return</span> image, target</span><br><span class="line"></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__len__</span>(<span class="params">self</span>):</span><br><span class="line">        <span class="keyword">return</span> <span class="built_in">len</span>(self.ids)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 函数：从元组（image,caption）序列创建 mini-batch</span></span><br><span class="line"><span class="comment"># 之所以需要自己创建是因为默认不支持merging caption (including padding) i</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">collate_fn</span>(<span class="params">data</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Creates mini-batch tensors from the list of tuples (image, caption).</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    We should build custom collate_fn rather than using default collate_fn, </span></span><br><span class="line"><span class="string">    because merging caption (including padding) is not supported in default.</span></span><br><span class="line"><span class="string">    Args:</span></span><br><span class="line"><span class="string">        data: list of tuple (image, caption). </span></span><br><span class="line"><span class="string">            - image: torch tensor of shape (3, 256, 256).</span></span><br><span class="line"><span class="string">            - caption: torch tensor of shape (?); variable length.</span></span><br><span class="line"><span class="string">    Returns:</span></span><br><span class="line"><span class="string">        images: torch tensor of shape (batch_size, 3, 256, 256).</span></span><br><span class="line"><span class="string">        targets: torch tensor of shape (batch_size, padded_length).</span></span><br><span class="line"><span class="string">        lengths: list; valid length for each padded caption.</span></span><br><span class="line"><span class="string">    &quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># Sort a data list by caption length (descending order).</span></span><br><span class="line">    data.sort(key=<span class="keyword">lambda</span> x: <span class="built_in">len</span>(x[<span class="number">1</span>]), reverse=<span class="literal">True</span>)</span><br><span class="line">    images, captions = <span class="built_in">zip</span>(*data)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Merge images (from tuple of 3D tensor to 4D tensor).</span></span><br><span class="line">    images = torch.stack(images, <span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># Merge captions (from tuple of 1D tensor to 2D tensor).</span></span><br><span class="line">    lengths = [<span class="built_in">len</span>(cap) <span class="keyword">for</span> cap <span class="keyword">in</span> captions]</span><br><span class="line">    targets = torch.zeros(<span class="built_in">len</span>(captions), <span class="built_in">max</span>(lengths)).long()</span><br><span class="line">    <span class="keyword">for</span> i, cap <span class="keyword">in</span> <span class="built_in">enumerate</span>(captions):</span><br><span class="line">        end = lengths[i]</span><br><span class="line">        targets[i, :end] = cap[:end]        </span><br><span class="line">    <span class="keyword">return</span> images, targets, lengths</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 获取数据加载器</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">get_loader</span>(<span class="params">root, json, vocab, transform, batch_size, shuffle, num_workers</span>):</span><br><span class="line">    <span class="string">&quot;&quot;&quot;Returns torch.utils.data.DataLoader for custom coco dataset.&quot;&quot;&quot;</span></span><br><span class="line">    <span class="comment"># COCO caption dataset</span></span><br><span class="line">    coco = CocoDataset(root=root,</span><br><span class="line">                       json=json,</span><br><span class="line">                       vocab=vocab,</span><br><span class="line">                       transform=transform)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Data loader for COCO dataset</span></span><br><span class="line">    <span class="comment"># This will return (images, captions, lengths) for each iteration.</span></span><br><span class="line">    <span class="comment"># images: a tensor of shape (batch_size, 3, 224, 224).</span></span><br><span class="line">    <span class="comment"># captions: a tensor of shape (batch_size, padded_length).</span></span><br><span class="line">    <span class="comment"># lengths: a list indicating valid length for each caption. length is (batch_size).</span></span><br><span class="line">    data_loader = torch.utils.data.DataLoader(dataset=coco, </span><br><span class="line">                                              batch_size=batch_size,</span><br><span class="line">                                              shuffle=shuffle,</span><br><span class="line">                                              num_workers=num_workers,</span><br><span class="line">                                              collate_fn=collate_fn)</span><br><span class="line">    <span class="keyword">return</span> data_loader</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建模型（编码器和解码器-Encoder-and-Decoder）"><a href="#创建模型（编码器和解码器-Encoder-and-Decoder）" class="headerlink" title="创建模型（编码器和解码器 Encoder and Decoder）"></a>创建模型（编码器和解码器 Encoder and Decoder）</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torchvision.models <span class="keyword">as</span> models</span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pack_padded_sequence</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 编码器 ResNet-152模型</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">EncoderCNN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, embed_size</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Load the pretrained ResNet-152 and replace top fc layer.&quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 替换最后一层全连接层</span></span><br><span class="line">        <span class="built_in">super</span>(EncoderCNN, self).__init__()</span><br><span class="line">        resnet = models.resnet152(pretrained=<span class="literal">True</span>)</span><br><span class="line">        modules = <span class="built_in">list</span>(resnet.children())[:-<span class="number">1</span>]      <span class="comment"># delete the last fc layer.</span></span><br><span class="line">        self.resnet = nn.Sequential(*modules)</span><br><span class="line">        self.linear = nn.Linear(resnet.fc.in_features, embed_size)</span><br><span class="line">        self.bn = nn.BatchNorm1d(embed_size, momentum=<span class="number">0.01</span>)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, images</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Extract feature vectors from input images.&quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 编码器用来实现提取特征，并不需要计算梯度</span></span><br><span class="line">        <span class="keyword">with</span> torch.no_grad():</span><br><span class="line">            features = self.resnet(images)</span><br><span class="line">        features = features.reshape(features.size(<span class="number">0</span>), -<span class="number">1</span>)</span><br><span class="line">        features = self.bn(self.linear(features))</span><br><span class="line">        <span class="keyword">return</span> features</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 解码器 LSTM模型</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">DecoderRNN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, embed_size, hidden_size, vocab_size, num_layers, max_seq_length=<span class="number">20</span></span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Set the hyper-parameters and build the layers.&quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 超参数通过传参设置</span></span><br><span class="line">        <span class="built_in">super</span>(DecoderRNN, self).__init__()</span><br><span class="line">        self.embed = nn.Embedding(vocab_size, embed_size)</span><br><span class="line">        self.lstm = nn.LSTM(embed_size, hidden_size, num_layers, batch_first=<span class="literal">True</span>)</span><br><span class="line">        self.linear = nn.Linear(hidden_size, vocab_size)</span><br><span class="line">        self.max_seg_length = max_seq_length</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, features, captions, lengths</span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Decode image feature vectors and generates captions.&quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 前向传播是指将图像特征向量进行解码生成描述</span></span><br><span class="line">        embeddings = self.embed(captions)</span><br><span class="line">        embeddings = torch.cat((features.unsqueeze(<span class="number">1</span>), embeddings), <span class="number">1</span>)</span><br><span class="line">        packed = pack_padded_sequence(embeddings, lengths, batch_first=<span class="literal">True</span>) </span><br><span class="line">        hiddens, _ = self.lstm(packed)</span><br><span class="line">        outputs = self.linear(hiddens[<span class="number">0</span>])</span><br><span class="line">        <span class="keyword">return</span> outputs</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">sample</span>(<span class="params">self, features, states=<span class="literal">None</span></span>):</span><br><span class="line">        <span class="string">&quot;&quot;&quot;Generate captions for given image features using greedy search.&quot;&quot;&quot;</span></span><br><span class="line">        <span class="comment"># 使用贪心搜索从给定的图像特征生成描述</span></span><br><span class="line">        sampled_ids = []</span><br><span class="line">        inputs = features.unsqueeze(<span class="number">1</span>)</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(self.max_seg_length):</span><br><span class="line">            hiddens, states = self.lstm(inputs, states)          <span class="comment"># hiddens: (batch_size, 1, hidden_size)</span></span><br><span class="line">            outputs = self.linear(hiddens.squeeze(<span class="number">1</span>))            <span class="comment"># outputs:  (batch_size, vocab_size)</span></span><br><span class="line">            _, predicted = outputs.<span class="built_in">max</span>(<span class="number">1</span>)                        <span class="comment"># predicted: (batch_size)</span></span><br><span class="line">            sampled_ids.append(predicted)</span><br><span class="line">            inputs = self.embed(predicted)                       <span class="comment"># inputs: (batch_size, embed_size)</span></span><br><span class="line">            inputs = inputs.unsqueeze(<span class="number">1</span>)                         <span class="comment"># inputs: (batch_size, 1, embed_size)</span></span><br><span class="line">        sampled_ids = torch.stack(sampled_ids, <span class="number">1</span>)                <span class="comment"># sampled_ids: (batch_size, max_seq_length)</span></span><br><span class="line">        <span class="keyword">return</span> sampled_ids</span><br></pre></td></tr></table></figure>
+
+<h2 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h2><p><strong>refer</strong>：<a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/image_captioning/train.py">train.py</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包</span></span><br><span class="line"><span class="keyword">import</span> argparse</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> pickle</span><br><span class="line"><span class="comment"># from data_loader import get_loader </span></span><br><span class="line"><span class="comment"># from build_vocab import Vocabulary</span></span><br><span class="line"><span class="comment"># from model import EncoderCNN, DecoderRNN</span></span><br><span class="line"><span class="keyword">from</span> torch.nn.utils.rnn <span class="keyword">import</span> pack_padded_sequence</span><br><span class="line"><span class="keyword">from</span> torchvision <span class="keyword">import</span> transforms</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设备配置</span></span><br><span class="line">torch.cuda.set_device(<span class="number">1</span>) <span class="comment"># 这句用来设置pytorch在哪块GPU上运行</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置训练过程</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">train_main</span>(<span class="params">args</span>):</span><br><span class="line">    <span class="comment"># 创建模型模型的文件夹</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(args.model_path):</span><br><span class="line">        os.makedirs(args.model_path)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 配置transform: 图像预处理、归一化</span></span><br><span class="line">    transform = transforms.Compose([ </span><br><span class="line">        transforms.RandomCrop(args.crop_size),</span><br><span class="line">        transforms.RandomHorizontalFlip(), </span><br><span class="line">        transforms.ToTensor(), </span><br><span class="line">        transforms.Normalize((<span class="number">0.485</span>, <span class="number">0.456</span>, <span class="number">0.406</span>), </span><br><span class="line">                             (<span class="number">0.229</span>, <span class="number">0.224</span>, <span class="number">0.225</span>))])</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Load vocabulary wrapper</span></span><br><span class="line">    <span class="comment"># 加载词汇封装文件</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(args.vocab_path, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        vocab = pickle.load(f)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 新建数据加载器</span></span><br><span class="line">    data_loader = get_loader(args.image_dir, args.caption_path, vocab, </span><br><span class="line">                             transform, args.batch_size,</span><br><span class="line">                             shuffle=<span class="literal">True</span>, num_workers=args.num_workers) </span><br><span class="line"></span><br><span class="line">    <span class="comment"># 实例化编码器和解码器</span></span><br><span class="line">    encoder = EncoderCNN(args.embed_size).to(device)</span><br><span class="line">    decoder = DecoderRNN(args.embed_size, args.hidden_size, <span class="built_in">len</span>(vocab), args.num_layers).to(device)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 社会损失函数和优化器</span></span><br><span class="line">    criterion = nn.CrossEntropyLoss()</span><br><span class="line">    params = <span class="built_in">list</span>(decoder.parameters()) + <span class="built_in">list</span>(encoder.linear.parameters()) + <span class="built_in">list</span>(encoder.bn.parameters())</span><br><span class="line">    optimizer = torch.optim.Adam(params, lr=args.learning_rate)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 训练模型</span></span><br><span class="line">    total_step = <span class="built_in">len</span>(data_loader)</span><br><span class="line">    <span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(args.num_epochs):</span><br><span class="line">        <span class="keyword">for</span> i, (images, captions, lengths) <span class="keyword">in</span> <span class="built_in">enumerate</span>(data_loader):</span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 设置mini-batch数据集</span></span><br><span class="line">            images = images.to(device)</span><br><span class="line">            captions = captions.to(device)</span><br><span class="line">            targets = pack_padded_sequence(captions, lengths, batch_first=<span class="literal">True</span>)[<span class="number">0</span>]</span><br><span class="line">            </span><br><span class="line">            <span class="comment"># 前向传播-》反向传播-》优化</span></span><br><span class="line">            features = encoder(images)</span><br><span class="line">            outputs = decoder(features, captions, lengths)</span><br><span class="line">            loss = criterion(outputs, targets)</span><br><span class="line">            </span><br><span class="line">            decoder.zero_grad() <span class="comment"># 切记</span></span><br><span class="line">            encoder.zero_grad() <span class="comment">#切记</span></span><br><span class="line">            loss.backward()</span><br><span class="line">            </span><br><span class="line">            optimizer.step()</span><br><span class="line"></span><br><span class="line">            <span class="comment"># 打印Log信息</span></span><br><span class="line">            <span class="keyword">if</span> i % args.log_step == <span class="number">0</span>:</span><br><span class="line">                <span class="built_in">print</span>(<span class="string">&#x27;Epoch [&#123;&#125;/&#123;&#125;], Step [&#123;&#125;/&#123;&#125;], Loss: &#123;:.4f&#125;, Perplexity: &#123;:5.4f&#125;&#x27;</span></span><br><span class="line">                      .<span class="built_in">format</span>(epoch, args.num_epochs, i, total_step, loss.item(), np.exp(loss.item()))) </span><br><span class="line">                </span><br><span class="line">            <span class="comment">#  定期保存模型</span></span><br><span class="line">            <span class="keyword">if</span> (i+<span class="number">1</span>) % args.save_step == <span class="number">0</span>:</span><br><span class="line">                torch.save(decoder.state_dict(), os.path.join(</span><br><span class="line">                    args.model_path, <span class="string">&#x27;decoder-&#123;&#125;-&#123;&#125;.ckpt&#x27;</span>.<span class="built_in">format</span>(epoch+<span class="number">1</span>, i+<span class="number">1</span>)))</span><br><span class="line">                torch.save(encoder.state_dict(), os.path.join(</span><br><span class="line">                    args.model_path, <span class="string">&#x27;encoder-&#123;&#125;-&#123;&#125;.ckpt&#x27;</span>.<span class="built_in">format</span>(epoch+<span class="number">1</span>, i+<span class="number">1</span>)))</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置参数</span></span><br><span class="line">parser = argparse.ArgumentParser()</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置文件夹路径</span></span><br><span class="line">parser.add_argument(<span class="string">&#x27;--model_path&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;models/&#x27;</span> , <span class="built_in">help</span>=<span class="string">&#x27;path for saving trained models&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--crop_size&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span>, default=<span class="number">224</span> , <span class="built_in">help</span>=<span class="string">&#x27;size for randomly cropping images&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--vocab_path&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;/home/ubuntu/Datasets/coco/vocab.pkl&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;path for vocabulary wrapper&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--image_dir&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;/home/ubuntu/Datasets/coco/resized2014&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;directory for resized images&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--caption_path&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;/home/ubuntu/Datasets/coco/annotations/captions_train2014.json&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;path for train annotation json file&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置打印信息步长和保存步长</span></span><br><span class="line">parser.add_argument(<span class="string">&#x27;--log_step&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span> , default=<span class="number">10</span>, <span class="built_in">help</span>=<span class="string">&#x27;step size for prining log info&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--save_step&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span> , default=<span class="number">1000</span>, <span class="built_in">help</span>=<span class="string">&#x27;step size for saving trained models&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置模型参数</span></span><br><span class="line">parser.add_argument(<span class="string">&#x27;--embed_size&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span> , default=<span class="number">256</span>, <span class="built_in">help</span>=<span class="string">&#x27;dimension of word embedding vectors&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--hidden_size&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span> , default=<span class="number">512</span>, <span class="built_in">help</span>=<span class="string">&#x27;dimension of lstm hidden states&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--num_layers&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span> , default=<span class="number">1</span>, <span class="built_in">help</span>=<span class="string">&#x27;number of layers in lstm&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置超参数</span></span><br><span class="line">parser.add_argument(<span class="string">&#x27;--num_epochs&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span>, default=<span class="number">5</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--batch_size&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span>, default=<span class="number">128</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--num_workers&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span>, default=<span class="number">2</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--learning_rate&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">float</span>, default=<span class="number">0.001</span>)</span><br><span class="line"></span><br><span class="line">config = parser.parse_args(args=[])</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(config)</span><br><span class="line"></span><br><span class="line">train_main(config)</span><br></pre></td></tr></table></figure>
+
+<pre><code>Namespace(batch_size=128, caption_path=&#39;/home/ubuntu/Datasets/coco/annotations/captions_train2014.json&#39;, crop_size=224, embed_size=256, hidden_size=512, image_dir=&#39;/home/ubuntu/Datasets/coco/resized2014&#39;, learning_rate=0.001, log_step=10, model_path=&#39;models/&#39;, num_epochs=5, num_layers=1, num_workers=2, save_step=1000, vocab_path=&#39;/home/ubuntu/Datasets/coco/vocab.pkl&#39;)
+loading annotations into memory...
+Done (t=0.75s)
+creating index...
+index created!
+Epoch [0/5], Step [0/3236], Loss: 9.2119, Perplexity: 10015.3099
+Epoch [0/5], Step [10/3236], Loss: 5.8402, Perplexity: 343.8538
+Epoch [0/5], Step [20/3236], Loss: 5.4097, Perplexity: 223.5633
+Epoch [0/5], Step [30/3236], Loss: 4.9667, Perplexity: 143.5454
+Epoch [0/5], Step [40/3236], Loss: 4.7254, Perplexity: 112.7781
+Epoch [0/5], Step [50/3236], Loss: 4.4457, Perplexity: 85.2637
+Epoch [0/5], Step [60/3236], Loss: 4.3398, Perplexity: 76.6949
+
+.........................
+
+Epoch [4/5], Step [3140/3236], Loss: 2.0148, Perplexity: 7.4993
+Epoch [4/5], Step [3150/3236], Loss: 1.9162, Perplexity: 6.7949
+Epoch [4/5], Step [3160/3236], Loss: 1.8994, Perplexity: 6.6816
+Epoch [4/5], Step [3170/3236], Loss: 1.7569, Perplexity: 5.7942
+Epoch [4/5], Step [3180/3236], Loss: 1.8736, Perplexity: 6.5118
+Epoch [4/5], Step [3190/3236], Loss: 1.9967, Perplexity: 7.3650
+Epoch [4/5], Step [3200/3236], Loss: 1.8380, Perplexity: 6.2840
+Epoch [4/5], Step [3210/3236], Loss: 1.9305, Perplexity: 6.8927
+Epoch [4/5], Step [3220/3236], Loss: 1.9491, Perplexity: 7.0224
+Epoch [4/5], Step [3230/3236], Loss: 1.8040, Perplexity: 6.0742
+</code></pre>
+<h2 id="模型测试"><a href="#模型测试" class="headerlink" title="模型测试"></a>模型测试</h2><p><strong>refer</strong>: <a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/image_captioning/sample.py">sample.py</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np </span><br><span class="line"><span class="keyword">import</span> argparse</span><br><span class="line"><span class="keyword">import</span> pickle </span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">from</span> torchvision <span class="keyword">import</span> transforms </span><br><span class="line"><span class="comment"># from build_vocab import Vocabulary</span></span><br><span class="line"><span class="comment"># from model import EncoderCNN, DecoderRNN</span></span><br><span class="line"><span class="keyword">from</span> PIL <span class="keyword">import</span> Image</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设备配置</span></span><br><span class="line">torch.cuda.set_device(<span class="number">1</span>) <span class="comment"># 这句用来设置pytorch在哪块GPU上运行</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义函数 加载图像</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">load_image</span>(<span class="params">image_path, transform=<span class="literal">None</span></span>):</span><br><span class="line">    image = Image.<span class="built_in">open</span>(image_path)</span><br><span class="line">    image = image.resize([<span class="number">224</span>, <span class="number">224</span>], Image.LANCZOS)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> transform <span class="keyword">is</span> <span class="keyword">not</span> <span class="literal">None</span>:</span><br><span class="line">        image = transform(image).unsqueeze(<span class="number">0</span>)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> image</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义测试函数</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">test</span>(<span class="params">args</span>):</span><br><span class="line">    <span class="comment"># 图像预处理模块</span></span><br><span class="line">    transform = transforms.Compose([</span><br><span class="line">        transforms.ToTensor(), </span><br><span class="line">        transforms.Normalize((<span class="number">0.485</span>, <span class="number">0.456</span>, <span class="number">0.406</span>), </span><br><span class="line">                             (<span class="number">0.229</span>, <span class="number">0.224</span>, <span class="number">0.225</span>))])</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 加载词汇表封装</span></span><br><span class="line">    <span class="keyword">with</span> <span class="built_in">open</span>(args.vocab_path, <span class="string">&#x27;rb&#x27;</span>) <span class="keyword">as</span> f:</span><br><span class="line">        vocab = pickle.load(f)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 建立两个模型</span></span><br><span class="line">    encoder = EncoderCNN(args.embed_size).<span class="built_in">eval</span>()  <span class="comment"># 切换成评估模式 (即批归一化使用移动 均值/方差)</span></span><br><span class="line">    decoder = DecoderRNN(args.embed_size, args.hidden_size, <span class="built_in">len</span>(vocab), args.num_layers)</span><br><span class="line">    encoder = encoder.to(device)</span><br><span class="line">    decoder = decoder.to(device)</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 加载训练好的模型的参数</span></span><br><span class="line">    encoder.load_state_dict(torch.load(args.encoder_path))</span><br><span class="line">    decoder.load_state_dict(torch.load(args.decoder_path))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 准备一幅图像</span></span><br><span class="line">    image = load_image(args.image, transform)</span><br><span class="line">    image_tensor = image.to(device)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 从图像生成描述</span></span><br><span class="line">    feature = encoder(image_tensor)</span><br><span class="line">    sampled_ids = decoder.sample(feature)</span><br><span class="line">    sampled_ids = sampled_ids[<span class="number">0</span>].cpu().numpy()          <span class="comment"># (1, max_seq_length) -&gt; (max_seq_length)</span></span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 将词ID转换为单词</span></span><br><span class="line">    sampled_caption = []</span><br><span class="line">    <span class="keyword">for</span> word_id <span class="keyword">in</span> sampled_ids:</span><br><span class="line">        word = vocab.idx2word[word_id]</span><br><span class="line">        sampled_caption.append(word)</span><br><span class="line">        <span class="keyword">if</span> word == <span class="string">&#x27;&lt;end&gt;&#x27;</span>:</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">    sentence = <span class="string">&#x27; &#x27;</span>.join(sampled_caption)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 打印图像和描述</span></span><br><span class="line">    <span class="built_in">print</span> (sentence)</span><br><span class="line">    image = Image.<span class="built_in">open</span>(args.image)</span><br><span class="line">    plt.imshow(np.asarray(image))</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置参数进行测试</span></span><br><span class="line">parser = argparse.ArgumentParser()</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--image&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;png/football2.jpg&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;input image for generating caption&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--encoder_path&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;models/encoder-5-3000.ckpt&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;path for trained encoder&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--decoder_path&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;models/decoder-5-3000.ckpt&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;path for trained decoder&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--vocab_path&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">str</span>, default=<span class="string">&#x27;/home/ubuntu/Datasets/coco/vocab.pkl&#x27;</span>, <span class="built_in">help</span>=<span class="string">&#x27;path for vocabulary wrapper&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Model parameters (should be same as paramters in train.py)</span></span><br><span class="line">parser.add_argument(<span class="string">&#x27;--embed_size&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span> , default=<span class="number">256</span>, <span class="built_in">help</span>=<span class="string">&#x27;dimension of word embedding vectors&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--hidden_size&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span> , default=<span class="number">512</span>, <span class="built_in">help</span>=<span class="string">&#x27;dimension of lstm hidden states&#x27;</span>)</span><br><span class="line">parser.add_argument(<span class="string">&#x27;--num_layers&#x27;</span>, <span class="built_in">type</span>=<span class="built_in">int</span> , default=<span class="number">1</span>, <span class="built_in">help</span>=<span class="string">&#x27;number of layers in lstm&#x27;</span>)</span><br><span class="line">config = parser.parse_args(args=[])</span><br><span class="line">test(config)</span><br></pre></td></tr></table></figure>
+
+<pre><code>&lt;start&gt; a soccer player kicking a ball on a field . &lt;end&gt;
+</code></pre>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511103/blog/vvyusb0lspgdgxef5ug8.png" alt="png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>xiaohai
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://shenxiaohai.me/pytorch-tutorial-advanced-04/" title="PyTorch 高级篇（4）：图像标注（Image Captioning (CNN-RNN)）">https://shenxiaohai.me/pytorch-tutorial-advanced-04/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/PyTorch/" rel="tag"><i class="fa fa-tag"></i> PyTorch</a>
+              <a href="/tags/%E5%9B%BE%E5%83%8F%E6%A0%87%E6%B3%A8/" rel="tag"><i class="fa fa-tag"></i> 图像标注</a>
+              <a href="/tags/ResNet-152/" rel="tag"><i class="fa fa-tag"></i> ResNet-152</a>
+              <a href="/tags/LSTM/" rel="tag"><i class="fa fa-tag"></i> LSTM</a>
+              <a href="/tags/%E7%89%B9%E5%BE%81%E5%90%91%E9%87%8F/" rel="tag"><i class="fa fa-tag"></i> 特征向量</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/pytorch-tutorial-advanced-03/" rel="prev" title="PyTorch 高级篇（3）：神经风格迁移（Neural Style Transfer）">
+                  <i class="fa fa-chevron-left"></i> PyTorch 高级篇（3）：神经风格迁移（Neural Style Transfer）
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/pytorch-tutorial-TensorBoard/" rel="next" title="PyTorch 番外篇：Pytorch中的TensorBoard（TensorBoard in PyTorch）">
+                  PyTorch 番外篇：Pytorch中的TensorBoard（TensorBoard in PyTorch） <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments"><div id="twikoo-comments"></div></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-laptop"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohai</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/veraposeidon" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quicklink/2.3.0/quicklink.umd.js" integrity="sha256-yvJQOINiH9fWemHn0vCA5lsHWJaHs6/ZmO+1Ft04SvM=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://shenxiaohai.me/pytorch-tutorial-advanced-04/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="twikoo" type="application/json">{"enable":true,"visitor":false,"envId":"https://twikoo-comment.shenxiaohai.me/","el":"#twikoo-comments"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.twikoo.el)
+    .then(() => NexT.utils.getScript(
+      CONFIG.twikoo.jsUrl || 'https://cdn.jsdelivr.net/npm/twikoo/dist/twikoo.all.min.js',
+      { condition: window.twikoo }
+    ))
+    .then(() => {
+      twikoo.init(CONFIG.twikoo);
+    });
+});
+</script>
+<style>
+.post-block, .comments {
+  overflow: visible;
+}
+.tk-owo-emotion {
+  display: inline-block;
+}
+</style>
+
+</body>
+</html>

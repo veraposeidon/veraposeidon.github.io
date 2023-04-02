@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.webp" color="#222">
+  <meta name="google-site-verification" content="Cj9oDgXxdJe6MoA_lEUQ2rmOouwJeTm5uJNqjhOv8Ng">
+  <meta name="msvalidate.01" content="E5D0AA8F5E012DFD9C5F3954DF8283B1">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,700,700italic%7CNoto+Serif+SC:300,300italic,400,400italic,700,700italic%7CSource+Code+Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shenxiaohai.me","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"twikoo","storage":true,"lazyload":false,"nav":null,"activeClass":"twikoo"},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Pytorch高级S03E01：生成对抗网络（Generative Adversarial Networks）。生成对抗网络判别模型和生成模型GAN+MINIST生成手写数字">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch 高级篇（1）：生成对抗网络（Generative Adversarial Networks）">
+<meta property="og:url" content="https://shenxiaohai.me/pytorch-tutorial-advanced-01/index.html">
+<meta property="og:site_name" content="SHEN&#39;s DevNotes">
+<meta property="og:description" content="Pytorch高级S03E01：生成对抗网络（Generative Adversarial Networks）。生成对抗网络判别模型和生成模型GAN+MINIST生成手写数字">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511080/blog/c6acau71ayrtznvkzfki.svg">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511081/blog/vwky6wrdcwfbmlbzmixy.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511082/blog/jafyda6w0tr01dbx1du8.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511082/blog/pzrrtuix2vtqw3a1bq7i.png">
+<meta property="article:published_time" content="2018-10-20T09:49:03.000Z">
+<meta property="article:modified_time" content="2023-03-11T05:04:43.313Z">
+<meta property="article:author" content="xiaohai">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="生成对抗网络">
+<meta property="article:tag" content="GAN">
+<meta property="article:tag" content="判别模型">
+<meta property="article:tag" content="生成模型">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511080/blog/c6acau71ayrtznvkzfki.svg">
+
+
+<link rel="canonical" href="https://shenxiaohai.me/pytorch-tutorial-advanced-01/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shenxiaohai.me/pytorch-tutorial-advanced-01/","path":"pytorch-tutorial-advanced-01/","title":"PyTorch 高级篇（1）：生成对抗网络（Generative Adversarial Networks）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PyTorch 高级篇（1）：生成对抗网络（Generative Adversarial Networks） | SHEN's DevNotes</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YDT7F4NZP6"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-YDT7F4NZP6","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="SHEN's DevNotes" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">SHEN's DevNotes</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记，编程技巧，效率工具</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">131</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">18</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">74</span></a></li><li class="menu-item menu-item-碎碎念-|-memos"><a href="https://memos.shenxiaohai.me/" rel="section" target="_blank"><i class="fa fa-file-pen fa-fw"></i>碎碎念 | Memos</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PyTorch-%E9%AB%98%E7%BA%A7%E7%AF%87%EF%BC%881%EF%BC%89%EF%BC%9A%E7%94%9F%E6%88%90%E5%AF%B9%E6%8A%97%E7%BD%91%E7%BB%9C%EF%BC%88Generative-Adversarial-Networks%EF%BC%89"><span class="nav-text">PyTorch 高级篇（1）：生成对抗网络（Generative Adversarial Networks）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E5%AF%B9%E6%8A%97%E7%BD%91%E7%BB%9C-%E5%AD%A6%E4%B9%A0%E8%B5%84%E6%96%99"><span class="nav-text">生成对抗网络 学习资料</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#PyTorch-%E5%AE%9E%E7%8E%B0"><span class="nav-text">PyTorch 实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E5%A4%84%E7%90%86%E9%98%B6%E6%AE%B5"><span class="nav-text">预处理阶段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MINIST-%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-text">MINIST 数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%A4%E5%88%AB%E6%A8%A1%E5%9E%8B%E5%92%8C%E7%94%9F%E6%88%90%E6%A8%A1%E5%9E%8B%E7%9A%84%E5%88%9B%E5%BB%BA"><span class="nav-text">判别模型和生成模型的创建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E6%8A%97%E7%94%9F%E6%88%90%E8%AE%AD%E7%BB%83"><span class="nav-text">对抗生成训练</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E6%9E%9C%E5%B1%95%E7%A4%BA"><span class="nav-text">结果展示</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#real-image"><span class="nav-text">real image</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#fake-image-%E8%BF%9B%E5%8C%96%E8%BF%87%E7%A8%8B"><span class="nav-text">fake image 进化过程</span></a></li></ol></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xiaohai</p>
+  <div class="site-description" itemprop="description">我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/veraposeidon" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;veraposeidon" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/HiYoake" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;HiYoake" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shenxiaohai.me/pytorch-tutorial-advanced-01/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xiaohai">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SHEN's DevNotes">
+      <meta itemprop="description" content="我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PyTorch 高级篇（1）：生成对抗网络（Generative Adversarial Networks） | SHEN's DevNotes">
+      <meta itemprop="description" content="Pytorch高级S03E01：生成对抗网络（Generative Adversarial Networks）。</br>生成对抗网络</br>判别模型和生成模型</br>GAN+MINIST生成手写数字">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PyTorch 高级篇（1）：生成对抗网络（Generative Adversarial Networks）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-10-20 09:49:03" itemprop="dateCreated datePublished" datetime="2018-10-20T09:49:03Z">2018-10-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-11 05:04:43" itemprop="dateModified" datetime="2023-03-11T05:04:43Z">2023-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">深度学习框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">Pytorch高级S03E01：生成对抗网络（Generative Adversarial Networks）。</br>生成对抗网络</br>判别模型和生成模型</br>GAN+MINIST生成手写数字</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511080/blog/c6acau71ayrtznvkzfki.svg" alt="PyTorch"></p>
+<h1 id="PyTorch-高级篇（1）：生成对抗网络（Generative-Adversarial-Networks）"><a href="#PyTorch-高级篇（1）：生成对抗网络（Generative-Adversarial-Networks）" class="headerlink" title="PyTorch 高级篇（1）：生成对抗网络（Generative Adversarial Networks）"></a>PyTorch 高级篇（1）：生成对抗网络（Generative Adversarial Networks）</h1><blockquote>
+<p>参考代码</p>
+<p><strong>yunjey的 <a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/03-advanced/generative_adversarial_network/main.py">pytorch tutorial系列</a></strong></p>
+</blockquote>
+<h2 id="生成对抗网络-学习资料"><a href="#生成对抗网络-学习资料" class="headerlink" title="生成对抗网络 学习资料"></a>生成对抗网络 学习资料</h2><p>对于生成对抗网络还是很感兴趣的，可以用来生成图像, 生成的图像可以拿来当样本，hiahia。</p>
+<blockquote>
+<p><strong>论文 Arxiv地址</strong></p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1406.2661">Generative Adversarial Networks</a></p>
+<p><strong>推荐 相关博客和教程</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.msra.cn/zh-cn/news/features/gan-20170511">到底什么是生成式对抗网络GAN？By 微软亚洲研究院</a></p>
+<p><a target="_blank" rel="noopener" href="https://morvanzhou.github.io/tutorials/machine-learning/torch/4-06-A-GAN/">莫烦视频：什么是生成对抗网络 (GAN)</a></p>
+<p><a target="_blank" rel="noopener" href="https://morvanzhou.github.io/tutorials/machine-learning/torch/4-06-GAN/">莫烦视频：Pytorch实现GAN</a></p>
+</blockquote>
+<h2 id="PyTorch-实现"><a href="#PyTorch-实现" class="headerlink" title="PyTorch 实现"></a>PyTorch 实现</h2><h3 id="预处理阶段"><a href="#预处理阶段" class="headerlink" title="预处理阶段"></a>预处理阶段</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包</span></span><br><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torchvision</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">from</span> torchvision <span class="keyword">import</span> transforms</span><br><span class="line"><span class="keyword">from</span> torchvision.utils <span class="keyword">import</span> save_image</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设备配置</span></span><br><span class="line">torch.cuda.set_device(<span class="number">1</span>) <span class="comment"># 这句用来设置pytorch在哪块GPU上运行</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 超参数设置</span></span><br><span class="line"><span class="comment"># Hyper-parameters</span></span><br><span class="line">latent_size = <span class="number">64</span></span><br><span class="line">hidden_size = <span class="number">256</span></span><br><span class="line">image_size = <span class="number">784</span></span><br><span class="line">num_epochs = <span class="number">200</span></span><br><span class="line">batch_size = <span class="number">100</span></span><br><span class="line">sample_dir = <span class="string">&#x27;samples&#x27;</span></span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 如果没有文件夹就创建一个文件夹</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.exists(sample_dir):</span><br><span class="line">    os.makedirs(sample_dir)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 图像处理模块：transform设置</span></span><br><span class="line"><span class="comment"># Image processing：归一化</span></span><br><span class="line">transform = transforms.Compose([</span><br><span class="line">                transforms.ToTensor(),</span><br><span class="line">                transforms.Normalize(mean=(<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>),   <span class="comment"># 3 for RGB channels</span></span><br><span class="line">                                     std=(<span class="number">0.5</span>, <span class="number">0.5</span>, <span class="number">0.5</span>))])</span><br></pre></td></tr></table></figure>
+
+<h3 id="MINIST-数据集"><a href="#MINIST-数据集" class="headerlink" title="MINIST 数据集"></a>MINIST 数据集</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 加载同时做transform预处理</span></span><br><span class="line">mnist = torchvision.datasets.MNIST(root=<span class="string">&#x27;../../../data/minist&#x27;</span>,</span><br><span class="line">                                   train=<span class="literal">True</span>,</span><br><span class="line">                                   transform=transform,</span><br><span class="line">                                   download=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 数据加载器：GAN中只考虑判别模型和生成模型的对抗提高，无需设置训练集和测试集</span></span><br><span class="line">data_loader = torch.utils.data.DataLoader(dataset=mnist,</span><br><span class="line">                                          batch_size=batch_size, </span><br><span class="line">                                          shuffle=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="判别模型和生成模型的创建"><a href="#判别模型和生成模型的创建" class="headerlink" title="判别模型和生成模型的创建"></a>判别模型和生成模型的创建</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建判别模型</span></span><br><span class="line"><span class="comment"># Discriminator</span></span><br><span class="line">D = nn.Sequential(</span><br><span class="line">        nn.Linear(image_size, hidden_size), <span class="comment"># 判别的输入时图像数据</span></span><br><span class="line">        nn.LeakyReLU(<span class="number">0.2</span>),</span><br><span class="line">        nn.Linear(hidden_size, hidden_size),</span><br><span class="line">        nn.LeakyReLU(<span class="number">0.2</span>),</span><br><span class="line">        nn.Linear(hidden_size, <span class="number">1</span>),</span><br><span class="line">        nn.Sigmoid())</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 创建生成模型</span></span><br><span class="line"><span class="comment"># Generator </span></span><br><span class="line">G = nn.Sequential(</span><br><span class="line">        nn.Linear(latent_size, hidden_size), <span class="comment"># 生成的输入是随机数，可以自己定义</span></span><br><span class="line">        nn.ReLU(),</span><br><span class="line">        nn.Linear(hidden_size, hidden_size),</span><br><span class="line">        nn.ReLU(),</span><br><span class="line">        nn.Linear(hidden_size, image_size),</span><br><span class="line">        nn.Tanh())</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 拷到计算设备上</span></span><br><span class="line"><span class="comment"># Device setting</span></span><br><span class="line">D = D.to(device)</span><br><span class="line">G = G.to(device)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置损失函数和优化器</span></span><br><span class="line">criterion = nn.BCELoss() <span class="comment"># 二值交叉熵 Binary cross entropy loss</span></span><br><span class="line">d_optimizer = torch.optim.Adam(D.parameters(), lr=<span class="number">0.0002</span>)</span><br><span class="line">g_optimizer = torch.optim.Adam(G.parameters(), lr=<span class="number">0.0002</span>)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义两个函数</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">denorm</span>(<span class="params">x</span>):</span><br><span class="line">    out = (x + <span class="number">1</span>) / <span class="number">2</span></span><br><span class="line">    <span class="keyword">return</span> out.clamp(<span class="number">0</span>, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 重置梯度</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">reset_grad</span>():</span><br><span class="line">    d_optimizer.zero_grad()</span><br><span class="line">    g_optimizer.zero_grad()</span><br></pre></td></tr></table></figure>
+
+<h3 id="对抗生成训练"><a href="#对抗生成训练" class="headerlink" title="对抗生成训练"></a>对抗生成训练</h3><p>分两步：</p>
+<ol>
+<li>固定生成模型，优化判别模型</li>
+<li>固定判别模型，优化生成模型</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br></pre></td><td class="code"><pre><span class="line">total_step = <span class="built_in">len</span>(data_loader)</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">    <span class="keyword">for</span> i, (images, _) <span class="keyword">in</span> <span class="built_in">enumerate</span>(data_loader):</span><br><span class="line">        images = images.reshape(batch_size, -<span class="number">1</span>).to(device)</span><br><span class="line">            </span><br><span class="line">        <span class="comment"># 创建标签，随后会用于损失函数BCE loss的计算</span></span><br><span class="line">        real_labels = torch.ones(batch_size, <span class="number">1</span>).to(device)  <span class="comment"># true_label设为1，表示True</span></span><br><span class="line">        fake_labels = torch.zeros(batch_size, <span class="number">1</span>).to(device) <span class="comment"># fake_label设为0，表示False</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># ================================================================== #</span></span><br><span class="line">        <span class="comment">#                      训练判别模型                      #</span></span><br><span class="line">        <span class="comment"># ================================================================== #</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 计算real_损失</span></span><br><span class="line">        <span class="comment"># 使用公式 BCE_Loss(x, y): - y * log(D(x)) - (1-y) * log(1 - D(x))，来计算realimage的判别损失</span></span><br><span class="line">        <span class="comment"># 其中第二项永远为零，因为real_labels == 1</span></span><br><span class="line">        outputs = D(images)</span><br><span class="line">        d_loss_real = criterion(outputs, real_labels)</span><br><span class="line">        real_score = outputs</span><br><span class="line">        </span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 计算fake损失</span></span><br><span class="line">        <span class="comment"># 生成模型根据随机输入生成fake_images</span></span><br><span class="line">        z = torch.randn(batch_size, latent_size).to(device)</span><br><span class="line">        fake_images = G(z) </span><br><span class="line">        <span class="comment"># 使用公式 BCE_Loss(x, y): - y * log(D(x)) - (1-y) * log(1 - D(x))，来计算fakeImage的判别损失</span></span><br><span class="line">        <span class="comment"># 其中第一项永远为零，因为fake_labels == 0</span></span><br><span class="line">        outputs = D(fake_images)</span><br><span class="line">        d_loss_fake = criterion(outputs, fake_labels)</span><br><span class="line">        fake_score = outputs</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 反向传播和优化</span></span><br><span class="line">        d_loss = d_loss_real + d_loss_fake</span><br><span class="line">        reset_grad()</span><br><span class="line">        d_loss.backward()</span><br><span class="line">        d_optimizer.step()</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># ================================================================== #</span></span><br><span class="line">        <span class="comment">#                       训练生成模型                       #</span></span><br><span class="line">        <span class="comment"># ================================================================== #</span></span><br><span class="line"></span><br><span class="line">        <span class="comment"># 生成模型根据随机输入生成fake_images,然后判别模型进行判别</span></span><br><span class="line">        z = torch.randn(batch_size, latent_size).to(device)</span><br><span class="line">        fake_images = G(z)</span><br><span class="line">        outputs = D(fake_images)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 训练生成模型，使之最大化 log(D(G(z)) ，而不是最小化 log(1-D(G(z)))</span></span><br><span class="line">        <span class="comment"># 具体的解释在原文第三小节最后一段有解释</span></span><br><span class="line">        <span class="comment"># 大致含义就是在训练初期，生成模型G还很菜，判别模型会拒绝高置信度的样本，因为这些样本与训练数据不同。</span></span><br><span class="line">        <span class="comment"># 这样log(1-D(G(z)))就近乎饱和，梯度计算得到的值很小，不利于反向传播和训练。</span></span><br><span class="line">        <span class="comment"># 换一种思路，通过计算最大化log(D(G(z))，就能够在训练初期提供较大的梯度值，利于快速收敛</span></span><br><span class="line">        g_loss = criterion(outputs, real_labels)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 反向传播和优化</span></span><br><span class="line">        reset_grad()</span><br><span class="line">        g_loss.backward()</span><br><span class="line">        g_optimizer.step()</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (i+<span class="number">1</span>) % <span class="number">200</span> == <span class="number">0</span>:</span><br><span class="line">            <span class="built_in">print</span>(<span class="string">&#x27;Epoch [&#123;&#125;/&#123;&#125;], Step [&#123;&#125;/&#123;&#125;], d_loss: &#123;:.4f&#125;, g_loss: &#123;:.4f&#125;, D(x): &#123;:.2f&#125;, D(G(z)): &#123;:.2f&#125;&#x27;</span> </span><br><span class="line">                  .<span class="built_in">format</span>(epoch, num_epochs, i+<span class="number">1</span>, total_step, d_loss.item(), g_loss.item(), </span><br><span class="line">                          real_score.mean().item(), fake_score.mean().item()))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 在第一轮保存训练数据图像</span></span><br><span class="line">    <span class="keyword">if</span> (epoch+<span class="number">1</span>) == <span class="number">1</span>:</span><br><span class="line">        images = images.reshape(images.size(<span class="number">0</span>), <span class="number">1</span>, <span class="number">28</span>, <span class="number">28</span>)</span><br><span class="line">        save_image(denorm(images), os.path.join(sample_dir, <span class="string">&#x27;real_images.png&#x27;</span>))</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># 每一轮保存 生成的样本（即fake_images）</span></span><br><span class="line">    fake_images = fake_images.reshape(fake_images.size(<span class="number">0</span>), <span class="number">1</span>, <span class="number">28</span>, <span class="number">28</span>)</span><br><span class="line">    save_image(denorm(fake_images), os.path.join(sample_dir, <span class="string">&#x27;fake_images-&#123;&#125;.png&#x27;</span>.<span class="built_in">format</span>(epoch+<span class="number">1</span>)))</span><br></pre></td></tr></table></figure>
+
+<pre><code>Epoch [0/200], Step [200/600], d_loss: 0.0358, g_loss: 4.3944, D(x): 0.99, D(G(z)): 0.03
+Epoch [0/200], Step [400/600], d_loss: 0.1378, g_loss: 5.3265, D(x): 0.96, D(G(z)): 0.06
+Epoch [0/200], Step [600/600], d_loss: 0.2501, g_loss: 3.8991, D(x): 0.88, D(G(z)): 0.09
+Epoch [1/200], Step [200/600], d_loss: 0.0795, g_loss: 5.9620, D(x): 0.97, D(G(z)): 0.05
+Epoch [1/200], Step [400/600], d_loss: 0.0882, g_loss: 5.2908, D(x): 0.95, D(G(z)): 0.01
+Epoch [1/200], Step [600/600], d_loss: 0.4405, g_loss: 3.4986, D(x): 0.84, D(G(z)): 0.10
+Epoch [2/200], Step [200/600], d_loss: 0.9144, g_loss: 3.6864, D(x): 0.86, D(G(z)): 0.39
+Epoch [2/200], Step [400/600], d_loss: 0.3320, g_loss: 3.6846, D(x): 0.89, D(G(z)): 0.09
+Epoch [2/200], Step [600/600], d_loss: 0.3677, g_loss: 4.0595, D(x): 0.84, D(G(z)): 0.07
+Epoch [3/200], Step [200/600], d_loss: 1.1544, g_loss: 1.7915, D(x): 0.64, D(G(z)): 0.25
+Epoch [3/200], Step [400/600], d_loss: 0.2243, g_loss: 5.7187, D(x): 0.93, D(G(z)): 0.03
+Epoch [3/200], Step [600/600], d_loss: 0.7260, g_loss: 3.2014, D(x): 0.84, D(G(z)): 0.34
+Epoch [4/200], Step [200/600], d_loss: 0.3508, g_loss: 3.5732, D(x): 0.88, D(G(z)): 0.11
+Epoch [4/200], Step [400/600], d_loss: 0.2381, g_loss: 3.2004, D(x): 0.87, D(G(z)): 0.05
+Epoch [4/200], Step [600/600], d_loss: 1.0712, g_loss: 2.0204, D(x): 0.75, D(G(z)): 0.32
+Epoch [5/200], Step [200/600], d_loss: 0.8128, g_loss: 1.9196, D(x): 0.75, D(G(z)): 0.19
+Epoch [5/200], Step [400/600], d_loss: 0.6710, g_loss: 3.2527, D(x): 0.88, D(G(z)): 0.29
+Epoch [5/200], Step [600/600], d_loss: 0.1591, g_loss: 3.2350, D(x): 0.94, D(G(z)): 0.07
+Epoch [6/200], Step [200/600], d_loss: 0.1656, g_loss: 2.8785, D(x): 0.96, D(G(z)): 0.09
+Epoch [6/200], Step [400/600], d_loss: 0.1527, g_loss: 5.3023, D(x): 0.94, D(G(z)): 0.04
+Epoch [6/200], Step [600/600], d_loss: 0.1915, g_loss: 3.6295, D(x): 0.96, D(G(z)): 0.09
+Epoch [7/200], Step [200/600], d_loss: 0.2680, g_loss: 3.8414, D(x): 0.96, D(G(z)): 0.16
+Epoch [7/200], Step [400/600], d_loss: 0.3089, g_loss: 3.1775, D(x): 0.91, D(G(z)): 0.06
+Epoch [7/200], Step [600/600], d_loss: 0.1621, g_loss: 3.6864, D(x): 0.96, D(G(z)): 0.09
+Epoch [8/200], Step [200/600], d_loss: 0.1415, g_loss: 5.7511, D(x): 0.96, D(G(z)): 0.07
+Epoch [8/200], Step [400/600], d_loss: 0.2798, g_loss: 4.0020, D(x): 0.93, D(G(z)): 0.12
+Epoch [8/200], Step [600/600], d_loss: 0.1186, g_loss: 6.0730, D(x): 0.95, D(G(z)): 0.01
+Epoch [9/200], Step [200/600], d_loss: 0.1194, g_loss: 3.9334, D(x): 0.95, D(G(z)): 0.04
+Epoch [9/200], Step [400/600], d_loss: 0.2538, g_loss: 4.9895, D(x): 0.95, D(G(z)): 0.09
+Epoch [9/200], Step [600/600], d_loss: 0.0858, g_loss: 5.8676, D(x): 0.99, D(G(z)): 0.06
+Epoch [10/200], Step [200/600], d_loss: 0.1646, g_loss: 5.9101, D(x): 0.96, D(G(z)): 0.08
+Epoch [10/200], Step [400/600], d_loss: 0.1347, g_loss: 6.3711, D(x): 0.94, D(G(z)): 0.01
+Epoch [10/200], Step [600/600], d_loss: 0.1253, g_loss: 7.6121, D(x): 0.93, D(G(z)): 0.01
+
+........................
+
+Epoch [100/200], Step [200/600], d_loss: 0.5259, g_loss: 1.8732, D(x): 0.89, D(G(z)): 0.27
+Epoch [100/200], Step [400/600], d_loss: 0.9937, g_loss: 1.6773, D(x): 0.65, D(G(z)): 0.24
+Epoch [100/200], Step [600/600], d_loss: 0.8688, g_loss: 1.7864, D(x): 0.65, D(G(z)): 0.19
+Epoch [101/200], Step [200/600], d_loss: 0.7689, g_loss: 1.8882, D(x): 0.73, D(G(z)): 0.23
+Epoch [101/200], Step [400/600], d_loss: 0.8216, g_loss: 1.7205, D(x): 0.81, D(G(z)): 0.36
+Epoch [101/200], Step [600/600], d_loss: 0.9299, g_loss: 1.3693, D(x): 0.73, D(G(z)): 0.31
+Epoch [102/200], Step [200/600], d_loss: 0.8539, g_loss: 2.1614, D(x): 0.75, D(G(z)): 0.29
+Epoch [102/200], Step [400/600], d_loss: 1.1440, g_loss: 1.2271, D(x): 0.80, D(G(z)): 0.47
+Epoch [102/200], Step [600/600], d_loss: 0.8884, g_loss: 1.9186, D(x): 0.71, D(G(z)): 0.26
+Epoch [103/200], Step [200/600], d_loss: 0.8597, g_loss: 1.6677, D(x): 0.76, D(G(z)): 0.29
+Epoch [103/200], Step [400/600], d_loss: 0.7532, g_loss: 1.6774, D(x): 0.84, D(G(z)): 0.32
+Epoch [103/200], Step [600/600], d_loss: 0.7142, g_loss: 2.0797, D(x): 0.71, D(G(z)): 0.17
+Epoch [104/200], Step [200/600], d_loss: 0.8159, g_loss: 1.5567, D(x): 0.77, D(G(z)): 0.31
+Epoch [104/200], Step [400/600], d_loss: 0.6156, g_loss: 2.4817, D(x): 0.82, D(G(z)): 0.25
+Epoch [104/200], Step [600/600], d_loss: 0.9245, g_loss: 1.7658, D(x): 0.70, D(G(z)): 0.28
+Epoch [105/200], Step [200/600], d_loss: 0.7685, g_loss: 2.1336, D(x): 0.75, D(G(z)): 0.29
+Epoch [105/200], Step [400/600], d_loss: 0.7089, g_loss: 2.3518, D(x): 0.77, D(G(z)): 0.24
+Epoch [105/200], Step [600/600], d_loss: 0.9698, g_loss: 1.7970, D(x): 0.67, D(G(z)): 0.27
+Epoch [106/200], Step [200/600], d_loss: 0.8346, g_loss: 1.7312, D(x): 0.74, D(G(z)): 0.28
+Epoch [106/200], Step [400/600], d_loss: 0.8106, g_loss: 1.6253, D(x): 0.84, D(G(z)): 0.37
+Epoch [106/200], Step [600/600], d_loss: 0.7766, g_loss: 2.2826, D(x): 0.76, D(G(z)): 0.27
+Epoch [107/200], Step [200/600], d_loss: 0.8676, g_loss: 2.3836, D(x): 0.69, D(G(z)): 0.25
+Epoch [107/200], Step [400/600], d_loss: 0.6806, g_loss: 1.9751, D(x): 0.79, D(G(z)): 0.25
+Epoch [107/200], Step [600/600], d_loss: 0.6495, g_loss: 2.2493, D(x): 0.78, D(G(z)): 0.23
+Epoch [108/200], Step [200/600], d_loss: 0.6427, g_loss: 2.2878, D(x): 0.74, D(G(z)): 0.18
+Epoch [108/200], Step [400/600], d_loss: 1.0293, g_loss: 1.6300, D(x): 0.70, D(G(z)): 0.33
+Epoch [108/200], Step [600/600], d_loss: 0.9008, g_loss: 1.7924, D(x): 0.71, D(G(z)): 0.29
+Epoch [109/200], Step [200/600], d_loss: 0.7724, g_loss: 1.9093, D(x): 0.77, D(G(z)): 0.27
+Epoch [109/200], Step [400/600], d_loss: 0.9510, g_loss: 1.7266, D(x): 0.66, D(G(z)): 0.23
+Epoch [109/200], Step [600/600], d_loss: 0.9278, g_loss: 2.0237, D(x): 0.69, D(G(z)): 0.27
+
+........................
+
+Epoch [190/200], Step [200/600], d_loss: 1.0075, g_loss: 1.3284, D(x): 0.75, D(G(z)): 0.41
+Epoch [190/200], Step [400/600], d_loss: 0.9317, g_loss: 1.5531, D(x): 0.68, D(G(z)): 0.31
+Epoch [190/200], Step [600/600], d_loss: 0.9142, g_loss: 2.0236, D(x): 0.71, D(G(z)): 0.33
+Epoch [191/200], Step [200/600], d_loss: 0.9734, g_loss: 1.7790, D(x): 0.65, D(G(z)): 0.28
+Epoch [191/200], Step [400/600], d_loss: 1.2256, g_loss: 1.2511, D(x): 0.73, D(G(z)): 0.48
+Epoch [191/200], Step [600/600], d_loss: 0.9106, g_loss: 1.3276, D(x): 0.72, D(G(z)): 0.33
+Epoch [192/200], Step [200/600], d_loss: 1.0399, g_loss: 1.3145, D(x): 0.64, D(G(z)): 0.32
+Epoch [192/200], Step [400/600], d_loss: 0.8642, g_loss: 1.4594, D(x): 0.72, D(G(z)): 0.32
+Epoch [192/200], Step [600/600], d_loss: 0.8914, g_loss: 1.5153, D(x): 0.76, D(G(z)): 0.35
+Epoch [193/200], Step [200/600], d_loss: 0.8702, g_loss: 1.6950, D(x): 0.64, D(G(z)): 0.22
+Epoch [193/200], Step [400/600], d_loss: 0.9578, g_loss: 1.5045, D(x): 0.67, D(G(z)): 0.31
+Epoch [193/200], Step [600/600], d_loss: 1.1071, g_loss: 1.1405, D(x): 0.64, D(G(z)): 0.37
+Epoch [194/200], Step [200/600], d_loss: 0.9798, g_loss: 1.4018, D(x): 0.65, D(G(z)): 0.31
+Epoch [194/200], Step [400/600], d_loss: 0.8613, g_loss: 1.5124, D(x): 0.73, D(G(z)): 0.32
+Epoch [194/200], Step [600/600], d_loss: 1.0008, g_loss: 1.8627, D(x): 0.66, D(G(z)): 0.28
+Epoch [195/200], Step [200/600], d_loss: 0.9719, g_loss: 1.7610, D(x): 0.60, D(G(z)): 0.22
+Epoch [195/200], Step [400/600], d_loss: 0.9135, g_loss: 1.3339, D(x): 0.78, D(G(z)): 0.38
+Epoch [195/200], Step [600/600], d_loss: 0.9025, g_loss: 1.4633, D(x): 0.71, D(G(z)): 0.31
+Epoch [196/200], Step [200/600], d_loss: 0.7495, g_loss: 1.9101, D(x): 0.77, D(G(z)): 0.27
+Epoch [196/200], Step [400/600], d_loss: 1.0649, g_loss: 1.3968, D(x): 0.70, D(G(z)): 0.40
+Epoch [196/200], Step [600/600], d_loss: 0.9115, g_loss: 1.4607, D(x): 0.65, D(G(z)): 0.28
+Epoch [197/200], Step [200/600], d_loss: 0.9223, g_loss: 1.5513, D(x): 0.72, D(G(z)): 0.34
+Epoch [197/200], Step [400/600], d_loss: 1.1988, g_loss: 1.2663, D(x): 0.62, D(G(z)): 0.36
+Epoch [197/200], Step [600/600], d_loss: 0.9683, g_loss: 1.2183, D(x): 0.74, D(G(z)): 0.39
+Epoch [198/200], Step [200/600], d_loss: 0.8696, g_loss: 1.6043, D(x): 0.68, D(G(z)): 0.28
+Epoch [198/200], Step [400/600], d_loss: 1.1423, g_loss: 1.5558, D(x): 0.68, D(G(z)): 0.39
+Epoch [198/200], Step [600/600], d_loss: 1.0431, g_loss: 1.5314, D(x): 0.68, D(G(z)): 0.39
+Epoch [199/200], Step [200/600], d_loss: 1.0278, g_loss: 1.6758, D(x): 0.59, D(G(z)): 0.25
+Epoch [199/200], Step [400/600], d_loss: 0.9197, g_loss: 1.6217, D(x): 0.66, D(G(z)): 0.30
+Epoch [199/200], Step [600/600], d_loss: 0.8748, g_loss: 1.5809, D(x): 0.71, D(G(z)): 0.31
+</code></pre>
+<h3 id="结果展示"><a href="#结果展示" class="headerlink" title="结果展示"></a>结果展示</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#导入包</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt <span class="comment"># plt 用于显示图片</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.image <span class="keyword">as</span> mpimg <span class="comment"># mpimg 用于读取图片</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br></pre></td></tr></table></figure>
+
+<h4 id="real-image"><a href="#real-image" class="headerlink" title="real image"></a>real image</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">realPath = <span class="string">&#x27;./samples/real_images.png&#x27;</span></span><br><span class="line">realImage = mpimg.imread(realPath)</span><br><span class="line">plt.imshow(realImage) <span class="comment"># 显示图片</span></span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>) <span class="comment"># 不显示坐标轴</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511081/blog/vwky6wrdcwfbmlbzmixy.png" alt="png"></p>
+<h4 id="fake-image-进化过程"><a href="#fake-image-进化过程" class="headerlink" title="fake image 进化过程"></a>fake image 进化过程</h4><p>下图分别为第1,5,195,200轮训练生成的结果。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 起始阶段</span></span><br><span class="line">fakePath1 = <span class="string">&#x27;./samples/fake_images-1.png&#x27;</span></span><br><span class="line">fakeImg1 = mpimg.imread(fakePath1)</span><br><span class="line"></span><br><span class="line">fakePath5 = <span class="string">&#x27;./samples/fake_images-5.png&#x27;</span></span><br><span class="line">fakeImg5 = mpimg.imread(fakePath5)</span><br><span class="line"></span><br><span class="line">plt.figure()</span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span> ) <span class="comment"># 显示图片</span></span><br><span class="line">plt.imshow(fakeImg1) <span class="comment"># 显示图片</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span> ) <span class="comment"># 显示图片</span></span><br><span class="line">plt.imshow(fakeImg5) <span class="comment"># 显示图片</span></span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>) <span class="comment"># 不显示坐标轴</span></span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line">fakePath195 = <span class="string">&#x27;./samples/fake_images-195.png&#x27;</span></span><br><span class="line">fakeImg195 = mpimg.imread(fakePath195)</span><br><span class="line"></span><br><span class="line">fakePath200 = <span class="string">&#x27;./samples/fake_images-200.png&#x27;</span></span><br><span class="line">fakeImg200 = mpimg.imread(fakePath200)</span><br><span class="line"></span><br><span class="line">plt.figure()</span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span> ) <span class="comment"># 显示图片</span></span><br><span class="line">plt.imshow(fakeImg195) <span class="comment"># 显示图片</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span> ) <span class="comment"># 显示图片</span></span><br><span class="line">plt.imshow(fakeImg200) <span class="comment"># 显示图片</span></span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>) <span class="comment"># 不显示坐标轴</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511082/blog/jafyda6w0tr01dbx1du8.png" alt="png"></p>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678511082/blog/pzrrtuix2vtqw3a1bq7i.png" alt="png"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>xiaohai
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://shenxiaohai.me/pytorch-tutorial-advanced-01/" title="PyTorch 高级篇（1）：生成对抗网络（Generative Adversarial Networks）">https://shenxiaohai.me/pytorch-tutorial-advanced-01/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/PyTorch/" rel="tag"><i class="fa fa-tag"></i> PyTorch</a>
+              <a href="/tags/%E7%94%9F%E6%88%90%E5%AF%B9%E6%8A%97%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 生成对抗网络</a>
+              <a href="/tags/GAN/" rel="tag"><i class="fa fa-tag"></i> GAN</a>
+              <a href="/tags/%E5%88%A4%E5%88%AB%E6%A8%A1%E5%9E%8B/" rel="tag"><i class="fa fa-tag"></i> 判别模型</a>
+              <a href="/tags/%E7%94%9F%E6%88%90%E6%A8%A1%E5%9E%8B/" rel="tag"><i class="fa fa-tag"></i> 生成模型</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/pytorch-tutorial-intermediate-05/" rel="prev" title="PyTorch 中级篇（5）：语言模型（Language Model (RNN-LM)）">
+                  <i class="fa fa-chevron-left"></i> PyTorch 中级篇（5）：语言模型（Language Model (RNN-LM)）
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/pytorch-tutorial-advanced-02/" rel="next" title="PyTorch 高级篇（2）：变分自编码器（Variational Auto-Encoder）">
+                  PyTorch 高级篇（2）：变分自编码器（Variational Auto-Encoder） <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments"><div id="twikoo-comments"></div></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-laptop"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohai</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/veraposeidon" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quicklink/2.3.0/quicklink.umd.js" integrity="sha256-yvJQOINiH9fWemHn0vCA5lsHWJaHs6/ZmO+1Ft04SvM=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://shenxiaohai.me/pytorch-tutorial-advanced-01/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="twikoo" type="application/json">{"enable":true,"visitor":false,"envId":"https://twikoo-comment.shenxiaohai.me/","el":"#twikoo-comments"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.twikoo.el)
+    .then(() => NexT.utils.getScript(
+      CONFIG.twikoo.jsUrl || 'https://cdn.jsdelivr.net/npm/twikoo/dist/twikoo.all.min.js',
+      { condition: window.twikoo }
+    ))
+    .then(() => {
+      twikoo.init(CONFIG.twikoo);
+    });
+});
+</script>
+<style>
+.post-block, .comments {
+  overflow: visible;
+}
+.tk-owo-emotion {
+  display: inline-block;
+}
+</style>
+
+</body>
+</html>

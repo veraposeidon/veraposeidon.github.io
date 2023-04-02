@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.webp" color="#222">
+  <meta name="google-site-verification" content="Cj9oDgXxdJe6MoA_lEUQ2rmOouwJeTm5uJNqjhOv8Ng">
+  <meta name="msvalidate.01" content="E5D0AA8F5E012DFD9C5F3954DF8283B1">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,700,700italic%7CNoto+Serif+SC:300,300italic,400,400italic,700,700italic%7CSource+Code+Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shenxiaohai.me","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"twikoo","storage":true,"lazyload":false,"nav":null,"activeClass":"twikoo"},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="用Pytorch在CIFAR-10数据集上测试，定义简单两层卷积、实现可视化和用自取图像测试。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch在CIFAR-10数据集上的训练及测试过程">
+<meta property="og:url" content="https://shenxiaohai.me/cifar10-pytorch/index.html">
+<meta property="og:site_name" content="SHEN&#39;s DevNotes">
+<meta property="og:description" content="用Pytorch在CIFAR-10数据集上测试，定义简单两层卷积、实现可视化和用自取图像测试。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509781/blog/r9l6gz1f65bnnvegpe4z.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509782/blog/s6fqgs02cqsqzlo4t8pa.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509782/blog/tldnz1v6oxkxp9loagc9.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509783/blog/gzyh4ao0whu6pqnxuoix.png">
+<meta property="article:published_time" content="2018-11-29T13:43:38.000Z">
+<meta property="article:modified_time" content="2023-03-11T05:02:28.499Z">
+<meta property="article:author" content="xiaohai">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="CIFAR-10">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509781/blog/r9l6gz1f65bnnvegpe4z.png">
+
+
+<link rel="canonical" href="https://shenxiaohai.me/cifar10-pytorch/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shenxiaohai.me/cifar10-pytorch/","path":"cifar10-pytorch/","title":"PyTorch在CIFAR-10数据集上的训练及测试过程"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PyTorch在CIFAR-10数据集上的训练及测试过程 | SHEN's DevNotes</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YDT7F4NZP6"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-YDT7F4NZP6","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="SHEN's DevNotes" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">SHEN's DevNotes</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记，编程技巧，效率工具</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">131</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">18</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">74</span></a></li><li class="menu-item menu-item-碎碎念-|-memos"><a href="https://memos.shenxiaohai.me/" rel="section" target="_blank"><i class="fa fa-file-pen fa-fw"></i>碎碎念 | Memos</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PyTorch%E5%9C%A8CIFAR-10%E6%95%B0%E6%8D%AE%E9%9B%86%E4%B8%8A%E7%9A%84%E8%AE%AD%E7%BB%83%E5%8F%8A%E6%B5%8B%E8%AF%95%E8%BF%87%E7%A8%8B"><span class="nav-text">PyTorch在CIFAR-10数据集上的训练及测试过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A0%E8%BD%BDCIFAR-10%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-text">加载CIFAR-10数据集</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E8%AE%BE%E8%AE%A1%E5%92%8C%E8%AE%AD%E7%BB%83%EF%BC%9A%E8%87%AA%E5%AE%9A%E4%B9%89%E5%8D%B7%E7%A7%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C"><span class="nav-text">网络模型设计和训练：自定义卷积神经网络</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E6%B5%8B%E8%AF%95%E5%92%8C%E4%BF%9D%E5%AD%98"><span class="nav-text">模型测试和保存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%AF%E8%A7%86%E5%8C%96%E6%B5%8B%E8%AF%95%EF%BC%88%E6%95%B0%E6%8D%AE%E9%9B%86%E5%9B%BE%E5%83%8F%E5%92%8C%E5%85%B6%E4%BB%96%E5%9B%BE%E5%83%8F%E6%B5%8B%E8%AF%95%EF%BC%89"><span class="nav-text">可视化测试（数据集图像和其他图像测试）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%96%E6%B5%8B%E8%AF%95%E9%9B%86%E5%9B%BE%E5%83%8F%E6%B5%8B%E8%AF%95"><span class="nav-text">取测试集图像测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%94%BE%E5%85%A5%E6%A8%A1%E5%9E%8B%E8%BF%9B%E8%A1%8C%E6%B5%8B%E8%AF%95"><span class="nav-text">放入模型进行测试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%BB%E5%85%A5%E4%B8%80%E5%BC%A0%E8%87%AA%E5%B7%B1%E5%9B%BE%E5%83%8F%E8%BF%9B%E8%A1%8C%E6%B5%8B%E8%AF%95"><span class="nav-text">读入一张自己图像进行测试</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xiaohai</p>
+  <div class="site-description" itemprop="description">我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/veraposeidon" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;veraposeidon" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/HiYoake" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;HiYoake" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shenxiaohai.me/cifar10-pytorch/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xiaohai">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SHEN's DevNotes">
+      <meta itemprop="description" content="我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PyTorch在CIFAR-10数据集上的训练及测试过程 | SHEN's DevNotes">
+      <meta itemprop="description" content="用Pytorch在CIFAR-10数据集上测试，定义简单两层卷积、实现可视化和用自取图像测试。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PyTorch在CIFAR-10数据集上的训练及测试过程
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-11-29 13:43:38" itemprop="dateCreated datePublished" datetime="2018-11-29T13:43:38Z">2018-11-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-11 05:02:28" itemprop="dateModified" datetime="2023-03-11T05:02:28Z">2023-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">深度学习框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">用Pytorch在CIFAR-10数据集上测试，定义简单两层卷积、实现可视化和用自取图像测试。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="PyTorch在CIFAR-10数据集上的训练及测试过程"><a href="#PyTorch在CIFAR-10数据集上的训练及测试过程" class="headerlink" title="PyTorch在CIFAR-10数据集上的训练及测试过程"></a>PyTorch在CIFAR-10数据集上的训练及测试过程</h1><p>package Version</p>
+<ul>
+<li>python 3.6.5</li>
+<li>pytorch 0.4.1</li>
+</ul>
+<p>其他相关：</p>
+<p><a target="_blank" rel="noopener" href="https://www.cs.toronto.edu/~kriz/cifar.html">CIFAR-10数据集</a></p>
+<p><a target="_blank" rel="noopener" href="https://blog.csdn.net/u011636567/article/details/72821455">PyTorch读取Cifar数据集并显示图片</a></p>
+<p><a target="_blank" rel="noopener" href="https://www.cnblogs.com/hejunlin1992/p/7624807.html">卷积神经网络中的参数计算</a></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 导入包</span></span><br><span class="line"><span class="comment"># basic</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt <span class="comment"># plt 用于显示图片</span></span><br><span class="line"><span class="keyword">import</span> matplotlib.image <span class="keyword">as</span> mpimg <span class="comment"># mpimg 用于读取图片</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"></span><br><span class="line"><span class="comment">#resize功能</span></span><br><span class="line"><span class="keyword">from</span> scipy <span class="keyword">import</span> misc</span><br><span class="line"></span><br><span class="line"><span class="comment"># pytorch</span></span><br><span class="line"><span class="keyword">import</span> torch </span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torchvision</span><br><span class="line"><span class="keyword">import</span> torchvision.transforms <span class="keyword">as</span> transforms</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设备设置</span></span><br><span class="line">torch.cuda.set_device(<span class="number">1</span>) <span class="comment"># 这句用来设置pytorch在哪块GPU上运行，pytorch-cpu版本不需要运行这句</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 超参数设置</span></span><br><span class="line">num_epochs = <span class="number">5</span></span><br><span class="line">num_classes = <span class="number">10</span></span><br><span class="line">batch_size = <span class="number">32</span></span><br><span class="line">learning_rate = <span class="number">0.001</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="加载CIFAR-10数据集"><a href="#加载CIFAR-10数据集" class="headerlink" title="加载CIFAR-10数据集"></a>加载CIFAR-10数据集</h2><ul>
+<li>加载数据集</li>
+<li>数据增广</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cifar10 分类索引</span></span><br><span class="line">classes = (<span class="string">&#x27;plane&#x27;</span>, <span class="string">&#x27;car&#x27;</span>, <span class="string">&#x27;bird&#x27;</span>, <span class="string">&#x27;cat&#x27;</span>,</span><br><span class="line">           <span class="string">&#x27;deer&#x27;</span>, <span class="string">&#x27;dog&#x27;</span>, <span class="string">&#x27;frog&#x27;</span>, <span class="string">&#x27;horse&#x27;</span>, <span class="string">&#x27;ship&#x27;</span>, <span class="string">&#x27;truck&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 数据增广方法</span></span><br><span class="line">transform = transforms.Compose([</span><br><span class="line">    <span class="comment"># +4填充至36x36</span></span><br><span class="line">    transforms.Pad(<span class="number">4</span>),</span><br><span class="line">    <span class="comment"># 随机水平翻转</span></span><br><span class="line">    transforms.RandomHorizontalFlip(), </span><br><span class="line">    <span class="comment"># 随机裁剪至32x32</span></span><br><span class="line">    transforms.RandomCrop(<span class="number">32</span>), </span><br><span class="line">    <span class="comment"># 转换至Tensor</span></span><br><span class="line">    transforms.ToTensor(),</span><br><span class="line">    <span class="comment">#  归一化</span></span><br><span class="line"><span class="comment">#     transforms.Normalize(mean=(0.5, 0.5, 0.5),   # 3 for RGB channels</span></span><br><span class="line"><span class="comment">#                                      std=(0.5, 0.5, 0.5))</span></span><br><span class="line">    ])</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># cifar10路径</span></span><br><span class="line">cifar10Path = <span class="string">&#x27;./cifar&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">#  训练数据集</span></span><br><span class="line">train_dataset = torchvision.datasets.CIFAR10(root=cifar10Path,</span><br><span class="line">                                             train=<span class="literal">True</span>, </span><br><span class="line">                                             transform=transform,</span><br><span class="line">                                             download=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试数据集</span></span><br><span class="line">test_dataset = torchvision.datasets.CIFAR10(root=cifar10Path,</span><br><span class="line">                                            train=<span class="literal">False</span>, </span><br><span class="line">                                            transform=transform)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 生成数据加载器</span></span><br><span class="line"><span class="comment"># 训练数据加载器</span></span><br><span class="line">train_loader = torch.utils.data.DataLoader(dataset=train_dataset,</span><br><span class="line">                                           batch_size=batch_size, </span><br><span class="line">                                           shuffle=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># 测试数据加载器</span></span><br><span class="line">test_loader = torch.utils.data.DataLoader(dataset=test_dataset,</span><br><span class="line">                                          batch_size=batch_size, </span><br><span class="line">                                          shuffle=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<pre><code>Files already downloaded and verified
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看数据,取一组batch</span></span><br><span class="line">data_iter = <span class="built_in">iter</span>(test_loader)</span><br><span class="line"></span><br><span class="line">images, labels = <span class="built_in">next</span>(data_iter)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取batch中的一张图像</span></span><br><span class="line">idx = <span class="number">15</span></span><br><span class="line">image = images[idx].numpy()</span><br><span class="line">image = np.transpose(image, (<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>))</span><br><span class="line">plt.imshow(image)</span><br><span class="line">classes[labels[idx].numpy()]</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>&#39;ship&#39;
+</code></pre>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509781/blog/r9l6gz1f65bnnvegpe4z.png" alt="png"></p>
+<h2 id="网络模型设计和训练：自定义卷积神经网络"><a href="#网络模型设计和训练：自定义卷积神经网络" class="headerlink" title="网络模型设计和训练：自定义卷积神经网络"></a>网络模型设计和训练：自定义卷积神经网络</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 搭建卷积神经网络模型</span></span><br><span class="line"><span class="comment"># 两个卷积层</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ConvNet</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, num_classes=<span class="number">10</span></span>):</span><br><span class="line">        <span class="built_in">super</span>(ConvNet, self).__init__()</span><br><span class="line">        self.conv1 = nn.Sequential(</span><br><span class="line">            <span class="comment"># 卷积层计算</span></span><br><span class="line">            nn.Conv2d(<span class="number">3</span>, <span class="number">16</span>, kernel_size=<span class="number">5</span>, stride=<span class="number">1</span>, padding=<span class="number">2</span>),</span><br><span class="line">            <span class="comment">#  批归一化</span></span><br><span class="line">            nn.BatchNorm2d(<span class="number">16</span>),</span><br><span class="line">            <span class="comment">#ReLU激活函数</span></span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            <span class="comment"># 池化层：最大池化</span></span><br><span class="line">            nn.MaxPool2d(kernel_size=<span class="number">2</span>, stride=<span class="number">2</span>))</span><br><span class="line">        </span><br><span class="line">        self.conv2 = nn.Sequential(</span><br><span class="line">            nn.Conv2d(<span class="number">16</span>, <span class="number">32</span>, kernel_size=<span class="number">5</span>, stride=<span class="number">1</span>, padding=<span class="number">2</span>),</span><br><span class="line">            nn.BatchNorm2d(<span class="number">32</span>),</span><br><span class="line">            nn.ReLU(),</span><br><span class="line">            nn.MaxPool2d(kernel_size=<span class="number">2</span>, stride=<span class="number">2</span>))</span><br><span class="line">        </span><br><span class="line">        self.fc = nn.Linear(<span class="number">8</span>*<span class="number">8</span>*<span class="number">32</span>, num_classes)</span><br><span class="line">        </span><br><span class="line">    <span class="comment"># 定义前向传播顺序</span></span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        out = self.conv1(x)</span><br><span class="line">        out = self.conv2(out)</span><br><span class="line">        out = out.reshape(out.size(<span class="number">0</span>), -<span class="number">1</span>)</span><br><span class="line">        out = self.fc(out)</span><br><span class="line">        <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实例化一个模型，并迁移至gpu</span></span><br><span class="line">model = ConvNet(num_classes).to(device)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 定义损失函数和优化器</span></span><br><span class="line">criterion = nn.CrossEntropyLoss()</span><br><span class="line">optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">total_step = <span class="built_in">len</span>(train_loader)</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">    <span class="keyword">for</span> i, (images, labels) <span class="keyword">in</span> <span class="built_in">enumerate</span>(train_loader):</span><br><span class="line">        <span class="comment"># 注意模型在GPU中，数据也要搬到GPU中</span></span><br><span class="line">        images = images.to(device)</span><br><span class="line">        labels = labels.to(device)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 前向传播</span></span><br><span class="line">        outputs = model(images)</span><br><span class="line">        loss = criterion(outputs, labels)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 反向传播和优化</span></span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (i+<span class="number">1</span>) % <span class="number">100</span> == <span class="number">0</span>:</span><br><span class="line">            <span class="built_in">print</span> (<span class="string">&#x27;Epoch [&#123;&#125;/&#123;&#125;], Step [&#123;&#125;/&#123;&#125;], Loss: &#123;:.4f&#125;&#x27;</span> </span><br><span class="line">                   .<span class="built_in">format</span>(epoch+<span class="number">1</span>, num_epochs, i+<span class="number">1</span>, total_step, loss.item()))</span><br></pre></td></tr></table></figure>
+
+<pre><code>Epoch [1/5], Step [100/1563], Loss: 1.9562
+Epoch [1/5], Step [200/1563], Loss: 1.6313
+Epoch [1/5], Step [300/1563], Loss: 1.6405
+Epoch [1/5], Step [400/1563], Loss: 1.7303
+Epoch [1/5], Step [500/1563], Loss: 1.4697
+Epoch [1/5], Step [600/1563], Loss: 1.5183
+Epoch [1/5], Step [700/1563], Loss: 1.3547
+
+...
+
+Epoch [5/5], Step [600/1563], Loss: 1.1019
+Epoch [5/5], Step [700/1563], Loss: 0.8237
+Epoch [5/5], Step [800/1563], Loss: 0.8497
+Epoch [5/5], Step [900/1563], Loss: 0.7738
+Epoch [5/5], Step [1000/1563], Loss: 0.7937
+Epoch [5/5], Step [1100/1563], Loss: 1.1982
+Epoch [5/5], Step [1200/1563], Loss: 1.1113
+Epoch [5/5], Step [1300/1563], Loss: 0.9233
+Epoch [5/5], Step [1400/1563], Loss: 1.3893
+Epoch [5/5], Step [1500/1563], Loss: 0.9238
+</code></pre>
+<h2 id="模型测试和保存"><a href="#模型测试和保存" class="headerlink" title="模型测试和保存"></a>模型测试和保存</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置为评估模式</span></span><br><span class="line">model.<span class="built_in">eval</span>()</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>ConvNet(
+  (conv1): Sequential(
+    (0): Conv2d(3, 16, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (conv2): Sequential(
+    (0): Conv2d(16, 32, kernel_size=(5, 5), stride=(1, 1), padding=(2, 2))
+    (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    (2): ReLU()
+    (3): MaxPool2d(kernel_size=2, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (fc): Linear(in_features=2048, out_features=10, bias=True)
+)
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 节省计算资源，不去计算梯度</span></span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    correct = <span class="number">0</span></span><br><span class="line">    total = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> images, labels <span class="keyword">in</span> test_loader:</span><br><span class="line">        images = images.to(device)</span><br><span class="line">        labels = labels.to(device)</span><br><span class="line">        outputs = model(images)</span><br><span class="line">        _, predicted = torch.<span class="built_in">max</span>(outputs.data, <span class="number">1</span>)</span><br><span class="line">        total += labels.size(<span class="number">0</span>)</span><br><span class="line">        correct += (predicted == labels).<span class="built_in">sum</span>().item()</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;Test Accuracy of the model on the test images: &#123;&#125; %&#x27;</span>.<span class="built_in">format</span>(<span class="number">100</span> * correct / total))</span><br></pre></td></tr></table></figure>
+
+<pre><code>Test Accuracy of the model on the test images: 59.35 %
+</code></pre>
+<p>准确率是低了点，因为模型太简单了。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#  保存模型</span></span><br><span class="line">torch.save(model.state_dict(), <span class="string">&#x27;model.ckpt&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="可视化测试（数据集图像和其他图像测试）"><a href="#可视化测试（数据集图像和其他图像测试）" class="headerlink" title="可视化测试（数据集图像和其他图像测试）"></a>可视化测试（数据集图像和其他图像测试）</h2><h3 id="取测试集图像测试"><a href="#取测试集图像测试" class="headerlink" title="取测试集图像测试"></a>取测试集图像测试</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 查看数据,取一组batch</span></span><br><span class="line">data_iter = <span class="built_in">iter</span>(test_loader)</span><br><span class="line">images, labels = <span class="built_in">next</span>(data_iter)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 取batch中的一张图像，显示图像和真实标签</span></span><br><span class="line">idx = <span class="number">10</span></span><br><span class="line">image = images[idx].numpy()</span><br><span class="line">image = np.transpose(image, (<span class="number">1</span>,<span class="number">2</span>,<span class="number">0</span>))</span><br><span class="line">plt.imshow(image)</span><br><span class="line">classes[labels[idx].numpy()]</span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>&#39;plane&#39;
+</code></pre>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509782/blog/s6fqgs02cqsqzlo4t8pa.png" alt="png"></p>
+<h3 id="放入模型进行测试"><a href="#放入模型进行测试" class="headerlink" title="放入模型进行测试"></a>放入模型进行测试</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 转换为（B,C,H,W）大小</span></span><br><span class="line">imagebatch = image.reshape(-<span class="number">1</span>,<span class="number">3</span>,<span class="number">32</span>,<span class="number">32</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为torch tensor</span></span><br><span class="line">image_tensor = torch.from_numpy(imagebatch)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 调用模型进行评估</span></span><br><span class="line">model.<span class="built_in">eval</span>() </span><br><span class="line">output = model(image_tensor.to(device))</span><br><span class="line">_, predicted = torch.<span class="built_in">max</span>(output.data, <span class="number">1</span>)</span><br><span class="line">pre = predicted.cpu().numpy()</span><br><span class="line"><span class="built_in">print</span>(pre) <span class="comment"># 查看预测结果ID</span></span><br><span class="line"><span class="built_in">print</span>(classes[pre[<span class="number">0</span>]])</span><br></pre></td></tr></table></figure>
+
+<pre><code>[0]
+plane
+</code></pre>
+<p>注意，准确率还很低，预测出错没事情。后面改善网络结构就好了。</p>
+<h3 id="读入一张自己图像进行测试"><a href="#读入一张自己图像进行测试" class="headerlink" title="读入一张自己图像进行测试"></a>读入一张自己图像进行测试</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 读取图像</span></span><br><span class="line">srcPath = <span class="string">&#x27;horse.jpg&#x27;</span></span><br><span class="line">src = mpimg.imread(srcPath)<span class="comment"># 读取和代码处于同一目录下的 图片</span></span><br><span class="line"><span class="comment"># 此时 lena 就已经是一个 np.array 了，可以对它进行任意处理</span></span><br><span class="line"><span class="comment"># 原图大小</span></span><br><span class="line"><span class="built_in">print</span>(src.shape) </span><br><span class="line"></span><br><span class="line">plt.imshow(src) <span class="comment"># 显示图片</span></span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>) <span class="comment"># 不显示坐标轴</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>(193, 260, 3)
+</code></pre>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509782/blog/tldnz1v6oxkxp9loagc9.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># resize至32x32</span></span><br><span class="line">newImg = misc.imresize(src,(<span class="number">32</span>,<span class="number">32</span>))</span><br><span class="line">plt.imshow(newImg) <span class="comment"># 显示图片</span></span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>) <span class="comment"># 不显示坐标轴</span></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<pre><code>/home/ubuntu/anaconda3/lib/python3.6/site-packages/ipykernel_launcher.py:2: DeprecationWarning: `imresize` is deprecated!
+`imresize` is deprecated in SciPy 1.0.0, and will be removed in 1.2.0.
+Use ``skimage.transform.resize`` instead.
+  
+</code></pre>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509783/blog/gzyh4ao0whu6pqnxuoix.png" alt="png"></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 转换为（B,C,H,W）大小</span></span><br><span class="line">imagebatch = newImg.reshape(-<span class="number">1</span>,<span class="number">3</span>,<span class="number">32</span>,<span class="number">32</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 转换为torch tensor</span></span><br><span class="line">image_tensor = torch.from_numpy(imagebatch).<span class="built_in">float</span>()</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 调用模型进行评估</span></span><br><span class="line">model.<span class="built_in">eval</span>() </span><br><span class="line">output = model(image_tensor.to(device))</span><br><span class="line">_, predicted = torch.<span class="built_in">max</span>(output.data, <span class="number">1</span>)</span><br><span class="line">pre = predicted.cpu().numpy()</span><br><span class="line"><span class="built_in">print</span>(pre) <span class="comment"># 查看预测结果ID</span></span><br><span class="line"><span class="built_in">print</span>(classes[pre[<span class="number">0</span>]])</span><br></pre></td></tr></table></figure>
+
+<pre><code>[1]
+car
+</code></pre>
+<p>还是预测出错，但是过程就是这么个过程。后续可以通过改善模型来提高准确率。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>xiaohai
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://shenxiaohai.me/cifar10-pytorch/" title="PyTorch在CIFAR-10数据集上的训练及测试过程">https://shenxiaohai.me/cifar10-pytorch/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/PyTorch/" rel="tag"><i class="fa fa-tag"></i> PyTorch</a>
+              <a href="/tags/CIFAR-10/" rel="tag"><i class="fa fa-tag"></i> CIFAR-10</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/paper-SSD/" rel="prev" title="SSD 论文阅读笔记">
+                  <i class="fa fa-chevron-left"></i> SSD 论文阅读笔记
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/gpu-server-lab/" rel="next" title="搭建实验室公共GPU服务器">
+                  搭建实验室公共GPU服务器 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments"><div id="twikoo-comments"></div></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-laptop"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohai</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/veraposeidon" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quicklink/2.3.0/quicklink.umd.js" integrity="sha256-yvJQOINiH9fWemHn0vCA5lsHWJaHs6/ZmO+1Ft04SvM=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://shenxiaohai.me/cifar10-pytorch/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="twikoo" type="application/json">{"enable":true,"visitor":false,"envId":"https://twikoo-comment.shenxiaohai.me/","el":"#twikoo-comments"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.twikoo.el)
+    .then(() => NexT.utils.getScript(
+      CONFIG.twikoo.jsUrl || 'https://cdn.jsdelivr.net/npm/twikoo/dist/twikoo.all.min.js',
+      { condition: window.twikoo }
+    ))
+    .then(() => {
+      twikoo.init(CONFIG.twikoo);
+    });
+});
+</script>
+<style>
+.post-block, .comments {
+  overflow: visible;
+}
+.tk-owo-emotion {
+  display: inline-block;
+}
+</style>
+
+</body>
+</html>

@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.webp" color="#222">
+  <meta name="google-site-verification" content="Cj9oDgXxdJe6MoA_lEUQ2rmOouwJeTm5uJNqjhOv8Ng">
+  <meta name="msvalidate.01" content="E5D0AA8F5E012DFD9C5F3954DF8283B1">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,700,700italic%7CNoto+Serif+SC:300,300italic,400,400italic,700,700italic%7CSource+Code+Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shenxiaohai.me","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"twikoo","storage":true,"lazyload":false,"nav":null,"activeClass":"twikoo"},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="用于将LabelMe标注好的数据转换为VOC格式和COCO格式的数据集。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="labelme2Datasets">
+<meta property="og:url" content="https://shenxiaohai.me/labelme2Datasets/index.html">
+<meta property="og:site_name" content="SHEN&#39;s DevNotes">
+<meta property="og:description" content="用于将LabelMe标注好的数据转换为VOC格式和COCO格式的数据集。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://raw.githubusercontent.com/veraposeidon/labelme2Datasets/main/images/logo.png">
+<meta property="article:published_time" content="2019-12-09T10:59:21.000Z">
+<meta property="article:modified_time" content="2023-03-11T05:04:43.315Z">
+<meta property="article:author" content="xiaohai">
+<meta property="article:tag" content="工具">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="labelme">
+<meta property="article:tag" content="PASCAL-VOC">
+<meta property="article:tag" content="MS_COCO">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/veraposeidon/labelme2Datasets/main/images/logo.png">
+
+
+<link rel="canonical" href="https://shenxiaohai.me/labelme2Datasets/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shenxiaohai.me/labelme2Datasets/","path":"labelme2Datasets/","title":"labelme2Datasets"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>labelme2Datasets | SHEN's DevNotes</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YDT7F4NZP6"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-YDT7F4NZP6","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="SHEN's DevNotes" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">SHEN's DevNotes</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记，编程技巧，效率工具</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">131</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">18</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">74</span></a></li><li class="menu-item menu-item-碎碎念-|-memos"><a href="https://memos.shenxiaohai.me/" rel="section" target="_blank"><i class="fa fa-file-pen fa-fw"></i>碎碎念 | Memos</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BD%AC%E6%8D%A2%E8%84%9A%E6%9C%AC%EF%BC%88%E5%B7%A5%E5%85%B7%E5%90%91%EF%BC%89"><span class="nav-text">数据集转换脚本（工具向）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%AE%80%E4%BB%8B"><span class="nav-text">简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%A0%87%E6%B3%A8%E5%B7%A5%E5%85%B7%E5%92%8C%E5%B8%B8%E8%A7%81%E7%9A%84%E4%B8%A4%E7%A7%8D%E6%95%B0%E6%8D%AE%E9%9B%86%E6%A0%BC%E5%BC%8F"><span class="nav-text">标注工具和常见的两种数据集格式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BB%93%E5%BA%93%E4%B8%AD%E7%9A%84%E4%BB%A3%E7%A0%81%E6%96%87%E4%BB%B6"><span class="nav-text">仓库中的代码文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%8B%93%E5%B1%95"><span class="nav-text">拓展</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%B5%81%E7%A8%8B"><span class="nav-text">使用流程</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E4%B8%80%EF%BC%9A%E4%BD%BF%E7%94%A8Labelme%E6%A0%87%E6%B3%A8%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-text">步骤一：使用Labelme标注数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E4%BA%8C%EF%BC%9A%E8%BD%AC%E6%8D%A2%E4%B8%BAVOC%E9%A3%8E%E6%A0%BC%E7%9A%84%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-text">步骤二：转换为VOC风格的数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E4%B8%89%EF%BC%9A%E5%88%86%E5%89%B2%E8%AE%AD%E7%BB%83%E9%9B%86%E5%92%8C%E6%B5%8B%E8%AF%95%E9%9B%86"><span class="nav-text">步骤三：分割训练集和测试集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A5%E9%AA%A4%E5%9B%9B%EF%BC%9A%E5%B0%86VOC%E6%95%B0%E6%8D%AE%E9%9B%86%E8%BD%AC%E6%8D%A2%E4%B8%BACOCO%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-text">步骤四：将VOC数据集转换为COCO数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E9%80%89%E6%AD%A5%E9%AA%A4%EF%BC%9ALabelme%E6%96%87%E4%BB%B6%E8%BD%AC%E6%8D%A2%E4%B8%BA%E8%AF%AD%E4%B9%89%E5%88%86%E5%89%B2%E6%A0%87%E6%B3%A8%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-text">自选步骤：Labelme文件转换为语义分割标注数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%87%AA%E9%80%89%E6%AD%A5%E9%AA%A4%EF%BC%9A%E7%BB%9F%E8%AE%A1VOC%E6%95%B0%E6%8D%AE%E9%9B%86%EF%BC%8C%E5%B9%B6%E8%BF%9B%E8%A1%8C%E7%AE%80%E5%8D%95%E8%BF%87%E9%87%87%E6%A0%B7%E5%A4%84%E7%90%86"><span class="nav-text">自选步骤：统计VOC数据集，并进行简单过采样处理</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xiaohai</p>
+  <div class="site-description" itemprop="description">我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/veraposeidon" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;veraposeidon" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/HiYoake" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;HiYoake" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shenxiaohai.me/labelme2Datasets/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xiaohai">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SHEN's DevNotes">
+      <meta itemprop="description" content="我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="labelme2Datasets | SHEN's DevNotes">
+      <meta itemprop="description" content="用于将LabelMe标注好的数据转换为VOC格式和COCO格式的数据集。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          labelme2Datasets
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2019-12-09 10:59:21" itemprop="dateCreated datePublished" datetime="2019-12-09T10:59:21Z">2019-12-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-11 05:04:43" itemprop="dateModified" datetime="2023-03-11T05:04:43Z">2023-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/" itemprop="url" rel="index"><span itemprop="name">计算机视觉</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">用于将LabelMe标注好的数据转换为VOC格式和COCO格式的数据集。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>自己的写的一组转换脚本。偷懒，直接将README拷贝过来了。</p>
+<p>代码地址：<a target="_blank" rel="noopener" href="https://github.com/veraposeidon/labelme2Datasets">labelme2Datasets</a></p>
+<p><img data-src="https://raw.githubusercontent.com/veraposeidon/labelme2Datasets/main/images/logo.png" alt="LOGO"> </p>
+<h1 id="数据集转换脚本（工具向）"><a href="#数据集转换脚本（工具向）" class="headerlink" title="数据集转换脚本（工具向）"></a>数据集转换脚本（工具向）</h1><p><strong>News:</strong> 最近开始论文实验，需要重新整理一下数据集，顺便整理一下这个代码仓库。</p>
+<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>仓库中的脚本用于将Labelme标注的数据转换为PASCAL VOC格式或MS COCO格式的标准数据集，便于直接利用现有的训练框架进行训练。</p>
+<h2 id="标注工具和常见的两种数据集格式"><a href="#标注工具和常见的两种数据集格式" class="headerlink" title="标注工具和常见的两种数据集格式"></a>标注工具和常见的两种数据集格式</h2><p>Labelme是我用的标注工具，对图像进行多种类型的标注，可以直接得到<code>json</code>文件。GitHub地址如下：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/wkentaro/labelme">labelme: Image Polygonal Annotation with Python</a></p>
+<p>PASCAL-VOC和MS-COCO是两个大型的开源数据集，其数据集的标注形式成为了通用的标注方式，常见的视觉模型的训练框架都支持这两种格式的读取，将自己的数据集转换为这两种标注方式，可以避免修改读取数据的代码。</p>
+<p>两种数据集和标注格式的介绍：</p>
+<p><a target="_blank" rel="noopener" href="https://arleyzhang.github.io/articles/1dc20586/">目标检测数据集PASCAL VOC简介</a></p>
+<p><a target="_blank" rel="noopener" href="https://arleyzhang.github.io/articles/e5b86f16/">目标检测数据集MSCOCO简介</a></p>
+<h2 id="仓库中的代码文件"><a href="#仓库中的代码文件" class="headerlink" title="仓库中的代码文件"></a>仓库中的代码文件</h2><ul>
+<li><p><code>labelme_json_to_dataset.py</code>：演示如何将单个labelme标注的json文件转换为单张图像的数据集。</p>
+<p><strong>用法</strong>  <code>python labelme_json_to_dataset.py [-h] [-o OUT] json_file</code></p>
+<p><strong>举例</strong>  <code>python labelme_json_to_dataset.py test/test_single.json -o test/test_single</code></p>
+</li>
+<li><p><code>bbox_labelme2voc.py</code>：批量处理labelme标注的json文件，转换成VOC格式的数据集。</p>
+</li>
+<li><p><code>split_dataset.py</code>：将VOC数据集中的样本按照比例，分割成训练集和测试集。</p>
+</li>
+<li><p><code>voc_xml2coco_json.py</code>：将VOC数据集转换为COCO数据集。</p>
+</li>
+<li><p><code>segmentation_labelme2voc.py</code>：将labelme标注的json文件转换为VOC文件下下的语义分割标注文件。三种类型，<code>.npy</code>，<code>.png</code>和可视化图像。</p>
+</li>
+<li><p><code>voc_category_statics_and_smiple_oversampling.py</code>：统计VOC数据集的标注数目，并进行简单的过采样处理。<strong>过采样的方法有点简单的，可以用一些过采样算法替代。</strong></p>
+</li>
+<li><p><code>utils.py</code>: 内置一些简单的转换函数。</p>
+</li>
+</ul>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><p><a target="_blank" rel="noopener" href="https://github.com/wkentaro/labelme">labelme</a>: </p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># python3</span></span><br><span class="line">conda create --name=labelme python=3.6</span><br><span class="line">conda activate labelme</span><br><span class="line">conda install labelme</span><br></pre></td></tr></table></figure>
+
+<p>其他工具：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">conda install progressbar2    <span class="comment"># 进度条</span></span><br><span class="line">conda install scikit-learn  <span class="comment"># 用于分割数据集 </span></span><br><span class="line">conda install xmltodict	</span><br><span class="line">conda install lxml</span><br></pre></td></tr></table></figure>
+
+<h2 id="拓展"><a href="#拓展" class="headerlink" title="拓展"></a>拓展</h2><p>仓库中的脚本只针对目前本人已有数据的转换，如果有实例分割、语义分割或视频标注等数据，可以参考labelme提供的示例代码进行修改，示例代码演示了这类标注文件如何转换成VOC格式数据集：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/wkentaro/labelme/tree/master/examples">https://github.com/wkentaro/labelme/tree/master/examples</a></p>
+<h2 id="使用流程"><a href="#使用流程" class="headerlink" title="使用流程"></a>使用流程</h2><h3 id="步骤一：使用Labelme标注数据集"><a href="#步骤一：使用Labelme标注数据集" class="headerlink" title="步骤一：使用Labelme标注数据集"></a>步骤一：使用Labelme标注数据集</h3><ul>
+<li>标注得到一批json文件</li>
+<li>准备好<code>label_names.txt</code>，包含数据集的目标标签，可参考<code>test/label_names.txt</code></li>
+<li>如果有需要进行标签名称转换的，准备好<code>label_dict.txt </code>，可参考<code>test/label_dict.txt</code></li>
+</ul>
+<h3 id="步骤二：转换为VOC风格的数据集"><a href="#步骤二：转换为VOC风格的数据集" class="headerlink" title="步骤二：转换为VOC风格的数据集"></a>步骤二：转换为VOC风格的数据集</h3><p><strong>用法：</strong></p>
+<p><code>python bbox_labelme2voc.py --labels LABELS [--label_dict LABEL_DICT] input_dir output_dir </code></p>
+<ul>
+<li><code>LABELS</code>：<code>label_names.txt</code></li>
+<li><code>LABEL_DICT</code>：<code>label_dict.txt</code></li>
+<li><code>input_dir </code>：json标注文件所在文件夹</li>
+<li><code>output_dir</code>：VOC数据集文件夹</li>
+</ul>
+<p><strong>举例：</strong> </p>
+<p><code>python bbox_labelme2voc.py --labels test/label_names.txt label_dict test/label_dict.txt test/test_jsons test/test_voc</code></p>
+<h3 id="步骤三：分割训练集和测试集"><a href="#步骤三：分割训练集和测试集" class="headerlink" title="步骤三：分割训练集和测试集"></a>步骤三：分割训练集和测试集</h3><p><strong>用法：</strong></p>
+<p><code>python split_dataset.py [--random_state RANDOM_STATE] voc_dir test_ratio</code></p>
+<ul>
+<li><code>voc_dir</code>：VOC数据集根目录，脚本创建</li>
+<li><code>test_ratio</code>：测试集比例</li>
+<li><code>RANDOM_STATE</code>：随机数种子</li>
+</ul>
+<p>训练集和测试集文件在<code>ImageSets/Main</code>文件夹下。</p>
+<p><strong>举例：</strong> </p>
+<p><code>python split_dataset.py test/test_voc 0.35</code></p>
+<h3 id="步骤四：将VOC数据集转换为COCO数据集"><a href="#步骤四：将VOC数据集转换为COCO数据集" class="headerlink" title="步骤四：将VOC数据集转换为COCO数据集"></a>步骤四：将VOC数据集转换为COCO数据集</h3><p><strong>用法：</strong></p>
+<p><code>python voc_xml2coco_json.py voc_dir voc_split coco_dir anno_file</code></p>
+<ul>
+<li><code>voc_dir </code>：VOC数据集根目录</li>
+<li><code>voc_split</code>：训练集或测试集文件名称，例如train或test</li>
+<li><code>coco_dir</code>：COCO数据集根目录，脚本创建</li>
+<li><code>anno_file</code>：与训练集或测试集对应的COCO数据集Json标注文件，保存在<code>coco_dir/annotations</code>文件夹下。</li>
+</ul>
+<p><strong>举例：</strong></p>
+<p><code>python voc_xml2coco_json.py test/test_voc train test/test_coco train.json</code></p>
+<h3 id="自选步骤：Labelme文件转换为语义分割标注数据集"><a href="#自选步骤：Labelme文件转换为语义分割标注数据集" class="headerlink" title="自选步骤：Labelme文件转换为语义分割标注数据集"></a>自选步骤：Labelme文件转换为语义分割标注数据集</h3><p><strong>用法：</strong> </p>
+<p><code>python segmentation_labelme2voc.py seg_labels_file jsons_dir voc_dir </code></p>
+<ul>
+<li><code>seg_labels_file </code>：与标注对应的标签文件</li>
+<li><code>jsons_dir</code>：包含标注文件的文件夹</li>
+<li><code>voc_dir</code>：目标文件夹</li>
+</ul>
+<p><strong>举例：</strong></p>
+<p><code>python segmentation_labelme2voc.py test/label_names.txt test/test_jsons test/test_voc</code></p>
+<h3 id="自选步骤：统计VOC数据集，并进行简单过采样处理"><a href="#自选步骤：统计VOC数据集，并进行简单过采样处理" class="headerlink" title="自选步骤：统计VOC数据集，并进行简单过采样处理"></a>自选步骤：统计VOC数据集，并进行简单过采样处理</h3><p><strong>用法：</strong> </p>
+<p><code>python voc_category_statics_and_smiple_oversampling.py [--save_name SAVE_NAME] voc_dir set </code></p>
+<ul>
+<li><code>voc_dir</code>：VOC数据集根目录</li>
+<li><code>set</code>：数据集名字，比如train，在<code>voc_dir/ImageSets/Main</code>文件夹下</li>
+<li><code>SAVE_NAME</code>：过采样后的数据集保存文件。将保存在<code>voc_dir/ImageSets/Main</code>文件夹下</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>xiaohai
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://shenxiaohai.me/labelme2Datasets/" title="labelme2Datasets">https://shenxiaohai.me/labelme2Datasets/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E5%B7%A5%E5%85%B7/" rel="tag"><i class="fa fa-tag"></i> 工具</a>
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/labelme/" rel="tag"><i class="fa fa-tag"></i> labelme</a>
+              <a href="/tags/PASCAL-VOC/" rel="tag"><i class="fa fa-tag"></i> PASCAL-VOC</a>
+              <a href="/tags/MS-COCO/" rel="tag"><i class="fa fa-tag"></i> MS_COCO</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/online-algo-summary/" rel="prev" title="总结总结数据结构和算法不会的题目">
+                  <i class="fa fa-chevron-left"></i> 总结总结数据结构和算法不会的题目
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/new-stage/" rel="next" title="新阶段">
+                  新阶段 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments"><div id="twikoo-comments"></div></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-laptop"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohai</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/veraposeidon" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quicklink/2.3.0/quicklink.umd.js" integrity="sha256-yvJQOINiH9fWemHn0vCA5lsHWJaHs6/ZmO+1Ft04SvM=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://shenxiaohai.me/labelme2Datasets/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="twikoo" type="application/json">{"enable":true,"visitor":false,"envId":"https://twikoo-comment.shenxiaohai.me/","el":"#twikoo-comments"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.twikoo.el)
+    .then(() => NexT.utils.getScript(
+      CONFIG.twikoo.jsUrl || 'https://cdn.jsdelivr.net/npm/twikoo/dist/twikoo.all.min.js',
+      { condition: window.twikoo }
+    ))
+    .then(() => {
+      twikoo.init(CONFIG.twikoo);
+    });
+});
+</script>
+<style>
+.post-block, .comments {
+  overflow: visible;
+}
+.tk-owo-emotion {
+  display: inline-block;
+}
+</style>
+
+</body>
+</html>

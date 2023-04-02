@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.webp" color="#222">
+  <meta name="google-site-verification" content="Cj9oDgXxdJe6MoA_lEUQ2rmOouwJeTm5uJNqjhOv8Ng">
+  <meta name="msvalidate.01" content="E5D0AA8F5E012DFD9C5F3954DF8283B1">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,700,700italic%7CNoto+Serif+SC:300,300italic,400,400italic,700,700italic%7CSource+Code+Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shenxiaohai.me","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"twikoo","storage":true,"lazyload":false,"nav":null,"activeClass":"twikoo"},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="CS131 Computer Vision： Foundations and Applications，Homework1：Filters-Instagram。 重点在理解卷积、线性系统和不同的卷积核，以及如何利用它们寻找特定的信号。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CS131, Homewrok1, Filters-Instagram">
+<meta property="og:url" content="https://shenxiaohai.me/cs131-homework1/index.html">
+<meta property="og:site_name" content="SHEN&#39;s DevNotes">
+<meta property="og:description" content="CS131 Computer Vision： Foundations and Applications，Homework1：Filters-Instagram。 重点在理解卷积、线性系统和不同的卷积核，以及如何利用它们寻找特定的信号。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510983/blog/devs2idyvhlgfexbbczw.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510984/blog/a6qu6hxkoi1xlbmooeug.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510984/blog/g9mgfdryni7rnqzlgmti.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510985/blog/yyeoj9lfks3uxzt7hms6.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510985/blog/onmfnqpebtqup8ssrhgv.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510986/blog/iqemo4dceytqlsgv6o55.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510986/blog/w2m4c5npjg2bbjw5nrh3.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510987/blog/epekowz7rdec9quiifiy.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510988/blog/s05fxhtq0aqpohmllrv7.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510988/blog/wpk189pkgvbmvzmzelhy.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510989/blog/wbznc1qes1jcamj1pxzg.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510990/blog/u9edyteybtpqphvtpvjy.png">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510990/blog/dnfxkp4xqubhjqbknguy.png">
+<meta property="article:published_time" content="2018-04-15T15:32:26.000Z">
+<meta property="article:modified_time" content="2023-03-11T05:03:11.214Z">
+<meta property="article:author" content="xiaohai">
+<meta property="article:tag" content="计算机视觉">
+<meta property="article:tag" content="CS131">
+<meta property="article:tag" content="图像卷积">
+<meta property="article:tag" content="图像滤波">
+<meta property="article:tag" content="互相关">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510983/blog/devs2idyvhlgfexbbczw.png">
+
+
+<link rel="canonical" href="https://shenxiaohai.me/cs131-homework1/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shenxiaohai.me/cs131-homework1/","path":"cs131-homework1/","title":"CS131, Homewrok1, Filters-Instagram"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>CS131, Homewrok1, Filters-Instagram | SHEN's DevNotes</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YDT7F4NZP6"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-YDT7F4NZP6","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="SHEN's DevNotes" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">SHEN's DevNotes</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记，编程技巧，效率工具</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">131</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">18</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">74</span></a></li><li class="menu-item menu-item-碎碎念-|-memos"><a href="https://memos.shenxiaohai.me/" rel="section" target="_blank"><i class="fa fa-file-pen fa-fw"></i>碎碎念 | Memos</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Homework-1"><span class="nav-text">Homework 1</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Part-1-Convolutions"><span class="nav-text">Part 1: Convolutions</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-Commutative-Property-10-points"><span class="nav-text">1.1 Commutative Property (10 points)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-Linear-and-Shift-Invariance-10-points"><span class="nav-text">1.2 Linear and Shift Invariance (10 points)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-Implementation-30-points"><span class="nav-text">1.3 Implementation (30 points)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Extra-Credit-1-1-of-final-grade"><span class="nav-text">Extra Credit 1 (1% of final grade)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Part-2-Cross-correlation"><span class="nav-text">Part 2: Cross-correlation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Template-Matching-with-Cross-correlation-12-points"><span class="nav-text">2.1 Template Matching with Cross-correlation (12 points)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E4%BA%92%E7%9B%B8%E5%85%B3%E6%80%A7%E5%AE%9E%E7%8E%B0%E6%A8%A1%E6%9D%BF%E5%8C%B9%E9%85%8D"><span class="nav-text">使用互相关性实现模板匹配</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Interpretation"><span class="nav-text">Interpretation</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-Zero-mean-cross-correlation-6-points"><span class="nav-text">2.2 Zero-mean cross-correlation (6 points)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-Normalized-Cross-correlation-12-points"><span class="nav-text">2.3 Normalized Cross-correlation (12 points)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Part-3-Separable-Filters"><span class="nav-text">Part 3: Separable Filters</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-Theory-10-points"><span class="nav-text">3.1 Theory (10 points)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-Complexity-comparison-10-points"><span class="nav-text">3.2 Complexity comparison (10 points)</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BB%A3%E7%A0%81%E6%A1%A3%E6%A1%88"><span class="nav-text">代码档案</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xiaohai</p>
+  <div class="site-description" itemprop="description">我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/veraposeidon" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;veraposeidon" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/HiYoake" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;HiYoake" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shenxiaohai.me/cs131-homework1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xiaohai">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SHEN's DevNotes">
+      <meta itemprop="description" content="我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="CS131, Homewrok1, Filters-Instagram | SHEN's DevNotes">
+      <meta itemprop="description" content="CS131 Computer Vision： Foundations and Applications，Homework1：Filters-Instagram。<br> 重点在理解卷积、线性系统和不同的卷积核，以及如何利用它们寻找特定的信号。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          CS131, Homewrok1, Filters-Instagram
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-04-15 15:32:26" itemprop="dateCreated datePublished" datetime="2018-04-15T15:32:26Z">2018-04-15</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-11 05:03:11" itemprop="dateModified" datetime="2023-03-11T05:03:11Z">2023-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/" itemprop="url" rel="index"><span itemprop="name">计算机视觉</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">CS131 Computer Vision： Foundations and Applications，Homework1：Filters-Instagram。<br> 重点在理解卷积、线性系统和不同的卷积核，以及如何利用它们寻找特定的信号。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="Homework-1"><a href="#Homework-1" class="headerlink" title="Homework 1"></a>Homework 1</h1><p><em>This notebook includes both coding and written questions. Please hand in this notebook file with all the outputs and your answers to the written questions.</em></p>
+<p>这份作业覆盖的主题有线性滤波器，卷积和互相关性。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Setup</span></span><br><span class="line"><span class="keyword">import</span> numpy <span class="keyword">as</span> np</span><br><span class="line"><span class="keyword">import</span> matplotlib.pyplot <span class="keyword">as</span> plt</span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> time</span><br><span class="line"><span class="keyword">from</span> skimage <span class="keyword">import</span> io</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> __future__ <span class="keyword">import</span> print_function</span><br><span class="line"></span><br><span class="line">%matplotlib inline</span><br><span class="line">plt.rcParams[<span class="string">&#x27;figure.figsize&#x27;</span>] = (<span class="number">10.0</span>, <span class="number">8.0</span>) <span class="comment"># set default size of plots</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;image.interpolation&#x27;</span>] = <span class="string">&#x27;nearest&#x27;</span></span><br><span class="line">plt.rcParams[<span class="string">&#x27;image.cmap&#x27;</span>] = <span class="string">&#x27;gray&#x27;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># for auto-reloading extenrnal modules</span></span><br><span class="line">%load_ext autoreload</span><br><span class="line">%autoreload <span class="number">2</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="Part-1-Convolutions"><a href="#Part-1-Convolutions" class="headerlink" title="Part 1: Convolutions"></a>Part 1: Convolutions</h2><h3 id="1-1-Commutative-Property-10-points"><a href="#1-1-Commutative-Property-10-points" class="headerlink" title="1.1 Commutative Property (10 points)"></a>1.1 Commutative Property (10 points)</h3><p>Recall that the convolution of an image $f:\mathbb{R}^2\rightarrow \mathbb{R}$ and a kernel $h:\mathbb{R}^2\rightarrow\mathbb{R}$ is defined as follows:<br>$$(f*h)[m,n]&#x3D;\sum_{i&#x3D;-\infty}^\infty\sum_{j&#x3D;-\infty}^\infty f[i,j]\cdot h[m-i,n-j]$$</p>
+<p>Or equivalently,</p>
+
+\begin{align}
+(f*h)[m,n] &= \sum_{i=-\infty}^\infty\sum_{j=-\infty}^\infty h[i,j]\cdot f[m-i,n-j]\\
+&= (h*f)[m,n]
+\end{align}
+
+
+<p>Show that this is true (i.e. prove that the convolution operator is commutative: $f<em>h &#x3D; h</em>f$).</p>
+<p><strong>Your Answer:</strong> <em>Write your solution in this markdown cell. Please write your equations in <a target="_blank" rel="noopener" href="http://jupyter-notebook.readthedocs.io/en/latest/examples/Notebook/Typesetting%20Equations.html">LaTex equations</a>.</em></p>
+<p>题目就是证明卷积交换律。</p>
+<p><strong>证明</strong>：<br>将式中积分变量 $i$ 和 $j$ 置换为 $m-x$ 和 $n-y$，则</p>
+
+\begin{align}
+(f*h)[m,n]&=\sum_{i=-\infty}^\infty\sum_{j=-\infty}^\infty f[i,j]\cdot h[m-i,n-j] \\
+&=\sum_{x=+\infty}^{-\infty}\sum_{y=+\infty}^{-\infty} f[m-x,n-y]\cdot  h[x,y] \\
+&=\sum_{x=+\infty}^{-\infty}\sum_{y=+\infty}^{-\infty} h[x,y]\cdot  f[m-x,n-y] \\
+&=\sum_{x=-\infty}^{\infty}\sum_{y=-\infty}^{\infty} h[x,y]\cdot  f[m-x,n-y] \\
+&=(h*f)[m,n]
+\end{align}
+
+
+<p><strong>证毕</strong>。</p>
+<h3 id="1-2-Linear-and-Shift-Invariance-10-points"><a href="#1-2-Linear-and-Shift-Invariance-10-points" class="headerlink" title="1.2 Linear and Shift Invariance (10 points)"></a>1.2 Linear and Shift Invariance (10 points)</h3><p>Let $f$ be a function $\mathbb{R}^2\rightarrow\mathbb{R}$. Consider a system $f\xrightarrow{s}g$, where $g&#x3D;(f*h)$ with some kernel $h:\mathbb{R}^2\rightarrow\mathbb{R}$. Show that $S$ defined by any kernel $h$ is a Linear Shift Invariant (LSI) system. In other words, for any $h$, show that $S$ satisfies both of the following:</p>
+<ul>
+<li>$S[a\cdot{f_1}+b\cdot{f_2}]&#x3D; a\cdot{S[f_1]}+b\cdot{S[f_2]}$</li>
+<li>If $f[m,n]\xrightarrow{s}g[m,n]$ then $f[m-m_0,n-n_0]\xrightarrow{s}g[m-m_0,n-n_0]$</li>
+</ul>
+<p><strong>Your Answer:</strong> <em>Write your solution in this markdown cell. Please write your equations in <a target="_blank" rel="noopener" href="http://jupyter-notebook.readthedocs.io/en/latest/examples/Notebook/Typesetting%20Equations.html">LaTex equations</a>.</em></p>
+<p><strong>第一题证明</strong>：</p>
+
+\begin{align}
+S[a\cdot{f_1}+b\cdot{f_2}] &= [a\cdot{f_1}+b\cdot{f_2}]*h[m,n]\\
+&=\sum_{i=-\infty}^\infty\sum_{j=-\infty}^\infty (a\cdot f_1[i,j]+b \cdot f_2[i,j])\cdot h[m-i,n-j] \\
+&=\sum_{i=-\infty}^\infty\sum_{j=-\infty}^\infty (a \cdot f_1[i,j] \cdot h[m-i,n-j]  + b \cdot f_2[i,j] \cdot h[m-i,n-j]) \\
+&= a \cdot \sum_{i=-\infty}^\infty\sum_{j=-\infty}^\infty f_1[i,j] \cdot h[m-i,n-j]  + b \cdot \sum_{i=-\infty}^\infty\sum_{j=-\infty}^\infty f_2[i,j] \cdot h[m-i,n-j]  \\
+&=a \cdot (f_1*h) + b \cdot (f_2*h) \\
+&= a \cdot S[f_1]  + b\cdot S[f_2]
+\end{align}
+
+
+<p><strong>证毕</strong>.</p>
+<p><strong>第二题没证,不知道怎么证明线性移不别</strong>.</p>
+<h3 id="1-3-Implementation-30-points"><a href="#1-3-Implementation-30-points" class="headerlink" title="1.3 Implementation (30 points)"></a>1.3 Implementation (30 points)</h3><p>In this section, you will implement two versions of convolution:</p>
+<ul>
+<li><code>conv_nested</code></li>
+<li><code>conv_fast</code></li>
+</ul>
+<p>First, run the code cell below to load the image to work with.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Open image as grayscale</span></span><br><span class="line">img = io.imread(<span class="string">&#x27;dog.jpg&#x27;</span>, as_grey=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Show image</span></span><br><span class="line">plt.imshow(img)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.title(<span class="string">&quot;Isn&#x27;t he cute?&quot;</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510983/blog/devs2idyvhlgfexbbczw.png" alt="png"></p>
+<p>Now, implement the function <strong><code>conv_nested</code></strong> in <strong><code>filters.py</code></strong>. This is a naive implementation of convolution which uses 4 nested for-loops. It takes an image $f$ and a kernel $h$ as inputs and outputs the convolved image $(f*h)$ that has the same shape as the input image. This implementation should take a few seconds to run.</p>
+<ul>
+<li>Hint: It may be easier to implement $(h*f)$</li>
+</ul>
+<p>We’ll first test your <code>conv_nested</code> function on a simple input.</p>
+<p>思路：使用四层嵌套循环来实现对图像的卷积操作。<br>两种方案：</p>
+<ul>
+<li><p>按照卷积函数的公式定义来进行计算。<br>$$(f*h)[m,n]&#x3D;\sum_{i&#x3D;-\infty}^\infty\sum_{j&#x3D;-\infty}^\infty f[i,j]\cdot h[m-i,n-j]$$</p>
+</li>
+<li><p>按照卷积计算的可视化过程进行计算，即翻转内核，移动内核，累加迭代的过程。</p>
+</li>
+</ul>
+<p>conv_nested的实现在filters.py中。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> filters <span class="keyword">import</span> conv_nested</span><br><span class="line"></span><br><span class="line"><span class="comment"># Simple convolution kernel.</span></span><br><span class="line">kernel = np.array(</span><br><span class="line">[</span><br><span class="line">    [<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>],</span><br><span class="line">    [<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>],</span><br><span class="line">    [<span class="number">1</span>,<span class="number">0</span>,<span class="number">1</span>]</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line"><span class="comment"># Create a test image: a white square in the middle</span></span><br><span class="line">test_img = np.zeros((<span class="number">9</span>, <span class="number">9</span>))</span><br><span class="line">test_img[<span class="number">3</span>:<span class="number">6</span>, <span class="number">3</span>:<span class="number">6</span>] = <span class="number">1</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Run your conv_nested function on the test image</span></span><br><span class="line">test_output = conv_nested(test_img, kernel)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Build the expected output</span></span><br><span class="line">expected_output = np.zeros((<span class="number">9</span>, <span class="number">9</span>))</span><br><span class="line">expected_output[<span class="number">2</span>:<span class="number">7</span>, <span class="number">2</span>:<span class="number">7</span>] = <span class="number">1</span></span><br><span class="line">expected_output[<span class="number">4</span>, <span class="number">2</span>:<span class="number">7</span>] = <span class="number">2</span></span><br><span class="line">expected_output[<span class="number">2</span>:<span class="number">7</span>, <span class="number">4</span>] = <span class="number">2</span></span><br><span class="line">expected_output[<span class="number">4</span>, <span class="number">4</span>] = <span class="number">4</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot the test image</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(test_img)</span><br><span class="line">plt.title(<span class="string">&#x27;Test image&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot your convolved image</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(test_output)</span><br><span class="line">plt.title(<span class="string">&#x27;Convolution&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot the exepected output</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">3</span>,<span class="number">3</span>)</span><br><span class="line">plt.imshow(expected_output)</span><br><span class="line">plt.title(<span class="string">&#x27;Exepected output&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Test if the output matches expected output</span></span><br><span class="line"><span class="keyword">assert</span> np.<span class="built_in">max</span>(test_output - expected_output) &lt; <span class="number">1e-10</span>, <span class="string">&quot;Your solution is not correct.&quot;</span></span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510984/blog/a6qu6hxkoi1xlbmooeug.png" alt="png"></p>
+<p>Now let’s test your <code>conv_nested</code> function on a real image.</p>
+<p>简单的卷积测试，这是一个X方向上的边缘检测算子。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> filters <span class="keyword">import</span> conv_nested</span><br><span class="line"></span><br><span class="line"><span class="comment"># Simple convolution kernel.</span></span><br><span class="line"><span class="comment"># Feel free to change the kernel and to see different outputs.</span></span><br><span class="line">kernel = np.array(</span><br><span class="line">[</span><br><span class="line">    [<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>],</span><br><span class="line">    [<span class="number">2</span>,<span class="number">0</span>,-<span class="number">2</span>],</span><br><span class="line">    [<span class="number">1</span>,<span class="number">0</span>,-<span class="number">1</span>]</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">out = conv_nested(img, kernel)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot original image</span></span><br><span class="line">plt.subplot(<span class="number">2</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line">plt.title(<span class="string">&#x27;Original&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot your convolved image</span></span><br><span class="line">plt.subplot(<span class="number">2</span>,<span class="number">2</span>,<span class="number">3</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line">plt.title(<span class="string">&#x27;Convolution&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot what you should get</span></span><br><span class="line">solution_img = io.imread(<span class="string">&#x27;convoluted_dog.jpg&#x27;</span>, as_grey=<span class="literal">True</span>)</span><br><span class="line">plt.subplot(<span class="number">2</span>,<span class="number">2</span>,<span class="number">4</span>)</span><br><span class="line">plt.imshow(solution_img)</span><br><span class="line">plt.title(<span class="string">&#x27;What you should get&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510984/blog/g9mgfdryni7rnqzlgmti.png" alt="png"></p>
+<p>Let us implement a more efficient version of convolution using array operations in numpy. As shown in the lecture, a convolution can be considered as a sliding window that computes sum of the pixel values weighted by the flipped kernel. The faster version will i) zero-pad an image, ii) flip the kernel horizontally and vertically, and iii) compute weighted sum of the neighborhood at each pixel.</p>
+<p>First, implement the function <strong><code>zero_pad</code></strong> in <strong><code>filters.py</code></strong>.</p>
+<p>由于判断卷积核是否超出图像边界这一步导致计算很慢，这里有一种更快的方式：</p>
+<ol>
+<li>对图像边缘进行零填充</li>
+<li>翻转卷积核</li>
+<li>移动卷积核计算每个像素位置的卷积结果</li>
+</ol>
+<p>零填充的操作就两步：</p>
+<ol>
+<li>根据填充边缘大小生成一个大背景</li>
+<li>将原图拷贝到背景中心</li>
+</ol>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> filters <span class="keyword">import</span> zero_pad</span><br><span class="line"></span><br><span class="line">pad_width = <span class="number">20</span> <span class="comment"># width of the padding on the left and right</span></span><br><span class="line">pad_height = <span class="number">40</span> <span class="comment"># height of the padding on the top and bottom</span></span><br><span class="line"></span><br><span class="line">padded_img = zero_pad(img, pad_height, pad_width)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot your padded dog</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(padded_img)</span><br><span class="line">plt.title(<span class="string">&#x27;Padded dog&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot what you should get</span></span><br><span class="line">solution_img = io.imread(<span class="string">&#x27;padded_dog.jpg&#x27;</span>, as_grey=<span class="literal">True</span>)</span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(solution_img)</span><br><span class="line">plt.title(<span class="string">&#x27;What you should get&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510985/blog/yyeoj9lfks3uxzt7hms6.png" alt="png"></p>
+<p>Next, complete the function <strong><code>conv_fast</code></strong> in <strong><code>filters.py</code></strong> using <code>zero_pad</code>. Run the code below to compare the outputs by the two implementations. <code>conv_fast</code> should run significantly faster than <code>conv_nested</code>.<br>Depending on your implementation and computer, <code>conv_nested</code> should take a few seconds and <code>conv_fast</code> should be around 5 times faster.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> filters <span class="keyword">import</span> conv_fast</span><br><span class="line"></span><br><span class="line">t0 = time()</span><br><span class="line">out_fast = conv_fast(img, kernel)</span><br><span class="line">t1 = time()</span><br><span class="line">out_nested = conv_nested(img, kernel)</span><br><span class="line">t2 = time()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Compare the running time of the two implementations</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;conv_nested: took %f seconds.&quot;</span> % (t2 - t1))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;conv_fast: took %f seconds.&quot;</span> % (t1 - t0))</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot conv_nested output</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(out_nested)</span><br><span class="line">plt.title(<span class="string">&#x27;conv_nested&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot conv_fast output</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(out_fast)</span><br><span class="line">plt.title(<span class="string">&#x27;conv_fast&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Make sure that the two outputs are the same</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> (np.<span class="built_in">max</span>(out_fast - out_nested) &lt; <span class="number">1e-10</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Different outputs! Check your implementation.&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<pre><code>conv_nested: took 5.063853 seconds.
+conv_fast: took 1.080498 seconds.
+</code></pre>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510985/blog/onmfnqpebtqup8ssrhgv.png" alt="png"></p>
+<p>的确实现了约5倍大小的运行速度提升，需要指出的是，5倍的提升是（零填充+翻转卷积核计算）相对于（越界判断+卷积公式计算）来的。</p>
+<p>经过测试，如果conv_nested是通过（翻转卷积核计算+越界判断）方式的话，本身运行时间大约在1.4s左右。</p>
+<h3 id="Extra-Credit-1-1-of-final-grade"><a href="#Extra-Credit-1-1-of-final-grade" class="headerlink" title="Extra Credit 1 (1% of final grade)"></a>Extra Credit 1 (1% of final grade)</h3><p>Devise a faster version of convolution and implement <strong><code>conv_faster</code></strong> in <strong><code>filters.py</code></strong>. You will earn extra credit only if the <code>conv_faster</code> runs faster (by a fair margin) than <code>conv_fast</code> <strong>and</strong> outputs the same result.</p>
+<p>如何实现更快的卷积计算？ 我才想起来吴恩达在Machine Learning里特别强调了向量化带来的计算效率的提高。</p>
+<p>参考了文章<a target="_blank" rel="noopener" href="https://blog.csdn.net/guduruyu/article/details/78385418">【算法+图像处理】2D卷积与快速卷积算法C语言实现</a>，</p>
+<p>偷看了一眼<a target="_blank" rel="noopener" href="https://github.com/mikucy/CS131/blob/master/hw1_release/filters.py">mikucy的作业</a>，</p>
+<p>向量化的思路就是：</p>
+<ol>
+<li>将卷积核进行向量化</li>
+<li>将迭代过程中的计算块（计算中心及其领域）进行向量化，由于运算的对象都是核，此处可以将向量化的计算块拼成矩阵</li>
+<li>两者进行内积计算，并reshape成原有图像大小</li>
+</ol>
+<p>计算过程中的维度对齐：</p>
+<ul>
+<li>image: $(H_i,W_i)$</li>
+<li>kernel: $(H_k,W_k)$</li>
+<li>kernel_vectorized: $(H_k\cdot W_k,1)$</li>
+<li>patch_vectorized: $(1, H_k\cdot W_k)$</li>
+<li>image_vectorized2Matrix: $(H_i\cdot W_i, H_k\cdot W_k)$</li>
+<li>image_vectorized2Matrix * kernel_vectorized: $(H_i\cdot W_i,1)$</li>
+<li>reshaped: $(H_i,W_i)$</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> filters <span class="keyword">import</span> conv_faster</span><br><span class="line"></span><br><span class="line">t0 = time()</span><br><span class="line">out_fast = conv_fast(img, kernel)</span><br><span class="line">t1 = time()</span><br><span class="line">out_faster = conv_faster(img, kernel)</span><br><span class="line">t2 = time()</span><br><span class="line"></span><br><span class="line"><span class="comment"># Compare the running time of the two implementations</span></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;conv_fast: took %f seconds.&quot;</span> % (t1 - t0))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;conv_faster: took %f seconds.&quot;</span> % (t2 - t1))</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot conv_nested output</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(out_fast)</span><br><span class="line">plt.title(<span class="string">&#x27;conv_fast&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot conv_fast output</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(out_faster)</span><br><span class="line">plt.title(<span class="string">&#x27;conv_faster&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Make sure that the two outputs are the same</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> (np.<span class="built_in">max</span>(out_fast - out_faster) &lt; <span class="number">1e-10</span>):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&quot;Different outputs! Check your implementation.&quot;</span>)</span><br></pre></td></tr></table></figure>
+
+<pre><code>conv_fast: took 1.084435 seconds.
+conv_faster: took 0.310908 seconds.
+</code></pre>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510986/blog/iqemo4dceytqlsgv6o55.png" alt="png"></p>
+<p>经过测试，向量化之后的卷积操作的确又快了5倍左右。不错不错。</p>
+<hr>
+<h2 id="Part-2-Cross-correlation"><a href="#Part-2-Cross-correlation" class="headerlink" title="Part 2: Cross-correlation"></a>Part 2: Cross-correlation</h2><p>Cross-correlation of two 2D signals $f$ and $g$ is defined as follows:<br>$$(f\star{g})[m,n]&#x3D;\sum_{i&#x3D;-\infty}^\infty\sum_{j&#x3D;-\infty}^\infty f[i,j]\cdot g[i-m,j-n]$$</p>
+<h3 id="2-1-Template-Matching-with-Cross-correlation-12-points"><a href="#2-1-Template-Matching-with-Cross-correlation-12-points" class="headerlink" title="2.1 Template Matching with Cross-correlation (12 points)"></a>2.1 Template Matching with Cross-correlation (12 points)</h3><h3 id="使用互相关性实现模板匹配"><a href="#使用互相关性实现模板匹配" class="headerlink" title="使用互相关性实现模板匹配"></a>使用互相关性实现模板匹配</h3><p>Suppose that you are a clerk at a grocery store. One of your responsibilites is to check the shelves periodically and stock them up whenever there are sold-out items. You got tired of this laborious task and decided to build a computer vision system that keeps track of the items on the shelf.</p>
+<p>Luckily, you have learned in CS131 that cross-correlation can be used for template matching: a template $g$ is multiplied with regions of a larger image $f$ to measure how similar each region is to the template.</p>
+<p>The template of a product (<code>template.jpg</code>) and the image of shelf (<code>shelf.jpg</code>) is provided. We will use cross-correlation to find the product in the shelf.</p>
+<p>Implement <strong><code>cross_correlation</code></strong> function in <strong><code>filters.py</code></strong> and run the code below.</p>
+<p><em>- Hint: you may use the <code>conv_fast</code> function you implemented in the previous question.</em></p>
+<p><strong>note</strong> 可以使用之前的卷积函数来进行计算，但要注意卷积里面对卷积核进行翻转，而计算互相关时，匹配模板如同滤波一样，并不需要翻转匹配模板。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> filters <span class="keyword">import</span> cross_correlation</span><br><span class="line"></span><br><span class="line"><span class="comment"># Load template and image in grayscale</span></span><br><span class="line">img = io.imread(<span class="string">&#x27;shelf.jpg&#x27;</span>)</span><br><span class="line">img_grey = io.imread(<span class="string">&#x27;shelf.jpg&#x27;</span>, as_grey=<span class="literal">True</span>)</span><br><span class="line">temp = io.imread(<span class="string">&#x27;template.jpg&#x27;</span>)</span><br><span class="line">temp_grey = io.imread(<span class="string">&#x27;template.jpg&#x27;</span>, as_grey=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Perform cross-correlation between the image and the template</span></span><br><span class="line">out = cross_correlation(img_grey, temp_grey)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Find the location with maximum similarity</span></span><br><span class="line">y,x = (np.unravel_index(out.argmax(), out.shape))</span><br><span class="line"></span><br><span class="line"><span class="comment"># Display product template</span></span><br><span class="line">plt.figure(figsize=(<span class="number">25</span>,<span class="number">20</span>))</span><br><span class="line">plt.subplot(<span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">plt.imshow(temp)</span><br><span class="line">plt.title(<span class="string">&#x27;Template&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Display cross-correlation output</span></span><br><span class="line">plt.subplot(<span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line">plt.title(<span class="string">&#x27;Cross-correlation (white means more correlated)&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Display image</span></span><br><span class="line">plt.subplot(<span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line">plt.title(<span class="string">&#x27;Result (blue marker on the detected location)&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Draw marker at detected location</span></span><br><span class="line">plt.plot(x, y, <span class="string">&#x27;bx&#x27;</span>, ms=<span class="number">40</span>, mew=<span class="number">10</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510986/blog/w2m4c5npjg2bbjw5nrh3.png" alt="png"></p>
+<p>这里程序用了找匹配结果的最大值来判断匹配目标的所在。</p>
+<h4 id="Interpretation"><a href="#Interpretation" class="headerlink" title="Interpretation"></a>Interpretation</h4><p>How does the output of cross-correlation filter look like? Was it able to detect the product correctly? Explain what might be the problem with using raw template as a filter.</p>
+<p><strong>Your Answer:</strong> <em>Write your solution in this markdown cell.</em></p>
+<p>不是很清楚为啥不做任何处理匹配效果会很差。</p>
+<ul>
+<li>一个可能是图像和模板的亮度不同导致了匹配的出错。</li>
+<li>还有一个问题就是，一般的滤波核每个元素和加起来为一的，这个匹配图像作为内核去做计算的，肯定计算结果爆炸了呀，都是趋于255了？能量有种不协调的感觉</li>
+</ul>
+<hr>
+<h3 id="2-2-Zero-mean-cross-correlation-6-points"><a href="#2-2-Zero-mean-cross-correlation-6-points" class="headerlink" title="2.2 Zero-mean cross-correlation (6 points)"></a>2.2 Zero-mean cross-correlation (6 points)</h3><p>A solution to this problem is to subtract off the mean value of the template so that it has zero mean.</p>
+<p>Implement <strong><code>zero_mean_cross_correlation</code></strong> function in <strong><code>filters.py</code></strong> and run the code below.</p>
+<p>一种解决方案就是对匹配模板做零均值的操作。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> filters <span class="keyword">import</span> zero_mean_cross_correlation</span><br><span class="line"></span><br><span class="line"><span class="comment"># Perform cross-correlation between the image and the template</span></span><br><span class="line">out = zero_mean_cross_correlation(img_grey, temp_grey)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Find the location with maximum similarity</span></span><br><span class="line">y,x = (np.unravel_index(out.argmax(), out.shape))</span><br><span class="line"></span><br><span class="line"><span class="comment"># Display product template</span></span><br><span class="line">plt.figure(figsize=(<span class="number">30</span>,<span class="number">20</span>))</span><br><span class="line">plt.subplot(<span class="number">3</span>, <span class="number">1</span>, <span class="number">1</span>)</span><br><span class="line">plt.imshow(temp)</span><br><span class="line">plt.title(<span class="string">&#x27;Template&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Display cross-correlation output</span></span><br><span class="line">plt.subplot(<span class="number">3</span>, <span class="number">1</span>, <span class="number">2</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line">plt.title(<span class="string">&#x27;Cross-correlation (white means more correlated)&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Display image</span></span><br><span class="line">plt.subplot(<span class="number">3</span>, <span class="number">1</span>, <span class="number">3</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line">plt.title(<span class="string">&#x27;Result (blue marker on the detected location)&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Draw marker at detcted location</span></span><br><span class="line">plt.plot(x, y, <span class="string">&#x27;bx&#x27;</span>, ms=<span class="number">40</span>, mew=<span class="number">10</span>)</span><br><span class="line">plt.show()</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510987/blog/epekowz7rdec9quiifiy.png" alt="png"></p>
+<p>这样看来对匹配模板对零均值操作效果奇佳啊。</p>
+<p>You can also determine whether the product is present with appropriate scaling and thresholding.</p>
+<p>增加缩放和阈值来做判断。<br>阈值可以理解，不知道缩放的意义在于什么？</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">check_product_on_shelf</span>(<span class="params">shelf, product</span>):</span><br><span class="line">    out = zero_mean_cross_correlation(shelf, product)</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Scale output by the size of the template</span></span><br><span class="line">    out = out / <span class="built_in">float</span>(product.shape[<span class="number">0</span>]*product.shape[<span class="number">1</span>])</span><br><span class="line">    </span><br><span class="line">    <span class="comment"># Threshold output (this is arbitrary, you would need to tune the threshold for a real application)</span></span><br><span class="line">    out = out &gt; <span class="number">0.025</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">if</span> np.<span class="built_in">sum</span>(out) &gt; <span class="number">0</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;The product is on the shelf&#x27;</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="built_in">print</span>(<span class="string">&#x27;The product is not on the shelf&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Load image of the shelf without the product</span></span><br><span class="line">img2 = io.imread(<span class="string">&#x27;shelf_soldout.jpg&#x27;</span>)</span><br><span class="line">img2_grey = io.imread(<span class="string">&#x27;shelf_soldout.jpg&#x27;</span>, as_grey=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line">plt.imshow(img)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line">check_product_on_shelf(img_grey, temp_grey)</span><br><span class="line"></span><br><span class="line">plt.imshow(img2)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line">plt.show()</span><br><span class="line">check_product_on_shelf(img2_grey, temp_grey)</span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510988/blog/s05fxhtq0aqpohmllrv7.png" alt="png"></p>
+<pre><code>The product is on the shelf
+</code></pre>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510988/blog/wpk189pkgvbmvzmzelhy.png" alt="png"></p>
+<pre><code>The product is not on the shelf
+</code></pre>
+<hr>
+<h3 id="2-3-Normalized-Cross-correlation-12-points"><a href="#2-3-Normalized-Cross-correlation-12-points" class="headerlink" title="2.3 Normalized Cross-correlation (12 points)"></a>2.3 Normalized Cross-correlation (12 points)</h3><p>One day the light near the shelf goes out and the product tracker starts to malfunction. The <code>zero_mean_cross_correlation</code> is not robust to change in lighting condition. The code below demonstrates this.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> filters <span class="keyword">import</span> normalized_cross_correlation</span><br><span class="line"></span><br><span class="line"><span class="comment"># Load image</span></span><br><span class="line">img = io.imread(<span class="string">&#x27;shelf_dark.jpg&#x27;</span>)</span><br><span class="line">img_grey = io.imread(<span class="string">&#x27;shelf_dark.jpg&#x27;</span>, as_grey=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># Perform cross-correlation between the image and the template</span></span><br><span class="line">out = zero_mean_cross_correlation(img_grey, temp_grey)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Find the location with maximum similarity</span></span><br><span class="line">y,x = (np.unravel_index(out.argmax(), out.shape))</span><br><span class="line"></span><br><span class="line"><span class="comment"># Display image</span></span><br><span class="line">plt.imshow(img)</span><br><span class="line">plt.title(<span class="string">&#x27;Result (red marker on the detected location)&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Draw marker at detcted location</span></span><br><span class="line">plt.plot(x, y, <span class="string">&#x27;rx&#x27;</span>, ms=<span class="number">25</span>, mew=<span class="number">5</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510989/blog/wbznc1qes1jcamj1pxzg.png" alt="png"></p>
+<p>A solution is to normalize the pixels of the image and template at every step before comparing them. This is called <strong>normalized cross-correlation</strong>.</p>
+<p>The mathematical definition for normalized cross-correlation of $f$ and template $g$ is:<br>$$(f\star{g})[m,n]&#x3D;\sum_{i,j} \frac{f[i,j]-\overline{f_{m,n}}}{\sigma_{f_{m,n}}} \cdot \frac{g[i-m,j-n]-\overline{g}}{\sigma_g}$$</p>
+<p>where:</p>
+<ul>
+<li>$f_{m,n}$ is the patch image at position $(m,n)$</li>
+<li>$\overline{f_{m,n}}$ is the mean of the patch image $f_{m,n}$</li>
+<li>$\sigma_{f_{m,n}}$ is the standard deviation of the patch image $f_{m,n}$ </li>
+<li>$\overline{g}$ is the mean of the template $g$</li>
+<li>$\sigma_g$ is the standard deviation of the template $g$</li>
+</ul>
+<p>Implement <strong><code>normalized_cross_correlation</code></strong> function in <strong><code>filters.py</code></strong> and run the code below.</p>
+<p>直接对整幅待匹配的图做归一化操作，实验下来效果不行。</p>
+<p>分析下来也是，正确的图像区域，如果是做整幅图的归一化的话，明显受到了其他区域诸如亮度颜色等的影响，干扰了匹配。</p>
+<p>按照题目的意思是应该对每个待匹配块做归一化操作，然后比较匹配程度。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> filters <span class="keyword">import</span> normalized_cross_correlation</span><br><span class="line"></span><br><span class="line"><span class="comment"># Perform normalized cross-correlation between the image and the template</span></span><br><span class="line">out = normalized_cross_correlation(img_grey, temp_grey)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Find the location with maximum similarity</span></span><br><span class="line">y,x = (np.unravel_index(out.argmax(), out.shape))</span><br><span class="line"></span><br><span class="line"><span class="comment"># Display image</span></span><br><span class="line">plt.imshow(img)</span><br><span class="line">plt.title(<span class="string">&#x27;Result (red marker on the detected location)&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Draw marker at detcted location</span></span><br><span class="line">plt.plot(x, y, <span class="string">&#x27;rx&#x27;</span>, ms=<span class="number">25</span>, mew=<span class="number">5</span>)</span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+<p>遍历的方式太慢，太耗时间了。我怀疑这种做法了。</p>
+<h2 id="Part-3-Separable-Filters"><a href="#Part-3-Separable-Filters" class="headerlink" title="Part 3: Separable Filters"></a>Part 3: Separable Filters</h2><h3 id="3-1-Theory-10-points"><a href="#3-1-Theory-10-points" class="headerlink" title="3.1 Theory (10 points)"></a>3.1 Theory (10 points)</h3><p>Consider a $M_1\times{N_1}$ image $I$ and a $M_2\times{N_2}$ filter $F$. A filter $F$ is <strong>separable</strong> if it can be written as a product of two 1D filters: $F&#x3D;F_1F_2$.</p>
+<p>For example,<br>$$F&#x3D;<br>\begin{bmatrix}<br>1 &amp; -1 \<br>1 &amp; -1<br>\end{bmatrix}<br>$$<br>can be written as a matrix product of<br>$$F_1&#x3D;<br>\begin{bmatrix}<br>1  \<br>1<br>\end{bmatrix},<br>F_2&#x3D;<br>\begin{bmatrix}<br>1 &amp; -1<br>\end{bmatrix}<br>$$<br>Therefore $F$ is a separable filter.</p>
+<p>Prove that for any separable filter $F&#x3D;F_1F_2$,<br>$I*F&#x3D;(I*F_1)*F_2$</p>
+<p><strong>Your Answer:</strong> <em>Write your solution in this markdown cell. Please write your equations in <a target="_blank" rel="noopener" href="http://jupyter-notebook.readthedocs.io/en/latest/examples/Notebook/Typesetting%20Equations.html">LaTex equations</a>.</em></p>
+<p><strong>证明</strong></p>
+
+\begin{align} 
+(I*F)[M_2,N_2] &= \sum_{i=-\infty}^\infty \sum_{j=-\infty}^\infty I[i,j]\cdot F[M_2-i,N_2-j] \tag{1}\\
+&= \sum_{i=-\infty}^\infty\sum_{j=-\infty}^\infty I[i,j]\cdot F_1[M_2-i]\cdot F_2[N_2-j]\\
+&= \sum_{j=-\infty}^\infty F_2[N_2-j] \cdot (\sum_{i=-\infty}^\infty I[i,j]\cdot F_1[M_2-i]) \tag{2}\\
+&= \sum_{j=-\infty}^\infty F_2[N_2-j]\cdot(I(j)*F_1)\\
+&= F_2 * (I * F_1) \\
+&= (I * F_1) * F_2 
+\end{align}
+
+
+<p><strong>证毕</strong></p>
+<h3 id="3-2-Complexity-comparison-10-points"><a href="#3-2-Complexity-comparison-10-points" class="headerlink" title="3.2 Complexity comparison (10 points)"></a>3.2 Complexity comparison (10 points)</h3><p>(i) How many multiplications do you need to do a direct 2D convolution (i.e. $I*F$?)<br><br>(ii) How many multiplications do you need to do 1D convolutions on rows and columns (i.e. $(I*F_1)*F_2$)<br><br>(iii) Use Big-O notation to argue which one is more efficient in general: direct 2D convolution or two successive 1D convolutions?</p>
+<p><strong>Your Answer:</strong> <em>Write your solution in this markdown cell. Please write your equations in <a target="_blank" rel="noopener" href="http://jupyter-notebook.readthedocs.io/en/latest/examples/Notebook/Typesetting%20Equations.html">LaTex equations</a>.</em></p>
+<p><strong>复杂度比较</strong><br>根据上面的推导，可以看到式(1) 和 式(2)的区别：</p>
+<ol>
+<li>$I*F$乘法操作的次数为 $M_1 \cdot N_1$</li>
+<li>$(I*F_1)*F_2$乘法操作的次数为 $M_1+ N_1$</li>
+<li>我不会Big-O啊，明显分解的效率高哇。</li>
+</ol>
+<p>Now, we will empirically compare the running time of a separable 2D convolution and its equivalent two 1D convolutions. Gaussian kernel, widely used for blurring images, is one example of a separable filter. Run the code below to see its effect.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Load image</span></span><br><span class="line">img = io.imread(<span class="string">&#x27;dog.jpg&#x27;</span>, as_grey=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 5x5 Gaussian blur</span></span><br><span class="line">kernel = np.array(</span><br><span class="line">[</span><br><span class="line">    [<span class="number">1</span>,<span class="number">4</span>,<span class="number">6</span>,<span class="number">4</span>,<span class="number">1</span>],</span><br><span class="line">    [<span class="number">4</span>,<span class="number">16</span>,<span class="number">24</span>,<span class="number">16</span>,<span class="number">4</span>],</span><br><span class="line">    [<span class="number">6</span>,<span class="number">24</span>,<span class="number">36</span>,<span class="number">24</span>,<span class="number">6</span>],</span><br><span class="line">    [<span class="number">4</span>,<span class="number">16</span>,<span class="number">24</span>,<span class="number">16</span>,<span class="number">4</span>],</span><br><span class="line">    [<span class="number">1</span>,<span class="number">4</span>,<span class="number">6</span>,<span class="number">4</span>,<span class="number">1</span>]</span><br><span class="line">])</span><br><span class="line"></span><br><span class="line">t0 = time()</span><br><span class="line">out = conv_nested(img, kernel)</span><br><span class="line">t1 = time()</span><br><span class="line">t_normal = t1 - t0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot original image</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(img)</span><br><span class="line">plt.title(<span class="string">&#x27;Original&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot convolved image</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line">plt.title(<span class="string">&#x27;Blurred&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510990/blog/u9edyteybtpqphvtpvjy.png" alt="png"></p>
+<p>In the below code cell, define the two 1D arrays (<code>k1</code> and <code>k2</code>) whose product is equal to the Gaussian kernel.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># The kernel can be written as outer product of two 1D filters</span></span><br><span class="line">k1 = <span class="literal">None</span>  <span class="comment"># shape (5, 1)</span></span><br><span class="line">k2 = <span class="literal">None</span>  <span class="comment"># shape (1, 5)</span></span><br><span class="line"></span><br><span class="line"><span class="comment">### YOUR CODE HERE</span></span><br><span class="line">k1 = np.array([[<span class="number">1</span>],[<span class="number">4</span>],[<span class="number">6</span>],[<span class="number">4</span>],[<span class="number">1</span>]])</span><br><span class="line">k2 = np.array([[<span class="number">1</span>,<span class="number">4</span>,<span class="number">6</span>,<span class="number">4</span>,<span class="number">1</span>]])</span><br><span class="line"></span><br><span class="line"><span class="comment">### END YOUR CODE</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># Check if kernel is product of k1 and k2</span></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span>  np.<span class="built_in">all</span>(k1 * k2 == kernel):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;k1 * k2 is not equal to kernel&#x27;</span>)</span><br><span class="line">    </span><br><span class="line"><span class="keyword">assert</span> k1.shape == (<span class="number">5</span>, <span class="number">1</span>), <span class="string">&quot;k1 should have shape (5, 1)&quot;</span></span><br><span class="line"><span class="keyword">assert</span> k2.shape == (<span class="number">1</span>, <span class="number">5</span>), <span class="string">&quot;k2 should have shape (1, 5)&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>We now apply the two versions of convolution to the same image, and compare their running time. Note that the outputs of the two convolutions must be the same.</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Perform two convolutions using k1 and k2</span></span><br><span class="line">t0 = time()</span><br><span class="line">out_separable = conv_nested(img, k1)</span><br><span class="line">out_separable = conv_nested(out_separable, k2)</span><br><span class="line">t1 = time()</span><br><span class="line">t_separable = t1 - t0</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot normal convolution image</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">1</span>)</span><br><span class="line">plt.imshow(out)</span><br><span class="line">plt.title(<span class="string">&#x27;Normal convolution&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># Plot separable convolution image</span></span><br><span class="line">plt.subplot(<span class="number">1</span>,<span class="number">2</span>,<span class="number">2</span>)</span><br><span class="line">plt.imshow(out_separable)</span><br><span class="line">plt.title(<span class="string">&#x27;Separable convolution&#x27;</span>)</span><br><span class="line">plt.axis(<span class="string">&#x27;off&#x27;</span>)</span><br><span class="line"></span><br><span class="line">plt.show()</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Normal convolution: took %f seconds.&quot;</span> % (t_normal))</span><br><span class="line"><span class="built_in">print</span>(<span class="string">&quot;Separable convolution: took %f seconds.&quot;</span> % (t_separable))</span><br></pre></td></tr></table></figure>
+
+
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678510990/blog/dnfxkp4xqubhjqbknguy.png" alt="png"></p>
+<pre><code>Normal convolution: took 13.643008 seconds.
+Separable convolution: took 5.948668 seconds.
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Check if the two outputs are equal</span></span><br><span class="line"><span class="keyword">assert</span> np.<span class="built_in">max</span>(out_separable - out) &lt; <span class="number">1e-10</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 肉眼看不出来哪有区别，不知为啥断言错误。</span></span><br></pre></td></tr></table></figure>
+
+
+<h1 id="代码档案"><a href="#代码档案" class="headerlink" title="代码档案"></a>代码档案</h1><p><a target="_blank" rel="noopener" href="https://github.com/StanfordVL/CS131_release/tree/master/hw1_release">官方Repo作业材料</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/veraposeidon/CS131_Assignments/tree/master/hw1_release">个人Repo作业存档</a></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>xiaohai
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://shenxiaohai.me/cs131-homework1/" title="CS131, Homewrok1, Filters-Instagram">https://shenxiaohai.me/cs131-homework1/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/" rel="tag"><i class="fa fa-tag"></i> 计算机视觉</a>
+              <a href="/tags/CS131/" rel="tag"><i class="fa fa-tag"></i> CS131</a>
+              <a href="/tags/%E5%9B%BE%E5%83%8F%E5%8D%B7%E7%A7%AF/" rel="tag"><i class="fa fa-tag"></i> 图像卷积</a>
+              <a href="/tags/%E5%9B%BE%E5%83%8F%E6%BB%A4%E6%B3%A2/" rel="tag"><i class="fa fa-tag"></i> 图像滤波</a>
+              <a href="/tags/%E4%BA%92%E7%9B%B8%E5%85%B3/" rel="tag"><i class="fa fa-tag"></i> 互相关</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/cs131-homework0/" rel="prev" title="CS131, Homewrok0, Basics">
+                  <i class="fa fa-chevron-left"></i> CS131, Homewrok0, Basics
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/cs131-homework2/" rel="next" title="CS131, Homewrok2, Edges-Smart Car Lane Detection">
+                  CS131, Homewrok2, Edges-Smart Car Lane Detection <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments"><div id="twikoo-comments"></div></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-laptop"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohai</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/veraposeidon" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quicklink/2.3.0/quicklink.umd.js" integrity="sha256-yvJQOINiH9fWemHn0vCA5lsHWJaHs6/ZmO+1Ft04SvM=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://shenxiaohai.me/cs131-homework1/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="twikoo" type="application/json">{"enable":true,"visitor":false,"envId":"https://twikoo-comment.shenxiaohai.me/","el":"#twikoo-comments"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.twikoo.el)
+    .then(() => NexT.utils.getScript(
+      CONFIG.twikoo.jsUrl || 'https://cdn.jsdelivr.net/npm/twikoo/dist/twikoo.all.min.js',
+      { condition: window.twikoo }
+    ))
+    .then(() => {
+      twikoo.init(CONFIG.twikoo);
+    });
+});
+</script>
+<style>
+.post-block, .comments {
+  overflow: visible;
+}
+.tk-owo-emotion {
+  display: inline-block;
+}
+</style>
+
+</body>
+</html>

@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.webp" color="#222">
+  <meta name="google-site-verification" content="Cj9oDgXxdJe6MoA_lEUQ2rmOouwJeTm5uJNqjhOv8Ng">
+  <meta name="msvalidate.01" content="E5D0AA8F5E012DFD9C5F3954DF8283B1">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,700,700italic%7CNoto+Serif+SC:300,300italic,400,400italic,700,700italic%7CSource+Code+Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shenxiaohai.me","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"twikoo","storage":true,"lazyload":false,"nav":null,"activeClass":"twikoo"},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Pytorch中级S02E03：循环神经网络（Recurrent Neural Network）。循环神经网络LSTMRNN+MINIST分类">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network）">
+<meta property="og:url" content="https://shenxiaohai.me/pytorch-tutorial-intermediate-03/index.html">
+<meta property="og:site_name" content="SHEN&#39;s DevNotes">
+<meta property="og:description" content="Pytorch中级S02E03：循环神经网络（Recurrent Neural Network）。循环神经网络LSTMRNN+MINIST分类">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509723/blog/wibtwymxbx6rjckqachh.svg">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509725/blog/dfbtsvh0txsig99d2zbi.jpg">
+<meta property="article:published_time" content="2018-10-19T11:04:07.000Z">
+<meta property="article:modified_time" content="2023-03-11T05:02:28.493Z">
+<meta property="article:author" content="xiaohai">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="LSTM">
+<meta property="article:tag" content="循环神经网络">
+<meta property="article:tag" content="RNN">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509723/blog/wibtwymxbx6rjckqachh.svg">
+
+
+<link rel="canonical" href="https://shenxiaohai.me/pytorch-tutorial-intermediate-03/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shenxiaohai.me/pytorch-tutorial-intermediate-03/","path":"pytorch-tutorial-intermediate-03/","title":"PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network） | SHEN's DevNotes</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YDT7F4NZP6"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-YDT7F4NZP6","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="SHEN's DevNotes" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">SHEN's DevNotes</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记，编程技巧，效率工具</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">131</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">18</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">74</span></a></li><li class="menu-item menu-item-碎碎念-|-memos"><a href="https://memos.shenxiaohai.me/" rel="section" target="_blank"><i class="fa fa-file-pen fa-fw"></i>碎碎念 | Memos</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PyTorch-%E4%B8%AD%E7%BA%A7%E7%AF%87%EF%BC%883%EF%BC%89%EF%BC%9A%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%EF%BC%88Recurrent-Neural-Network%EF%BC%89"><span class="nav-text">PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C-%E5%AD%A6%E4%B9%A0%E8%B5%84%E6%BA%90"><span class="nav-text">循环神经网络 学习资源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pytorch%E5%AE%9E%E7%8E%B0"><span class="nav-text">Pytorch实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MINIST-%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-text">MINIST 数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E6%90%AD%E5%BB%BA"><span class="nav-text">循环神经网络搭建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-text">训练模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B5%8B%E8%AF%95%E6%A8%A1%E5%9E%8B%E5%B9%B6%E4%BF%9D%E5%AD%98"><span class="nav-text">测试模型并保存</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xiaohai</p>
+  <div class="site-description" itemprop="description">我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/veraposeidon" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;veraposeidon" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/HiYoake" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;HiYoake" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shenxiaohai.me/pytorch-tutorial-intermediate-03/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xiaohai">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SHEN's DevNotes">
+      <meta itemprop="description" content="我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network） | SHEN's DevNotes">
+      <meta itemprop="description" content="Pytorch中级S02E03：循环神经网络（Recurrent Neural Network）。</br>循环神经网络</br>LSTM</br>RNN+MINIST分类">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-10-19 11:04:07" itemprop="dateCreated datePublished" datetime="2018-10-19T11:04:07Z">2018-10-19</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-11 05:02:28" itemprop="dateModified" datetime="2023-03-11T05:02:28Z">2023-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">深度学习框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">Pytorch中级S02E03：循环神经网络（Recurrent Neural Network）。</br>循环神经网络</br>LSTM</br>RNN+MINIST分类</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509723/blog/wibtwymxbx6rjckqachh.svg" alt="PyTorch"></p>
+<h1 id="PyTorch-中级篇（3）：循环神经网络（Recurrent-Neural-Network）"><a href="#PyTorch-中级篇（3）：循环神经网络（Recurrent-Neural-Network）" class="headerlink" title="PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network）"></a>PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network）</h1><blockquote>
+<p>参考代码</p>
+<p><strong>yunjey的 <a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/blob/master/tutorials/02-intermediate/recurrent_neural_network/main.py">pytorch tutorial系列</a></strong></p>
+</blockquote>
+<h2 id="循环神经网络-学习资源"><a href="#循环神经网络-学习资源" class="headerlink" title="循环神经网络 学习资源"></a>循环神经网络 学习资源</h2><p>一直以为，循环神经网络使用在语音处理上的，跟我这个研究计算机视觉的没有多大关系，所以一直都回避RNN。</p>
+<p>这里居然有RNN对MINIST数据的网络实现，那就顺带把RNN给学了。</p>
+<p>RNN结合CNN可以用于描述照片，正好能跟计算机视觉结合起来。</p>
+<blockquote>
+<p><strong>介绍视频（没有原理）</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.youtube.com/watch?v=EEtf4kNsk7Q">什么是循环神经网络 RNN (深度学习)? What is Recurrent Neural Networks (deep learning)?</a></p>
+</blockquote>
+<blockquote>
+<p><strong>相关网页</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.zhihu.com/question/68552209">(新手向)能否简单易懂的介绍一下RNN(循环神经网络)？</a></p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/30844905">一文搞懂RNN（循环神经网络）基础篇</a>.</p>
+<p><a target="_blank" rel="noopener" href="https://www.jianshu.com/p/9dc9f41f0b29">【译】 理解 LSTM 网络</a></p>
+</blockquote>
+<p>当然这些都是基础版本的RNN，RNN的魅力在于它的各种变化版本能用来解决各种不同形式的问题。</p>
+<p><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/22930328">【图片来源】循环神经网络RNN打开手册</a><br><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509725/blog/dfbtsvh0txsig99d2zbi.jpg" alt="RNN的形式"></p>
+<h2 id="Pytorch实现"><a href="#Pytorch实现" class="headerlink" title="Pytorch实现"></a>Pytorch实现</h2><p><strong>many to one 的形式解决MINIST数据集 手写数字分类问题。</strong></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包</span></span><br><span class="line"><span class="keyword">import</span> torch </span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torchvision</span><br><span class="line"><span class="keyword">import</span> torchvision.transforms <span class="keyword">as</span> transforms</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设备配置</span></span><br><span class="line"><span class="comment"># Device configuration</span></span><br><span class="line">torch.cuda.set_device(<span class="number">1</span>) <span class="comment"># 这句用来设置pytorch在哪块GPU上运行</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 超参数设置</span></span><br><span class="line"><span class="comment"># Hyper-parameters</span></span><br><span class="line">sequence_length = <span class="number">28</span></span><br><span class="line">input_size = <span class="number">28</span></span><br><span class="line">hidden_size = <span class="number">128</span></span><br><span class="line">num_layers = <span class="number">2</span></span><br><span class="line">num_classes = <span class="number">10</span></span><br><span class="line">batch_size = <span class="number">100</span></span><br><span class="line">num_epochs = <span class="number">2</span></span><br><span class="line">learning_rate = <span class="number">0.01</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="MINIST-数据集"><a href="#MINIST-数据集" class="headerlink" title="MINIST 数据集"></a>MINIST 数据集</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 训练数据</span></span><br><span class="line">train_dataset = torchvision.datasets.MNIST(root=<span class="string">&#x27;../../../data/minist/&#x27;</span>,</span><br><span class="line">                                           train=<span class="literal">True</span>, </span><br><span class="line">                                           transform=transforms.ToTensor(),</span><br><span class="line">                                           download=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试数据</span></span><br><span class="line">test_dataset = torchvision.datasets.MNIST(root=<span class="string">&#x27;../../../data/minist/&#x27;</span>,</span><br><span class="line">                                          train=<span class="literal">False</span>, </span><br><span class="line">                                          transform=transforms.ToTensor())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 训练数据加载器</span></span><br><span class="line">train_loader = torch.utils.data.DataLoader(dataset=train_dataset,</span><br><span class="line">                                           batch_size=batch_size, </span><br><span class="line">                                           shuffle=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试数据加载器</span></span><br><span class="line">test_loader = torch.utils.data.DataLoader(dataset=test_dataset,</span><br><span class="line">                                          batch_size=batch_size, </span><br><span class="line">                                          shuffle=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<h3 id="循环神经网络搭建"><a href="#循环神经网络搭建" class="headerlink" title="循环神经网络搭建"></a>循环神经网络搭建</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">class</span> <span class="title class_">RNN</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, input_size, hidden_size, num_layers, num_classes</span>):</span><br><span class="line">        <span class="built_in">super</span>(RNN, self).__init__()</span><br><span class="line">        self.hidden_size = hidden_size</span><br><span class="line">        self.num_layers = num_layers</span><br><span class="line">        self.lstm = nn.LSTM(input_size, hidden_size, num_layers, batch_first=<span class="literal">True</span>) <span class="comment"># 选用LSTM RNN结构</span></span><br><span class="line">        self.fc = nn.Linear(hidden_size, num_classes) <span class="comment"># 最后一层为全连接层，将隐状态转为分类</span></span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        <span class="comment"># 初始化隐层状态和细胞状态</span></span><br><span class="line">        h0 = torch.zeros(self.num_layers, x.size(<span class="number">0</span>), self.hidden_size).to(device) </span><br><span class="line">        c0 = torch.zeros(self.num_layers, x.size(<span class="number">0</span>), self.hidden_size).to(device)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 前向传播LSTM</span></span><br><span class="line">        out, _ = self.lstm(x, (h0, c0))  <span class="comment"># 输出大小 (batch_size, seq_length, hidden_size)</span></span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 解码最后一个时刻的隐状态</span></span><br><span class="line">        out = self.fc(out[:, -<span class="number">1</span>, :])</span><br><span class="line">        <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实例化一个模型</span></span><br><span class="line"><span class="comment"># 注意输入维度，虽然我不懂将一幅图28x28拆成28个大小为28的序列有啥意义</span></span><br><span class="line">model = RNN(input_size, hidden_size, num_layers, num_classes).to(device)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 定义损失函数和优化器</span></span><br><span class="line"><span class="comment"># Adam: A Method for Stochastic Optimization</span></span><br><span class="line">criterion = nn.CrossEntropyLoss()</span><br><span class="line">optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)</span><br></pre></td></tr></table></figure>
+
+<h3 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">total_step = <span class="built_in">len</span>(train_loader)</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">    <span class="keyword">for</span> i, (images, labels) <span class="keyword">in</span> <span class="built_in">enumerate</span>(train_loader):</span><br><span class="line">        images = images.reshape(-<span class="number">1</span>, sequence_length, input_size).to(device) <span class="comment"># 注意维度</span></span><br><span class="line">        labels = labels.to(device)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 前向传播</span></span><br><span class="line">        outputs = model(images)</span><br><span class="line">        loss = criterion(outputs, labels)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 反向传播和优化，注意梯度每次清零</span></span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> (i+<span class="number">1</span>) % <span class="number">100</span> == <span class="number">0</span>:</span><br><span class="line">            <span class="built_in">print</span> (<span class="string">&#x27;Epoch [&#123;&#125;/&#123;&#125;], Step [&#123;&#125;/&#123;&#125;], Loss: &#123;:.4f&#125;&#x27;</span> </span><br><span class="line">                   .<span class="built_in">format</span>(epoch+<span class="number">1</span>, num_epochs, i+<span class="number">1</span>, total_step, loss.item()))</span><br></pre></td></tr></table></figure>
+
+<pre><code>Epoch [1/2], Step [100/600], Loss: 0.4569
+Epoch [1/2], Step [200/600], Loss: 0.2823
+Epoch [1/2], Step [300/600], Loss: 0.3512
+Epoch [1/2], Step [400/600], Loss: 0.1702
+Epoch [1/2], Step [500/600], Loss: 0.3181
+Epoch [1/2], Step [600/600], Loss: 0.1821
+Epoch [2/2], Step [100/600], Loss: 0.1540
+Epoch [2/2], Step [200/600], Loss: 0.0848
+Epoch [2/2], Step [300/600], Loss: 0.1985
+Epoch [2/2], Step [400/600], Loss: 0.1537
+Epoch [2/2], Step [500/600], Loss: 0.0988
+Epoch [2/2], Step [600/600], Loss: 0.0315
+</code></pre>
+<h3 id="测试模型并保存"><a href="#测试模型并保存" class="headerlink" title="测试模型并保存"></a>测试模型并保存</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 测试集</span></span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    correct = <span class="number">0</span></span><br><span class="line">    total = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> images, labels <span class="keyword">in</span> test_loader:</span><br><span class="line">        images = images.reshape(-<span class="number">1</span>, sequence_length, input_size).to(device)</span><br><span class="line">        labels = labels.to(device)</span><br><span class="line">        outputs = model(images)</span><br><span class="line">        _, predicted = torch.<span class="built_in">max</span>(outputs.data, <span class="number">1</span>)</span><br><span class="line">        total += labels.size(<span class="number">0</span>)</span><br><span class="line">        correct += (predicted == labels).<span class="built_in">sum</span>().item()</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;Test Accuracy of the model on the 10000 test images: &#123;&#125; %&#x27;</span>.<span class="built_in">format</span>(<span class="number">100</span> * correct / total)) </span><br></pre></td></tr></table></figure>
+
+<pre><code>Test Accuracy of the model on the 10000 test images: 97.47 %
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 保存模型</span></span><br><span class="line">torch.save(model.state_dict(), <span class="string">&#x27;model.ckpt&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>xiaohai
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://shenxiaohai.me/pytorch-tutorial-intermediate-03/" title="PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network）">https://shenxiaohai.me/pytorch-tutorial-intermediate-03/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/PyTorch/" rel="tag"><i class="fa fa-tag"></i> PyTorch</a>
+              <a href="/tags/LSTM/" rel="tag"><i class="fa fa-tag"></i> LSTM</a>
+              <a href="/tags/%E5%BE%AA%E7%8E%AF%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 循环神经网络</a>
+              <a href="/tags/RNN/" rel="tag"><i class="fa fa-tag"></i> RNN</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/pytorch_tutorial_intermediate_02/" rel="prev" title="PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks）">
+                  <i class="fa fa-chevron-left"></i> PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks）
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/pytorch-tutorial-intermediate-04/" rel="next" title="PyTorch 中级篇（4）：双向循环神经网络（Bidirectional Recurrent Neural Network）">
+                  PyTorch 中级篇（4）：双向循环神经网络（Bidirectional Recurrent Neural Network） <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments"><div id="twikoo-comments"></div></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-laptop"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohai</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/veraposeidon" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quicklink/2.3.0/quicklink.umd.js" integrity="sha256-yvJQOINiH9fWemHn0vCA5lsHWJaHs6/ZmO+1Ft04SvM=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://shenxiaohai.me/pytorch-tutorial-intermediate-03/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="twikoo" type="application/json">{"enable":true,"visitor":false,"envId":"https://twikoo-comment.shenxiaohai.me/","el":"#twikoo-comments"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.twikoo.el)
+    .then(() => NexT.utils.getScript(
+      CONFIG.twikoo.jsUrl || 'https://cdn.jsdelivr.net/npm/twikoo/dist/twikoo.all.min.js',
+      { condition: window.twikoo }
+    ))
+    .then(() => {
+      twikoo.init(CONFIG.twikoo);
+    });
+});
+</script>
+<style>
+.post-block, .comments {
+  overflow: visible;
+}
+.tk-owo-emotion {
+  display: inline-block;
+}
+</style>
+
+</body>
+</html>

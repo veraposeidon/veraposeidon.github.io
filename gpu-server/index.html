@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.webp" color="#222">
+  <meta name="google-site-verification" content="Cj9oDgXxdJe6MoA_lEUQ2rmOouwJeTm5uJNqjhOv8Ng">
+  <meta name="msvalidate.01" content="E5D0AA8F5E012DFD9C5F3954DF8283B1">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,700,700italic%7CNoto+Serif+SC:300,300italic,400,400italic,700,700italic%7CSource+Code+Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shenxiaohai.me","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"twikoo","storage":true,"lazyload":false,"nav":null,"activeClass":"twikoo"},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="使用LXD, ZFS搭建一台多人共用且不冲突的GPU深度学习服务器。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="搭建公用GPU服务器过程记录">
+<meta property="og:url" content="https://shenxiaohai.me/gpu-server/index.html">
+<meta property="og:site_name" content="SHEN&#39;s DevNotes">
+<meta property="og:description" content="使用LXD, ZFS搭建一台多人共用且不冲突的GPU深度学习服务器。">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509760/blog/rgc8gekmasuilhjqe8cj.png">
+<meta property="article:published_time" content="2018-06-28T16:21:50.000Z">
+<meta property="article:modified_time" content="2023-03-11T05:02:28.496Z">
+<meta property="article:author" content="xiaohai">
+<meta property="article:tag" content="配置">
+<meta property="article:tag" content="深度学习">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509760/blog/rgc8gekmasuilhjqe8cj.png">
+
+
+<link rel="canonical" href="https://shenxiaohai.me/gpu-server/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shenxiaohai.me/gpu-server/","path":"gpu-server/","title":"搭建公用GPU服务器过程记录"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>搭建公用GPU服务器过程记录 | SHEN's DevNotes</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YDT7F4NZP6"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-YDT7F4NZP6","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="SHEN's DevNotes" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">SHEN's DevNotes</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记，编程技巧，效率工具</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">131</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">18</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">74</span></a></li><li class="menu-item menu-item-碎碎念-|-memos"><a href="https://memos.shenxiaohai.me/" rel="section" target="_blank"><i class="fa fa-file-pen fa-fw"></i>碎碎念 | Memos</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E9%9C%80%E6%B1%82%E5%8F%8A%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE"><span class="nav-text">需求及硬件配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%9C%80%E6%B1%82"><span class="nav-text">需求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%96%B9%E6%A1%88"><span class="nav-text">方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE"><span class="nav-text">硬件配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F%E3%80%81%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85%E5%8F%8A%E7%BD%91%E6%A1%A5%E9%85%8D%E7%BD%AE"><span class="nav-text">系统、软件安装及网桥配置</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B3%BB%E7%BB%9F"><span class="nav-text">系统</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%89%E8%A3%85"><span class="nav-text">软件安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Nvidia%E6%98%BE%E5%8D%A1%E9%A9%B1%E5%8A%A8-390-48"><span class="nav-text">Nvidia显卡驱动(390.48)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BD%91%E6%A1%A5%E9%85%8D%E7%BD%AE"><span class="nav-text">网桥配置</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LXD%E9%85%8D%E7%BD%AE%E5%92%8C%E5%AE%B9%E5%99%A8%E5%88%9B%E5%BB%BA"><span class="nav-text">LXD配置和容器创建</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9D%E5%A7%8B%E5%8C%96%E5%92%8C%E7%BD%91%E5%8D%A1%E9%85%8D%E7%BD%AE"><span class="nav-text">初始化和网卡配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AA%8C%E8%AF%81"><span class="nav-text">验证</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9B%E5%BB%BA%E5%AE%B9%E5%99%A8"><span class="nav-text">创建容器</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%85%B6%E4%BB%96"><span class="nav-text">其他</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%B9%E5%99%A8%E4%B8%8A%E7%BD%91%E9%97%AE%E9%A2%98%E5%A4%87%E6%B3%A8"><span class="nav-text">容器上网问题备注</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%9C%E7%A8%8B%E7%99%BB%E5%BD%95%E7%9A%84%E9%97%AE%E9%A2%98%E5%A4%87%E6%B3%A8"><span class="nav-text">远程登录的问题备注</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xiaohai</p>
+  <div class="site-description" itemprop="description">我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/veraposeidon" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;veraposeidon" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/HiYoake" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;HiYoake" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shenxiaohai.me/gpu-server/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xiaohai">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SHEN's DevNotes">
+      <meta itemprop="description" content="我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="搭建公用GPU服务器过程记录 | SHEN's DevNotes">
+      <meta itemprop="description" content="使用LXD, ZFS搭建一台多人共用且不冲突的GPU深度学习服务器。">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          搭建公用GPU服务器过程记录
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-06-28 16:21:50" itemprop="dateCreated datePublished" datetime="2018-06-28T16:21:50Z">2018-06-28</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-11 05:02:28" itemprop="dateModified" datetime="2023-03-11T05:02:28Z">2023-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E8%A7%86%E8%A7%89/" itemprop="url" rel="index"><span itemprop="name">计算机视觉</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">使用LXD, ZFS搭建一台多人共用且不冲突的GPU深度学习服务器。</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h1 id="需求及硬件配置"><a href="#需求及硬件配置" class="headerlink" title="需求及硬件配置"></a>需求及硬件配置</h1><h2 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h2><p>机器只有一台，渴望的眼睛不只一双，要让每位同学像使用一台带有GPU的机器一样使用服务器。</p>
+<p>具体的需求无非包括：</p>
+<ul>
+<li>独立：不同用户之间独立，且不相互影响。</li>
+<li>自由：用户可以像使用一台最原始的机器一样，方便访问、足够大的权限（root）、自由安装程序、自由访问网络。</li>
+<li>隔离：用户无法操作宿主机。</li>
+<li>GPU：用户能够使用GPU。</li>
+</ul>
+<h2 id="方案"><a href="#方案" class="headerlink" title="方案"></a>方案</h2><p>参考以下资料，最终决定使用LXD+ZFS搭建公用服务器（具体容器和后端存储的原理不是很懂）。有不明白的地方，可以参考下面的几个教程。</p>
+<ul>
+<li><a target="_blank" rel="noopener" href="https://feelncut.com/2018/05/03/145.html">搭建多人共用的GPU服务器</a></li>
+<li><a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/25710517">为实验室建立公用GPU服务器</a></li>
+<li><a target="_blank" rel="noopener" href="https://bayton.org/docs/linux/lxd/lxd-zfs-and-bridged-networking-on-ubuntu-16-04-lts/">LXD, ZFS and bridged networking on Ubuntu 16.04 LTS+</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.yangl1996.com/2018/01/11/gpu-passthrough-for-lxc.html">ZFS 与 LXC 与 GPU Passthrough，以及贵校超算队集群管理</a></li>
+</ul>
+<h2 id="硬件配置"><a href="#硬件配置" class="headerlink" title="硬件配置"></a>硬件配置</h2><table>
+<thead>
+<tr>
+<th>CPU</th>
+<th>E5-2678 v3 *2</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>GPU</td>
+<td>Nvidia 1080Ti *2</td>
+</tr>
+<tr>
+<td>内存</td>
+<td>16G</td>
+</tr>
+<tr>
+<td>存储</td>
+<td>250G SSD * 1 + 2TB HDD * 1</td>
+</tr>
+<tr>
+<td>电源</td>
+<td>1000W</td>
+</tr>
+</tbody></table>
+<h1 id="系统、软件安装及网桥配置"><a href="#系统、软件安装及网桥配置" class="headerlink" title="系统、软件安装及网桥配置"></a>系统、软件安装及网桥配置</h1><h2 id="系统"><a href="#系统" class="headerlink" title="系统"></a>系统</h2><p>我选择Ubuntu 18.04 LTS，原因如下：</p>
+<ul>
+<li>LXD版本问题：Ubuntu 16.04 默认下载的LXD是2.0版本的，Ubuntu 18.04默认下载的LXD是3.0版本的，LXD2.0版本并不支持显卡配置到容器中，如果想要16.04配置显卡到LXD容器中，就得自己编译更高级的版本了，我选择重装系统18.04哈哈。</li>
+<li>网桥配置问题：Ubuntu 16.04默认的是使用传统的&#x2F;etc&#x2F;network&#x2F;interfaces的配置文件进行修改网络配置，为了配置一个br0网桥，折腾两天都要哭了。Ubuntu 18.04 使用的是netplan进行网络配置的快速管理，实践起来更加方便。当然，Ubuntu16.04如何使用netplan，不深究。</li>
+</ul>
+<h2 id="软件安装"><a href="#软件安装" class="headerlink" title="软件安装"></a>软件安装</h2><h3 id="Nvidia显卡驱动-390-48"><a href="#Nvidia显卡驱动-390-48" class="headerlink" title="Nvidia显卡驱动(390.48)"></a>Nvidia显卡驱动(390.48)</h3><p>装显卡驱动就不多讲了，网上教程一大把。不过在Ubuntu 18.04中，使用系统提供的NVIDIA driver安装很方便，如图：</p>
+<p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509760/blog/rgc8gekmasuilhjqe8cj.png" alt="安装显卡驱动"></p>
+<p>安装成功之后重启机器，就能使用 <code>nvidia-smi</code>查看显卡信息了。</p>
+<p>##LXD, ZFS和bridge-utils</p>
+<ul>
+<li>LXD 实现虚拟容器</li>
+<li>ZFS 用于管理物理磁盘，支持LXD高级功能</li>
+<li>bridge-utils 用于搭建网桥</li>
+</ul>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install lxd zfsutils-linux bridge-utils</span><br></pre></td></tr></table></figure>
+
+<h2 id="网桥配置"><a href="#网桥配置" class="headerlink" title="网桥配置"></a>网桥配置</h2><p>前面提到了，在Ubuntu 18.04中使用netplan配置网桥较为方便。</p>
+<p>修改<code>/etc/netplan/01-network-manager-all.yaml</code> ，文件名不一定是这个，修改文件下的默认文件即可（修改配置文件时记得备份）。下面是我的案例，因为机器所在的环境需要使用局域网内分配的IP上网。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"># Let NetworkManager manage all devices on this system</span><br><span class="line">network:</span><br><span class="line">  version: 2</span><br><span class="line">#  renderer: NetworkManager</span><br><span class="line">  ethernets:</span><br><span class="line">    enp6s0:</span><br><span class="line">      dhcp4: no</span><br><span class="line">      dhcp6: no</span><br><span class="line"></span><br><span class="line">  bridges:</span><br><span class="line">    br0:</span><br><span class="line">      interfaces: [enp6s0]</span><br><span class="line">      dhcp4: no</span><br><span class="line">      addresses: [192.168.2.199/20]</span><br><span class="line">      gateway4: 192.168.15.252</span><br><span class="line">      nameservers:</span><br><span class="line">        addresses: [192.168.15.252]</span><br><span class="line">      parameters:</span><br><span class="line">        forward-delay: 0</span><br></pre></td></tr></table></figure>
+
+<p>运行命令，是配置修改生效</p>
+<p><code>sudo netplan apply</code></p>
+<p>运行<code>ifconfig</code>查看网络信息，确认修改已经生效：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">br0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        inet 192.168.2.199  netmask 255.255.240.0  broadcast 192.168.15.255</span><br><span class="line">        inet6 fe80::903a:a7ff:fe70:4ad1  prefixlen 64  scopeid 0x20&lt;link&gt;</span><br><span class="line">        ether 92:3a:a7:70:4a:d1  txqueuelen 1000  (Ethernet)</span><br><span class="line">        RX packets 943809  bytes 152320211 (152.3 MB)</span><br><span class="line">        RX errors 0  dropped 86  overruns 0  frame 0</span><br><span class="line">        TX packets 157452  bytes 78313673 (78.3 MB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line"></span><br><span class="line">enp6s0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500</span><br><span class="line">        ether 18:31:bf:cd:57:fb  txqueuelen 1000  (Ethernet)</span><br><span class="line">        RX packets 1547511  bytes 917361647 (917.3 MB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 442558  bytes 101426890 (101.4 MB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line">        device memory 0xc7300000-c737ffff  </span><br><span class="line"></span><br><span class="line">lo: flags=73&lt;UP,LOOPBACK,RUNNING&gt;  mtu 65536</span><br><span class="line">        inet 127.0.0.1  netmask 255.0.0.0</span><br><span class="line">        inet6 ::1  prefixlen 128  scopeid 0x10&lt;host&gt;</span><br><span class="line">        loop  txqueuelen 1000  (Local Loopback)</span><br><span class="line">        RX packets 71372  bytes 94031953 (94.0 MB)</span><br><span class="line">        RX errors 0  dropped 0  overruns 0  frame 0</span><br><span class="line">        TX packets 71372  bytes 94031953 (94.0 MB)</span><br><span class="line">        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h1 id="LXD配置和容器创建"><a href="#LXD配置和容器创建" class="headerlink" title="LXD配置和容器创建"></a>LXD配置和容器创建</h1><h2 id="初始化和网卡配置"><a href="#初始化和网卡配置" class="headerlink" title="初始化和网卡配置"></a>初始化和网卡配置</h2><p>运行<code>sudo lxd init</code>进行LXD的初始化，注意，前面已经配置好了br0网桥，因此配置过程中不用生成了。</p>
+<p>下面是案例：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@ubuntu-lxd-tut:~$ sudo lxd init</span><br><span class="line">Name of the storage backend to use (dir or zfs): zfs</span><br><span class="line">Create a new ZFS pool (yes/no)? yes</span><br><span class="line">Name of the new ZFS pool: lxd</span><br><span class="line">Would you like to use an existing block device (yes/no)? yes</span><br><span class="line">Path to the existing block device: /dev/sdb1</span><br><span class="line">Would you like LXD to be available over the network (yes/no)? no</span><br><span class="line">Do you want to configure the LXD bridge (yes/no)? no</span><br><span class="line">Warning: Stopping lxd.service, but it can still be activated by:</span><br><span class="line">  lxd.socket</span><br><span class="line">LXD has been successfully configured.</span><br></pre></td></tr></table></figure>
+
+<p>配置LXD默认网卡</p>
+<p><code>lxc network attach-profile br0 default eth0</code>，意思是默认br0作为新建容器的eth0网卡。</p>
+<h2 id="验证"><a href="#验证" class="headerlink" title="验证"></a>验证</h2><p><code>sudo zpool list lxd</code> 查看ZFS的后端存储池。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@ubuntu-lxd-tut:~$ sudo zpool list lxd</span><br><span class="line">NAME   SIZE  ALLOC   FREE  EXPANDSZ   FRAG    CAP  DEDUP  HEALTH  ALTROOT</span><br><span class="line">lxd   19.9G   646M  19.2G         -     2%     3%  1.00x  ONLINE  -</span><br></pre></td></tr></table></figure>
+
+<p><code>sudo lxc info</code> 查看LXD的配置信息</p>
+<p><code>sudo lxc profile show default</code> 查看默认容器配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@ubuntu-lxd-tut:~$ lxc profile show default</span><br><span class="line">name: default</span><br><span class="line">config: &#123;&#125;</span><br><span class="line">description: Default LXD profile</span><br><span class="line">devices:</span><br><span class="line">  eth0:</span><br><span class="line">    name: eth0</span><br><span class="line">    nictype: bridged</span><br><span class="line">    parent: br0</span><br><span class="line">    type: nic</span><br></pre></td></tr></table></figure>
+
+<h2 id="创建容器"><a href="#创建容器" class="headerlink" title="创建容器"></a>创建容器</h2><p><code>sudo lxc launch ubuntu:xenial xenTest</code>  创建一个Ubuntu16.04的容器。</p>
+<p><code>sudo lxc list</code> 进行查看已经创建的所有容器。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@ubuntu-lxd-tut:~$ lxc list</span><br><span class="line">+---------+---------+----------------------+------+------------+-----------+</span><br><span class="line">|  NAME   |  STATE  |        IPV4          | IPV6 |    TYPE    | SNAPSHOTS |</span><br><span class="line">+---------+---------+----------------------+------+------------+-----------+</span><br><span class="line">| xenTest | RUNNING | 192.168.0.199 (eth0) |      | PERSISTENT | 0         |</span><br><span class="line">+---------+---------+----------------------+------+------------+-----------+</span><br></pre></td></tr></table></figure>
+
+<p><code>sudo lxc exec xenTest bash</code> 进入容器 xenTest 的命令行模式（root下）。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ubuntu@ubuntu-lxd-tut:~$ lxc exec xenTest bash</span><br><span class="line">root@xenTest:~# </span><br></pre></td></tr></table></figure>
+
+<h1 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h1><h2 id="容器上网问题备注"><a href="#容器上网问题备注" class="headerlink" title="容器上网问题备注"></a>容器上网问题备注</h2><p>创建的容器没法上网，查看了一下，是因为创建容器时分配给容器的网络配置是采用DHCP形式的，由于服务器需要使用固定的address、netmask和nameserver，于是重新在容器中（ubuntu16.04）的<code>/etc/network/interfaces</code> 用静态static的形式设置了一遍网络配置，需要注意的是我用了同网段的另外一个IP，因为和宿主机使用同一个IP会产生冲突。（隐隐约约有种和前面的步骤冲突了的样子，不是很懂网络配置，能用就行了）。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">auto lo</span><br><span class="line">iface lo inet loopback</span><br><span class="line"></span><br><span class="line">auto eth0</span><br><span class="line">iface eth0 inet static</span><br><span class="line">  address 192.168.x.x # 同宿主机同网段的另一个IP,其他同宿主机网络配置</span><br><span class="line">  netmask 255.255.x.x</span><br><span class="line">  gateway 192.168.x.x</span><br><span class="line">  nameserver x.x.x.x</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+<h2 id="远程登录的问题备注"><a href="#远程登录的问题备注" class="headerlink" title="远程登录的问题备注"></a>远程登录的问题备注</h2><p>肯定有远程登录的需求，方案有很多。</p>
+<ul>
+<li><p>花生壳：有便宜方案，但是支持两个端口转发，显然不够</p>
+<p><a target="_blank" rel="noopener" href="https://www.oray.com/">官网</a></p>
+</li>
+<li><p>ngrok：官网的比较慢，然后自己用公网服务器搭建过程中域名和子域名这些把我搞糊涂了，简而言之就是配置稍复杂。<br><a target="_blank" rel="noopener" href="https://ngrok.com/">官网</a></p>
+</li>
+<li><p>frp：下午了解了frp，搭建起来很方便，就决定用这个了。<br><a target="_blank" rel="noopener" href="https://github.com/fatedier/frp/blob/master/README_zh.md">中文文档</a></p>
+</li>
+</ul>
+<p>虽然能SSH登录了，端口转发也可以自己实现了，但速度还是很慢啊，我也很绝望，远程登录的体验太差了，服务器网太慢了吗？</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>xiaohai
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://shenxiaohai.me/gpu-server/" title="搭建公用GPU服务器过程记录">https://shenxiaohai.me/gpu-server/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E9%85%8D%E7%BD%AE/" rel="tag"><i class="fa fa-tag"></i> 配置</a>
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/pcl-vol-measure/" rel="prev" title="PCL体积测量Demo">
+                  <i class="fa fa-chevron-left"></i> PCL体积测量Demo
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/titanic-decisionTree/" rel="next" title="泰坦尼克号幸存者分析-决策树方式">
+                  泰坦尼克号幸存者分析-决策树方式 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments"><div id="twikoo-comments"></div></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-laptop"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohai</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/veraposeidon" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quicklink/2.3.0/quicklink.umd.js" integrity="sha256-yvJQOINiH9fWemHn0vCA5lsHWJaHs6/ZmO+1Ft04SvM=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://shenxiaohai.me/gpu-server/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="twikoo" type="application/json">{"enable":true,"visitor":false,"envId":"https://twikoo-comment.shenxiaohai.me/","el":"#twikoo-comments"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.twikoo.el)
+    .then(() => NexT.utils.getScript(
+      CONFIG.twikoo.jsUrl || 'https://cdn.jsdelivr.net/npm/twikoo/dist/twikoo.all.min.js',
+      { condition: window.twikoo }
+    ))
+    .then(() => {
+      twikoo.init(CONFIG.twikoo);
+    });
+});
+</script>
+<style>
+.post-block, .comments {
+  overflow: visible;
+}
+.tk-owo-emotion {
+  display: inline-block;
+}
+</style>
+
+</body>
+</html>

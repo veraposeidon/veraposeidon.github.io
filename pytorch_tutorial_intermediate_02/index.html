@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
+  <link rel="mask-icon" href="/images/logo.webp" color="#222">
+  <meta name="google-site-verification" content="Cj9oDgXxdJe6MoA_lEUQ2rmOouwJeTm5uJNqjhOv8Ng">
+  <meta name="msvalidate.01" content="E5D0AA8F5E012DFD9C5F3954DF8283B1">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,700,700italic%7CNoto+Serif+SC:300,300italic,400,400italic,700,700italic%7CSource+Code+Pro:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha256-HtsXJanqjKTc8vVQjO4YMhiqFoXkfBsjBWcX91T1jr8=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"shenxiaohai.me","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.1","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"twikoo","storage":true,"lazyload":false,"nav":null,"activeClass":"twikoo"},"stickytabs":false,"motion":{"enable":false,"async":false,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.xml","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="/js/config.js"></script>
+
+    <meta name="description" content="Pytorch中级S02E02：深度残差网络（Deep Residual Networks）。深度残差网络残差单元模型可视化工具Netron">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks）">
+<meta property="og:url" content="https://shenxiaohai.me/pytorch_tutorial_intermediate_02/index.html">
+<meta property="og:site_name" content="SHEN&#39;s DevNotes">
+<meta property="og:description" content="Pytorch中级S02E02：深度残差网络（Deep Residual Networks）。深度残差网络残差单元模型可视化工具Netron">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509765/blog/xgtvsprrewr5jh2f3s1r.svg">
+<meta property="og:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509767/blog/lkii2jagh2xwoyinsmny.png">
+<meta property="article:published_time" content="2018-10-18T20:03:21.000Z">
+<meta property="article:modified_time" content="2023-03-11T05:02:28.498Z">
+<meta property="article:author" content="xiaohai">
+<meta property="article:tag" content="深度学习">
+<meta property="article:tag" content="PyTorch">
+<meta property="article:tag" content="ResNet">
+<meta property="article:tag" content="深度残差网络">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509765/blog/xgtvsprrewr5jh2f3s1r.svg">
+
+
+<link rel="canonical" href="https://shenxiaohai.me/pytorch_tutorial_intermediate_02/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://shenxiaohai.me/pytorch_tutorial_intermediate_02/","path":"pytorch_tutorial_intermediate_02/","title":"PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks）"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks） | SHEN's DevNotes</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YDT7F4NZP6"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-YDT7F4NZP6","only_pageview":false}</script>
+  <script src="/js/third-party/analytics/google-analytics.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="SHEN's DevNotes" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">SHEN's DevNotes</p>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">学习笔记，编程技巧，效率工具</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a></li><li class="menu-item menu-item-tags"><a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">131</span></a></li><li class="menu-item menu-item-categories"><a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">18</span></a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">74</span></a></li><li class="menu-item menu-item-碎碎念-|-memos"><a href="https://memos.shenxiaohai.me/" rel="section" target="_blank"><i class="fa fa-file-pen fa-fw"></i>碎碎念 | Memos</a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#PyTorch-%E4%B8%AD%E7%BA%A7%E7%AF%87%EF%BC%882%EF%BC%89%EF%BC%9A%E6%B7%B1%E5%BA%A6%E6%AE%8B%E5%B7%AE%E7%BD%91%E7%BB%9C%EF%BC%88Deep-Residual-Networks%EF%BC%89"><span class="nav-text">PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B7%B1%E5%BA%A6%E6%AE%8B%E5%B7%AE%E7%BD%91%E7%BB%9C-%E5%AD%A6%E4%B9%A0%E8%B5%84%E6%BA%90"><span class="nav-text">深度残差网络 学习资源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pytorch%E5%AE%9E%E7%8E%B0"><span class="nav-text">Pytorch实现</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A2%84%E5%A4%84%E7%90%86"><span class="nav-text">预处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#CIFAR-10-%E6%95%B0%E6%8D%AE%E9%9B%86"><span class="nav-text">CIFAR-10 数据集</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%B1%E5%BA%A6%E6%AE%8B%E5%B7%AE%E7%BD%91%E7%BB%9C%E6%A8%A1%E5%9E%8B%E8%AE%BE%E8%AE%A1"><span class="nav-text">深度残差网络模型设计</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3x3%E5%8D%B7%E7%A7%AF%E5%B1%82"><span class="nav-text">3x3卷积层</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AE%8B%E5%B7%AE%E5%9D%97%EF%BC%88%E6%AE%8B%E5%B7%AE%E5%8D%95%E5%85%83%EF%BC%89%EF%BC%88Residual-block%EF%BC%89"><span class="nav-text">残差块（残差单元）（Residual  block）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AE%8B%E5%B7%AE%E7%BD%91%E7%BB%9C%E6%90%AD%E5%BB%BA"><span class="nav-text">残差网络搭建</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%AE%9E%E4%BE%8B%E5%8C%96%E6%A8%A1%E5%9E%8B"><span class="nav-text">实例化模型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AE%AD%E7%BB%83%E6%A8%A1%E5%9E%8B"><span class="nav-text">训练模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E6%B5%8B%E8%AF%95%E5%92%8C%E4%BF%9D%E5%AD%98"><span class="nav-text">模型测试和保存</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Pytorch%E6%A8%A1%E5%9E%8B%E5%8F%AF%E8%A7%86%E5%8C%96"><span class="nav-text">Pytorch模型可视化</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%BC%E5%87%BAONNX%E6%A8%A1%E5%9E%8B"><span class="nav-text">导出ONNX模型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E5%8F%AF%E8%A7%86%E5%8C%96%E5%B7%A5%E5%85%B7%EF%BC%9ANETRON"><span class="nav-text">模型可视化工具：NETRON</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%A8%A1%E5%9E%8B%E5%8F%AF%E8%A7%86%E5%8C%96%E7%BB%93%E6%9E%9C"><span class="nav-text">模型可视化结果</span></a></li></ol></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xiaohai</p>
+  <div class="site-description" itemprop="description">我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。</div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">74</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">131</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/veraposeidon" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;veraposeidon" rel="noopener me" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/HiYoake" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;HiYoake" rel="noopener me" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" class="cc-opacity" rel="noopener" target="_blank"><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></a>
+  </div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://shenxiaohai.me/pytorch_tutorial_intermediate_02/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xiaohai">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="SHEN's DevNotes">
+      <meta itemprop="description" content="我在这个技术博客中分享学习笔记，提供实用技巧和工具资源。">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks） | SHEN's DevNotes">
+      <meta itemprop="description" content="Pytorch中级S02E02：深度残差网络（Deep Residual Networks）。</br>深度残差网络</br>残差单元</br>模型可视化工具Netron">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks）
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-10-18 20:03:21" itemprop="dateCreated datePublished" datetime="2018-10-18T20:03:21Z">2018-10-18</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar-check"></i>
+      </span>
+      <span class="post-meta-item-text">更新于</span>
+      <time title="修改时间：2023-03-11 05:02:28" itemprop="dateModified" datetime="2023-03-11T05:02:28Z">2023-03-11</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0%E6%A1%86%E6%9E%B6/" itemprop="url" rel="index"><span itemprop="name">深度学习框架</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">Pytorch中级S02E02：深度残差网络（Deep Residual Networks）。</br>深度残差网络</br>残差单元</br>模型可视化工具Netron</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509765/blog/xgtvsprrewr5jh2f3s1r.svg" alt="PyTorch"></p>
+<h1 id="PyTorch-中级篇（2）：深度残差网络（Deep-Residual-Networks）"><a href="#PyTorch-中级篇（2）：深度残差网络（Deep-Residual-Networks）" class="headerlink" title="PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks）"></a>PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks）</h1><blockquote>
+<p>参考代码</p>
+<p><strong>yunjey的 <a target="_blank" rel="noopener" href="https://github.com/yunjey/pytorch-tutorial/tree/master/tutorials/02-intermediate/deep_residual_network/main.py">pytorch tutorial系列</a></strong></p>
+</blockquote>
+<h2 id="深度残差网络-学习资源"><a href="#深度残差网络-学习资源" class="headerlink" title="深度残差网络 学习资源"></a>深度残差网络 学习资源</h2><blockquote>
+<p><strong>论文原文</strong></p>
+<p><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1512.03385">Deep Residual Learning for Image Recognition</a></p>
+</blockquote>
+<blockquote>
+<p><strong>Kaiming He的深度残差网络PPT</strong></p>
+<p><a target="_blank" rel="noopener" href="https://www.leiphone.com/news/201608/vhqwt5eWmUsLBcnv.html">秒懂！何凯明的深度残差网络PPT是这样的|ICML2016 tutorial</a></p>
+</blockquote>
+<h2 id="Pytorch实现"><a href="#Pytorch实现" class="headerlink" title="Pytorch实现"></a>Pytorch实现</h2><p>根据原文【4.2. CIFAR-10 and Analysis】一节设计的针对数据集CIFAR-10的深度残差网络。</p>
+<h3 id="预处理"><a href="#预处理" class="headerlink" title="预处理"></a>预处理</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 包</span></span><br><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">import</span> torch.nn <span class="keyword">as</span> nn</span><br><span class="line"><span class="keyword">import</span> torchvision</span><br><span class="line"><span class="keyword">import</span> torchvision.transforms <span class="keyword">as</span> transforms</span><br></pre></td></tr></table></figure>
+
+
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设备配置</span></span><br><span class="line">torch.cuda.set_device(<span class="number">1</span>) <span class="comment"># 这句用来设置pytorch在哪块GPU上运行</span></span><br><span class="line">device = torch.device(<span class="string">&#x27;cuda&#x27;</span> <span class="keyword">if</span> torch.cuda.is_available() <span class="keyword">else</span> <span class="string">&#x27;cpu&#x27;</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 超参数设置</span></span><br><span class="line">num_epochs = <span class="number">80</span></span><br><span class="line">learning_rate = <span class="number">0.001</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 图像预处理模块</span></span><br><span class="line"><span class="comment"># 先padding ，再 翻转，然后 裁剪。数据增广的手段</span></span><br><span class="line">transform = transforms.Compose([</span><br><span class="line">    transforms.Pad(<span class="number">4</span>),</span><br><span class="line">    transforms.RandomHorizontalFlip(),</span><br><span class="line">    transforms.RandomCrop(<span class="number">32</span>),</span><br><span class="line">    transforms.ToTensor()])</span><br></pre></td></tr></table></figure>
+
+<h3 id="CIFAR-10-数据集"><a href="#CIFAR-10-数据集" class="headerlink" title="CIFAR-10 数据集"></a>CIFAR-10 数据集</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#  训练数据集</span></span><br><span class="line">train_dataset = torchvision.datasets.CIFAR10(root=<span class="string">&#x27;../../../data/cifar-10&#x27;</span>,</span><br><span class="line">                                             train=<span class="literal">True</span>, </span><br><span class="line">                                             transform=transform,</span><br><span class="line">                                             download=<span class="literal">True</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 测试数据集</span></span><br><span class="line">test_dataset = torchvision.datasets.CIFAR10(root=<span class="string">&#x27;../../../data/cifar-10&#x27;</span>,</span><br><span class="line">                                            train=<span class="literal">False</span>, </span><br><span class="line">                                            transform=transforms.ToTensor())</span><br><span class="line"></span><br><span class="line"><span class="comment"># 数据加载器</span></span><br><span class="line"><span class="comment"># 训练数据加载器</span></span><br><span class="line">train_loader = torch.utils.data.DataLoader(dataset=train_dataset,</span><br><span class="line">                                           batch_size=<span class="number">100</span>, </span><br><span class="line">                                           shuffle=<span class="literal">True</span>)</span><br><span class="line"><span class="comment"># 测试数据加载器</span></span><br><span class="line">test_loader = torch.utils.data.DataLoader(dataset=test_dataset,</span><br><span class="line">                                          batch_size=<span class="number">100</span>, </span><br><span class="line">                                          shuffle=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<pre><code>Files already downloaded and verified
+</code></pre>
+<h3 id="深度残差网络模型设计"><a href="#深度残差网络模型设计" class="headerlink" title="深度残差网络模型设计"></a>深度残差网络模型设计</h3><h4 id="3x3卷积层"><a href="#3x3卷积层" class="headerlink" title="3x3卷积层"></a>3x3卷积层</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 3x3 convolution</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">conv3x3</span>(<span class="params">in_channels, out_channels, stride=<span class="number">1</span></span>):</span><br><span class="line">    <span class="keyword">return</span> nn.Conv2d(in_channels, out_channels, kernel_size=<span class="number">3</span>, </span><br><span class="line">                     stride=stride, padding=<span class="number">1</span>, bias=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure>
+
+<h4 id="残差块（残差单元）（Residual-block）"><a href="#残差块（残差单元）（Residual-block）" class="headerlink" title="残差块（残差单元）（Residual  block）"></a>残差块（残差单元）（Residual  block）</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Residual block</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ResidualBlock</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, in_channels, out_channels, stride=<span class="number">1</span>, downsample=<span class="literal">None</span></span>):</span><br><span class="line">        <span class="built_in">super</span>(ResidualBlock, self).__init__()</span><br><span class="line">        self.conv1 = conv3x3(in_channels, out_channels, stride)</span><br><span class="line">        self.bn1 = nn.BatchNorm2d(out_channels)</span><br><span class="line">        self.relu = nn.ReLU(inplace=<span class="literal">True</span>)</span><br><span class="line">        self.conv2 = conv3x3(out_channels, out_channels)</span><br><span class="line">        self.bn2 = nn.BatchNorm2d(out_channels)</span><br><span class="line">        self.downsample = downsample</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        residual = x</span><br><span class="line">        out = self.conv1(x)</span><br><span class="line">        out = self.bn1(out)</span><br><span class="line">        out = self.relu(out)</span><br><span class="line">        out = self.conv2(out)</span><br><span class="line">        out = self.bn2(out)</span><br><span class="line">        <span class="keyword">if</span> self.downsample:</span><br><span class="line">            residual = self.downsample(x)</span><br><span class="line">        out += residual</span><br><span class="line">        out = self.relu(out)</span><br><span class="line">        <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
+
+<h4 id="残差网络搭建"><a href="#残差网络搭建" class="headerlink" title="残差网络搭建"></a>残差网络搭建</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># ResNet</span></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ResNet</span>(nn.Module):</span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">__init__</span>(<span class="params">self, block, layers, num_classes=<span class="number">10</span></span>):</span><br><span class="line">        <span class="built_in">super</span>(ResNet, self).__init__()</span><br><span class="line">        self.in_channels = <span class="number">16</span></span><br><span class="line">        self.conv = conv3x3(<span class="number">3</span>, <span class="number">16</span>)</span><br><span class="line">        self.bn = nn.BatchNorm2d(<span class="number">16</span>)</span><br><span class="line">        self.relu = nn.ReLU(inplace=<span class="literal">True</span>)</span><br><span class="line">        self.layer1 = self.make_layer(block, <span class="number">16</span>, layers[<span class="number">0</span>])</span><br><span class="line">        self.layer2 = self.make_layer(block, <span class="number">32</span>, layers[<span class="number">0</span>], <span class="number">2</span>)</span><br><span class="line">        self.layer3 = self.make_layer(block, <span class="number">64</span>, layers[<span class="number">1</span>], <span class="number">2</span>)</span><br><span class="line">        self.avg_pool = nn.AvgPool2d(<span class="number">8</span>,ceil_mode=<span class="literal">False</span>) <span class="comment">#  nn.AvgPool2d需要添加参数ceil_mode=False，否则该模块无法导出为onnx格式</span></span><br><span class="line">        self.fc = nn.Linear(<span class="number">64</span>, num_classes)</span><br><span class="line">        </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">make_layer</span>(<span class="params">self, block, out_channels, blocks, stride=<span class="number">1</span></span>):</span><br><span class="line">        downsample = <span class="literal">None</span></span><br><span class="line">        <span class="keyword">if</span> (stride != <span class="number">1</span>) <span class="keyword">or</span> (self.in_channels != out_channels):</span><br><span class="line">            downsample = nn.Sequential(</span><br><span class="line">                conv3x3(self.in_channels, out_channels, stride=stride),</span><br><span class="line">                nn.BatchNorm2d(out_channels))</span><br><span class="line">        layers = []</span><br><span class="line">        layers.append(block(self.in_channels, out_channels, stride, downsample)) <span class="comment"># 残差直接映射部分</span></span><br><span class="line">        self.in_channels = out_channels</span><br><span class="line">        <span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">1</span>, blocks):</span><br><span class="line">            layers.append(block(out_channels, out_channels))</span><br><span class="line">        <span class="keyword">return</span> nn.Sequential(*layers)</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">def</span> <span class="title function_">forward</span>(<span class="params">self, x</span>):</span><br><span class="line">        out = self.conv(x)</span><br><span class="line">        out = self.bn(out)</span><br><span class="line">        out = self.relu(out)</span><br><span class="line">        out = self.layer1(out)</span><br><span class="line">        out = self.layer2(out)</span><br><span class="line">        out = self.layer3(out)</span><br><span class="line">        out = self.avg_pool(out)</span><br><span class="line">        out = out.view(out.size(<span class="number">0</span>), -<span class="number">1</span>)</span><br><span class="line">        out = self.fc(out)</span><br><span class="line">        <span class="keyword">return</span> out</span><br></pre></td></tr></table></figure>
+
+<h4 id="实例化模型"><a href="#实例化模型" class="headerlink" title="实例化模型"></a>实例化模型</h4><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 实例化一个残差网络模型</span></span><br><span class="line">model = ResNet(ResidualBlock, [<span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>]).to(device)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 设置损失函数和优化器</span></span><br><span class="line">criterion = nn.CrossEntropyLoss()</span><br><span class="line">optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 用于更新参数组中的学习率</span></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">update_lr</span>(<span class="params">optimizer, lr</span>):    </span><br><span class="line">    <span class="keyword">for</span> param_group <span class="keyword">in</span> optimizer.param_groups:</span><br><span class="line">        param_group[<span class="string">&#x27;lr&#x27;</span>] = lr</span><br></pre></td></tr></table></figure>
+
+<h3 id="训练模型"><a href="#训练模型" class="headerlink" title="训练模型"></a>训练模型</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">total_step = <span class="built_in">len</span>(train_loader)</span><br><span class="line">curr_lr = learning_rate</span><br><span class="line"><span class="keyword">for</span> epoch <span class="keyword">in</span> <span class="built_in">range</span>(num_epochs):</span><br><span class="line">    <span class="keyword">for</span> i, (images, labels) <span class="keyword">in</span> <span class="built_in">enumerate</span>(train_loader):</span><br><span class="line">        images = images.to(device)</span><br><span class="line">        labels = labels.to(device)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 前向传播</span></span><br><span class="line">        outputs = model(images)</span><br><span class="line">        loss = criterion(outputs, labels)</span><br><span class="line">        </span><br><span class="line">        <span class="comment"># 反向传播和优化</span></span><br><span class="line">        optimizer.zero_grad()</span><br><span class="line">        loss.backward()</span><br><span class="line">        optimizer.step()</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">if</span> ((i+<span class="number">1</span>) % <span class="number">100</span> == <span class="number">0</span>) <span class="keyword">and</span> ((epoch+<span class="number">1</span>) % <span class="number">5</span> == <span class="number">0</span>):</span><br><span class="line">            <span class="built_in">print</span> (<span class="string">&quot;Epoch [&#123;&#125;/&#123;&#125;], Step [&#123;&#125;/&#123;&#125;] Loss: &#123;:.4f&#125;&quot;</span></span><br><span class="line">                   .<span class="built_in">format</span>(epoch+<span class="number">1</span>, num_epochs, i+<span class="number">1</span>, total_step, loss.item()))</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 学习率衰减策略</span></span><br><span class="line">    <span class="keyword">if</span> (epoch+<span class="number">1</span>) % <span class="number">20</span> == <span class="number">0</span>:</span><br><span class="line">        curr_lr /= <span class="number">3</span></span><br><span class="line">        update_lr(optimizer, curr_lr)</span><br></pre></td></tr></table></figure>
+
+<pre><code>Epoch [5/80], Step [100/500] Loss: 0.6474
+Epoch [5/80], Step [200/500] Loss: 0.7043
+Epoch [5/80], Step [300/500] Loss: 0.7472
+Epoch [5/80], Step [400/500] Loss: 0.6662
+Epoch [5/80], Step [500/500] Loss: 0.6378
+Epoch [10/80], Step [100/500] Loss: 0.5786
+Epoch [10/80], Step [200/500] Loss: 0.7229
+Epoch [10/80], Step [300/500] Loss: 0.6183
+Epoch [10/80], Step [400/500] Loss: 0.5043
+Epoch [10/80], Step [500/500] Loss: 0.5799
+Epoch [15/80], Step [100/500] Loss: 0.5295
+Epoch [15/80], Step [200/500] Loss: 0.4475
+Epoch [15/80], Step [300/500] Loss: 0.3896
+Epoch [15/80], Step [400/500] Loss: 0.4869
+Epoch [15/80], Step [500/500] Loss: 0.4973
+Epoch [20/80], Step [100/500] Loss: 0.3953
+Epoch [20/80], Step [200/500] Loss: 0.4542
+Epoch [20/80], Step [300/500] Loss: 0.4003
+Epoch [20/80], Step [400/500] Loss: 0.3863
+Epoch [20/80], Step [500/500] Loss: 0.2813
+Epoch [25/80], Step [100/500] Loss: 0.3860
+Epoch [25/80], Step [200/500] Loss: 0.4341
+Epoch [25/80], Step [300/500] Loss: 0.3384
+Epoch [25/80], Step [400/500] Loss: 0.1694
+Epoch [25/80], Step [500/500] Loss: 0.2215
+Epoch [30/80], Step [100/500] Loss: 0.2096
+Epoch [30/80], Step [200/500] Loss: 0.1695
+Epoch [30/80], Step [300/500] Loss: 0.2272
+Epoch [30/80], Step [400/500] Loss: 0.2907
+Epoch [30/80], Step [500/500] Loss: 0.1764
+Epoch [35/80], Step [100/500] Loss: 0.2971
+Epoch [35/80], Step [200/500] Loss: 0.2568
+Epoch [35/80], Step [300/500] Loss: 0.1824
+Epoch [35/80], Step [400/500] Loss: 0.1700
+Epoch [35/80], Step [500/500] Loss: 0.2449
+Epoch [40/80], Step [100/500] Loss: 0.0951
+Epoch [40/80], Step [200/500] Loss: 0.2217
+Epoch [40/80], Step [300/500] Loss: 0.2020
+Epoch [40/80], Step [400/500] Loss: 0.1849
+Epoch [40/80], Step [500/500] Loss: 0.1752
+Epoch [45/80], Step [100/500] Loss: 0.3183
+Epoch [45/80], Step [200/500] Loss: 0.4195
+Epoch [45/80], Step [300/500] Loss: 0.2002
+Epoch [45/80], Step [400/500] Loss: 0.1956
+Epoch [45/80], Step [500/500] Loss: 0.1547
+Epoch [50/80], Step [100/500] Loss: 0.2431
+Epoch [50/80], Step [200/500] Loss: 0.1655
+Epoch [50/80], Step [300/500] Loss: 0.0941
+Epoch [50/80], Step [400/500] Loss: 0.2437
+Epoch [50/80], Step [500/500] Loss: 0.1340
+Epoch [55/80], Step [100/500] Loss: 0.2455
+Epoch [55/80], Step [200/500] Loss: 0.1532
+Epoch [55/80], Step [300/500] Loss: 0.1303
+Epoch [55/80], Step [400/500] Loss: 0.1286
+Epoch [55/80], Step [500/500] Loss: 0.2082
+Epoch [60/80], Step [100/500] Loss: 0.2705
+Epoch [60/80], Step [200/500] Loss: 0.1413
+Epoch [60/80], Step [300/500] Loss: 0.1149
+Epoch [60/80], Step [400/500] Loss: 0.1146
+Epoch [60/80], Step [500/500] Loss: 0.1569
+Epoch [65/80], Step [100/500] Loss: 0.1463
+Epoch [65/80], Step [200/500] Loss: 0.1799
+Epoch [65/80], Step [300/500] Loss: 0.1485
+Epoch [65/80], Step [400/500] Loss: 0.1690
+Epoch [65/80], Step [500/500] Loss: 0.2135
+Epoch [70/80], Step [100/500] Loss: 0.1388
+Epoch [70/80], Step [200/500] Loss: 0.1783
+Epoch [70/80], Step [300/500] Loss: 0.1284
+Epoch [70/80], Step [400/500] Loss: 0.1675
+Epoch [70/80], Step [500/500] Loss: 0.2066
+Epoch [75/80], Step [100/500] Loss: 0.1681
+Epoch [75/80], Step [200/500] Loss: 0.0998
+Epoch [75/80], Step [300/500] Loss: 0.1553
+Epoch [75/80], Step [400/500] Loss: 0.1153
+Epoch [75/80], Step [500/500] Loss: 0.1365
+Epoch [80/80], Step [100/500] Loss: 0.1176
+Epoch [80/80], Step [200/500] Loss: 0.2006
+Epoch [80/80], Step [300/500] Loss: 0.1738
+Epoch [80/80], Step [400/500] Loss: 0.1613
+Epoch [80/80], Step [500/500] Loss: 0.2003
+</code></pre>
+<h3 id="模型测试和保存"><a href="#模型测试和保存" class="headerlink" title="模型测试和保存"></a>模型测试和保存</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 设置为评估模式</span></span><br><span class="line">model.<span class="built_in">eval</span>() </span><br></pre></td></tr></table></figure>
+
+
+
+
+<pre><code>ResNet(
+  (conv): Conv2d(3, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+  (bn): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (relu): ReLU(inplace)
+  (layer1): Sequential(
+    (0): ResidualBlock(
+      (conv1): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace)
+      (conv2): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+    (1): ResidualBlock(
+      (conv1): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace)
+      (conv2): Conv2d(16, 16, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(16, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (layer2): Sequential(
+    (0): ResidualBlock(
+      (conv1): Conv2d(16, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace)
+      (conv2): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (downsample): Sequential(
+        (0): Conv2d(16, 32, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+        (1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): ResidualBlock(
+      (conv1): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace)
+      (conv2): Conv2d(32, 32, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(32, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (layer3): Sequential(
+    (0): ResidualBlock(
+      (conv1): Conv2d(32, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (downsample): Sequential(
+        (0): Conv2d(32, 64, kernel_size=(3, 3), stride=(2, 2), padding=(1, 1), bias=False)
+        (1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      )
+    )
+    (1): ResidualBlock(
+      (conv1): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn1): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+      (relu): ReLU(inplace)
+      (conv2): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1), padding=(1, 1), bias=False)
+      (bn2): BatchNorm2d(64, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+    )
+  )
+  (avg_pool): AvgPool2d(kernel_size=8, stride=8, padding=0)
+  (fc): Linear(in_features=64, out_features=10, bias=True)
+)
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 屏蔽梯度计算</span></span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    correct = <span class="number">0</span></span><br><span class="line">    total = <span class="number">0</span></span><br><span class="line">    <span class="keyword">for</span> images, labels <span class="keyword">in</span> test_loader:</span><br><span class="line">        images = images.to(device)</span><br><span class="line">        labels = labels.to(device)</span><br><span class="line">        outputs = model(images)</span><br><span class="line">        _, predicted = torch.<span class="built_in">max</span>(outputs.data, <span class="number">1</span>)</span><br><span class="line">        total += labels.size(<span class="number">0</span>)</span><br><span class="line">        correct += (predicted == labels).<span class="built_in">sum</span>().item()</span><br><span class="line"></span><br><span class="line">    <span class="built_in">print</span>(<span class="string">&#x27;Accuracy of the model on the test images: &#123;&#125; %&#x27;</span>.<span class="built_in">format</span>(<span class="number">100</span> * correct / total))</span><br></pre></td></tr></table></figure>
+
+<pre><code>Accuracy of the model on the test images: 88.24 %
+</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># 保存模型</span></span><br><span class="line">torch.save(model.state_dict(), <span class="string">&#x27;resnet.ckpt&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Pytorch模型可视化"><a href="#Pytorch模型可视化" class="headerlink" title="Pytorch模型可视化"></a>Pytorch模型可视化</h2><h3 id="导出ONNX模型"><a href="#导出ONNX模型" class="headerlink" title="导出ONNX模型"></a>导出ONNX模型</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch.onnx</span><br><span class="line"></span><br><span class="line"><span class="comment"># 按照输入格式，设计随机输入</span></span><br><span class="line">dummy_input =torch.randn(<span class="number">1</span>, <span class="number">3</span>, <span class="number">32</span>, <span class="number">32</span>).cuda()   </span><br><span class="line"><span class="comment"># 导出模型</span></span><br><span class="line">torch.onnx.export(model,dummy_input, <span class="string">&#x27;resnet.onnx&#x27;</span>,verbose=<span class="literal">True</span>) </span><br></pre></td></tr></table></figure>
+
+<pre><code>graph(%0 : Float(1, 3, 32, 32)
+      %1 : Float(16, 3, 3, 3)
+      %2 : Float(16)
+      %3 : Float(16)
+      %4 : Float(16)
+      %5 : Float(16)
+      %6 : Long()
+      %7 : Float(16, 16, 3, 3)
+      %8 : Float(16)
+      %9 : Float(16)
+      %10 : Float(16)
+      %11 : Float(16)
+      %12 : Long()
+      %13 : Float(16, 16, 3, 3)
+      %14 : Float(16)
+      %15 : Float(16)
+      %16 : Float(16)
+      %17 : Float(16)
+      %18 : Long()
+      %19 : Float(16, 16, 3, 3)
+      %20 : Float(16)
+      %21 : Float(16)
+      %22 : Float(16)
+      %23 : Float(16)
+      %24 : Long()
+      %25 : Float(16, 16, 3, 3)
+      %26 : Float(16)
+      %27 : Float(16)
+      %28 : Float(16)
+      %29 : Float(16)
+      %30 : Long()
+      %31 : Float(32, 16, 3, 3)
+      %32 : Float(32)
+      %33 : Float(32)
+      %34 : Float(32)
+      %35 : Float(32)
+      %36 : Long()
+      %37 : Float(32, 32, 3, 3)
+      %38 : Float(32)
+      %39 : Float(32)
+      %40 : Float(32)
+      %41 : Float(32)
+      %42 : Long()
+      %43 : Float(32, 16, 3, 3)
+      %44 : Float(32)
+      %45 : Float(32)
+      %46 : Float(32)
+      %47 : Float(32)
+      %48 : Long()
+      %49 : Float(32, 32, 3, 3)
+      %50 : Float(32)
+      %51 : Float(32)
+      %52 : Float(32)
+      %53 : Float(32)
+      %54 : Long()
+      %55 : Float(32, 32, 3, 3)
+      %56 : Float(32)
+      %57 : Float(32)
+      %58 : Float(32)
+      %59 : Float(32)
+      %60 : Long()
+      %61 : Float(64, 32, 3, 3)
+      %62 : Float(64)
+      %63 : Float(64)
+      %64 : Float(64)
+      %65 : Float(64)
+      %66 : Long()
+      %67 : Float(64, 64, 3, 3)
+      %68 : Float(64)
+      %69 : Float(64)
+      %70 : Float(64)
+      %71 : Float(64)
+      %72 : Long()
+      %73 : Float(64, 32, 3, 3)
+      %74 : Float(64)
+      %75 : Float(64)
+      %76 : Float(64)
+      %77 : Float(64)
+      %78 : Long()
+      %79 : Float(64, 64, 3, 3)
+      %80 : Float(64)
+      %81 : Float(64)
+      %82 : Float(64)
+      %83 : Float(64)
+      %84 : Long()
+      %85 : Float(64, 64, 3, 3)
+      %86 : Float(64)
+      %87 : Float(64)
+      %88 : Float(64)
+      %89 : Float(64)
+      %90 : Long()
+      %91 : Float(10, 64)
+      %92 : Float(10)) &#123;
+  %93 : Float(1, 16, 32, 32) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%0, %1), scope: ResNet/Conv2d[conv]
+  %94 : Float(1, 16, 32, 32) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%93, %2, %3, %4, %5), scope: ResNet/BatchNorm2d[bn]
+  %95 : Float(1, 16, 32, 32) = onnx::Relu(%94), scope: ResNet/ReLU[relu]
+  %96 : Float(1, 16, 32, 32) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%95, %7), scope: ResNet/Sequential[layer1]/ResidualBlock[0]/Conv2d[conv1]
+  %97 : Float(1, 16, 32, 32) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%96, %8, %9, %10, %11), scope: ResNet/Sequential[layer1]/ResidualBlock[0]/BatchNorm2d[bn1]
+  %98 : Float(1, 16, 32, 32) = onnx::Relu(%97), scope: ResNet/Sequential[layer1]/ResidualBlock[0]/ReLU[relu]
+  %99 : Float(1, 16, 32, 32) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%98, %13), scope: ResNet/Sequential[layer1]/ResidualBlock[0]/Conv2d[conv2]
+  %100 : Float(1, 16, 32, 32) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%99, %14, %15, %16, %17), scope: ResNet/Sequential[layer1]/ResidualBlock[0]/BatchNorm2d[bn2]
+  %101 : Float(1, 16, 32, 32) = onnx::Add(%100, %95), scope: ResNet/Sequential[layer1]/ResidualBlock[0]
+  %102 : Float(1, 16, 32, 32) = onnx::Relu(%101), scope: ResNet/Sequential[layer1]/ResidualBlock[0]/ReLU[relu]
+  %103 : Float(1, 16, 32, 32) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%102, %19), scope: ResNet/Sequential[layer1]/ResidualBlock[1]/Conv2d[conv1]
+  %104 : Float(1, 16, 32, 32) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%103, %20, %21, %22, %23), scope: ResNet/Sequential[layer1]/ResidualBlock[1]/BatchNorm2d[bn1]
+  %105 : Float(1, 16, 32, 32) = onnx::Relu(%104), scope: ResNet/Sequential[layer1]/ResidualBlock[1]/ReLU[relu]
+  %106 : Float(1, 16, 32, 32) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%105, %25), scope: ResNet/Sequential[layer1]/ResidualBlock[1]/Conv2d[conv2]
+  %107 : Float(1, 16, 32, 32) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%106, %26, %27, %28, %29), scope: ResNet/Sequential[layer1]/ResidualBlock[1]/BatchNorm2d[bn2]
+  %108 : Float(1, 16, 32, 32) = onnx::Add(%107, %102), scope: ResNet/Sequential[layer1]/ResidualBlock[1]
+  %109 : Float(1, 16, 32, 32) = onnx::Relu(%108), scope: ResNet/Sequential[layer1]/ResidualBlock[1]/ReLU[relu]
+  %110 : Float(1, 32, 16, 16) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[2, 2]](%109, %31), scope: ResNet/Sequential[layer2]/ResidualBlock[0]/Conv2d[conv1]
+  %111 : Float(1, 32, 16, 16) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%110, %32, %33, %34, %35), scope: ResNet/Sequential[layer2]/ResidualBlock[0]/BatchNorm2d[bn1]
+  %112 : Float(1, 32, 16, 16) = onnx::Relu(%111), scope: ResNet/Sequential[layer2]/ResidualBlock[0]/ReLU[relu]
+  %113 : Float(1, 32, 16, 16) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%112, %37), scope: ResNet/Sequential[layer2]/ResidualBlock[0]/Conv2d[conv2]
+  %114 : Float(1, 32, 16, 16) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%113, %38, %39, %40, %41), scope: ResNet/Sequential[layer2]/ResidualBlock[0]/BatchNorm2d[bn2]
+  %115 : Float(1, 32, 16, 16) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[2, 2]](%109, %43), scope: ResNet/Sequential[layer2]/ResidualBlock[0]/Sequential[downsample]/Conv2d[0]
+  %116 : Float(1, 32, 16, 16) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%115, %44, %45, %46, %47), scope: ResNet/Sequential[layer2]/ResidualBlock[0]/Sequential[downsample]/BatchNorm2d[1]
+  %117 : Float(1, 32, 16, 16) = onnx::Add(%114, %116), scope: ResNet/Sequential[layer2]/ResidualBlock[0]
+  %118 : Float(1, 32, 16, 16) = onnx::Relu(%117), scope: ResNet/Sequential[layer2]/ResidualBlock[0]/ReLU[relu]
+  %119 : Float(1, 32, 16, 16) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%118, %49), scope: ResNet/Sequential[layer2]/ResidualBlock[1]/Conv2d[conv1]
+  %120 : Float(1, 32, 16, 16) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%119, %50, %51, %52, %53), scope: ResNet/Sequential[layer2]/ResidualBlock[1]/BatchNorm2d[bn1]
+  %121 : Float(1, 32, 16, 16) = onnx::Relu(%120), scope: ResNet/Sequential[layer2]/ResidualBlock[1]/ReLU[relu]
+  %122 : Float(1, 32, 16, 16) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%121, %55), scope: ResNet/Sequential[layer2]/ResidualBlock[1]/Conv2d[conv2]
+  %123 : Float(1, 32, 16, 16) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%122, %56, %57, %58, %59), scope: ResNet/Sequential[layer2]/ResidualBlock[1]/BatchNorm2d[bn2]
+  %124 : Float(1, 32, 16, 16) = onnx::Add(%123, %118), scope: ResNet/Sequential[layer2]/ResidualBlock[1]
+  %125 : Float(1, 32, 16, 16) = onnx::Relu(%124), scope: ResNet/Sequential[layer2]/ResidualBlock[1]/ReLU[relu]
+  %126 : Float(1, 64, 8, 8) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[2, 2]](%125, %61), scope: ResNet/Sequential[layer3]/ResidualBlock[0]/Conv2d[conv1]
+  %127 : Float(1, 64, 8, 8) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%126, %62, %63, %64, %65), scope: ResNet/Sequential[layer3]/ResidualBlock[0]/BatchNorm2d[bn1]
+  %128 : Float(1, 64, 8, 8) = onnx::Relu(%127), scope: ResNet/Sequential[layer3]/ResidualBlock[0]/ReLU[relu]
+  %129 : Float(1, 64, 8, 8) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%128, %67), scope: ResNet/Sequential[layer3]/ResidualBlock[0]/Conv2d[conv2]
+  %130 : Float(1, 64, 8, 8) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%129, %68, %69, %70, %71), scope: ResNet/Sequential[layer3]/ResidualBlock[0]/BatchNorm2d[bn2]
+  %131 : Float(1, 64, 8, 8) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[2, 2]](%125, %73), scope: ResNet/Sequential[layer3]/ResidualBlock[0]/Sequential[downsample]/Conv2d[0]
+  %132 : Float(1, 64, 8, 8) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%131, %74, %75, %76, %77), scope: ResNet/Sequential[layer3]/ResidualBlock[0]/Sequential[downsample]/BatchNorm2d[1]
+  %133 : Float(1, 64, 8, 8) = onnx::Add(%130, %132), scope: ResNet/Sequential[layer3]/ResidualBlock[0]
+  %134 : Float(1, 64, 8, 8) = onnx::Relu(%133), scope: ResNet/Sequential[layer3]/ResidualBlock[0]/ReLU[relu]
+  %135 : Float(1, 64, 8, 8) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%134, %79), scope: ResNet/Sequential[layer3]/ResidualBlock[1]/Conv2d[conv1]
+  %136 : Float(1, 64, 8, 8) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%135, %80, %81, %82, %83), scope: ResNet/Sequential[layer3]/ResidualBlock[1]/BatchNorm2d[bn1]
+  %137 : Float(1, 64, 8, 8) = onnx::Relu(%136), scope: ResNet/Sequential[layer3]/ResidualBlock[1]/ReLU[relu]
+  %138 : Float(1, 64, 8, 8) = onnx::Conv[dilations=[1, 1], group=1, kernel_shape=[3, 3], pads=[1, 1, 1, 1], strides=[1, 1]](%137, %85), scope: ResNet/Sequential[layer3]/ResidualBlock[1]/Conv2d[conv2]
+  %139 : Float(1, 64, 8, 8) = onnx::BatchNormalization[epsilon=1e-05, is_test=1, momentum=1](%138, %86, %87, %88, %89), scope: ResNet/Sequential[layer3]/ResidualBlock[1]/BatchNorm2d[bn2]
+  %140 : Float(1, 64, 8, 8) = onnx::Add(%139, %134), scope: ResNet/Sequential[layer3]/ResidualBlock[1]
+  %141 : Float(1, 64, 8, 8) = onnx::Relu(%140), scope: ResNet/Sequential[layer3]/ResidualBlock[1]/ReLU[relu]
+  %142 : Dynamic = onnx::Pad[mode=constant, pads=[0, 0, 0, 0, 0, 0, 0, 0], value=0](%141), scope: ResNet/AvgPool2d[avg_pool]
+  %143 : Float(1, 64, 1, 1) = onnx::AveragePool[kernel_shape=[8, 8], pads=[0, 0, 0, 0], strides=[8, 8]](%142), scope: ResNet/AvgPool2d[avg_pool]
+  %144 : Dynamic = onnx::Shape(%143), scope: ResNet
+  %145 : Dynamic = onnx::Slice[axes=[0], ends=[1], starts=[0]](%144), scope: ResNet
+  %146 : Long() = onnx::Squeeze[axes=[0]](%145), scope: ResNet
+  %147 : Long() = onnx::Constant[value=&#123;-1&#125;](), scope: ResNet
+  %148 : Dynamic = onnx::Unsqueeze[axes=[0]](%146), scope: ResNet
+  %149 : Dynamic = onnx::Unsqueeze[axes=[0]](%147), scope: ResNet
+  %150 : Dynamic = onnx::Concat[axis=0](%148, %149), scope: ResNet
+  %151 : Float(1, 64) = onnx::Reshape(%143, %150), scope: ResNet
+  %152 : Float(1, 10) = onnx::Gemm[alpha=1, beta=1, broadcast=1, transB=1](%151, %91, %92), scope: ResNet/Linear[fc]
+  return (%152);
+&#125;
+</code></pre>
+<h3 id="模型可视化工具：NETRON"><a href="#模型可视化工具：NETRON" class="headerlink" title="模型可视化工具：NETRON"></a>模型可视化工具：NETRON</h3><p>有几种方式：</p>
+<ul>
+<li>安装ONNX客户端</li>
+<li>ONNX有测试网页可以加载显示模型 ：<a target="_blank" rel="noopener" href="https://lutzroeder.github.io/netron/">Netron</a></li>
+<li>安装netron服务，可以通过<code>import netron</code> 和 <code>netron.start(&#39;model.onnx&#39;)</code>来启动本地查看服务，打开指定端口即可看到。</li>
+</ul>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> netron</span><br><span class="line"><span class="comment">#打开服务</span></span><br><span class="line">netron.start(<span class="string">&#x27;resnet.onnx&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<pre><code>Stopping http://localhost:8080
+Serving &#39;resnet.onnx&#39; at http://localhost:8080
+</code></pre>
+<h3 id="模型可视化结果"><a href="#模型可视化结果" class="headerlink" title="模型可视化结果"></a>模型可视化结果</h3><p><img data-src="https://res.cloudinary.com/dgchmgebr/image/upload/v1678509767/blog/lkii2jagh2xwoyinsmny.png" alt="ResNet"></p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          
+
+<div class="post-copyright">
+<ul>
+  <li class="post-copyright-author">
+      <strong>本文作者： </strong>xiaohai
+  </li>
+  <li class="post-copyright-link">
+      <strong>本文链接：</strong>
+      <a href="https://shenxiaohai.me/pytorch_tutorial_intermediate_02/" title="PyTorch 中级篇（2）：深度残差网络（Deep Residual Networks）">https://shenxiaohai.me/pytorch_tutorial_intermediate_02/</a>
+  </li>
+  <li class="post-copyright-license">
+      <strong>版权声明： </strong>本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" rel="noopener" target="_blank"><i class="fab fa-fw fa-creative-commons"></i>BY-NC-SA</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E5%AD%A6%E4%B9%A0/" rel="tag"><i class="fa fa-tag"></i> 深度学习</a>
+              <a href="/tags/PyTorch/" rel="tag"><i class="fa fa-tag"></i> PyTorch</a>
+              <a href="/tags/ResNet/" rel="tag"><i class="fa fa-tag"></i> ResNet</a>
+              <a href="/tags/%E6%B7%B1%E5%BA%A6%E6%AE%8B%E5%B7%AE%E7%BD%91%E7%BB%9C/" rel="tag"><i class="fa fa-tag"></i> 深度残差网络</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/pytorch-tutorial-intermediate-01/" rel="prev" title="PyTorch 中级篇（1）：卷积神经网络（Convolutional Neural Network）">
+                  <i class="fa fa-chevron-left"></i> PyTorch 中级篇（1）：卷积神经网络（Convolutional Neural Network）
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/pytorch-tutorial-intermediate-03/" rel="next" title="PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network）">
+                  PyTorch 中级篇（3）：循环神经网络（Recurrent Neural Network） <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+    <div class="comments"><div id="twikoo-comments"></div></div>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-laptop"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xiaohai</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" rel="noopener" target="_blank">Hexo</a> & <a href="https://theme-next.js.org/" rel="noopener" target="_blank">NexT.Gemini</a> 强力驱动
+  </div>
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <a href="https://github.com/veraposeidon" class="github-corner" title="在 GitHub 上关注我" aria-label="在 GitHub 上关注我" rel="noopener" target="_blank"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lozad.js/1.16.0/lozad.min.js" integrity="sha256-mOFREFhqmHeQbXpK2lp4nA3qooVgACfh88fpJftLBbc=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pangu/4.0.7/pangu.min.js" integrity="sha256-j+yj56cdEY2CwkVtGyz18fNybFGpMGJ8JxG3GSyO2+I=" crossorigin="anonymous"></script>
+<script src="/js/comments.js"></script><script src="/js/utils.js"></script><script src="/js/next-boot.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="/js/third-party/search/local-search.js"></script>
+
+
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">true</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"none","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="/js/third-party/math/mathjax.js"></script>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/quicklink/2.3.0/quicklink.umd.js" integrity="sha256-yvJQOINiH9fWemHn0vCA5lsHWJaHs6/ZmO+1Ft04SvM=" crossorigin="anonymous"></script>
+  <script class="next-config" data-name="quicklink" type="application/json">{"enable":true,"home":true,"archive":true,"delay":true,"timeout":3000,"priority":true,"url":"https://shenxiaohai.me/pytorch_tutorial_intermediate_02/"}</script>
+  <script src="/js/third-party/quicklink.js"></script>
+<script class="next-config" data-name="twikoo" type="application/json">{"enable":true,"visitor":false,"envId":"https://twikoo-comment.shenxiaohai.me/","el":"#twikoo-comments"}</script>
+<script>
+document.addEventListener('page:loaded', () => {
+  NexT.utils.loadComments(CONFIG.twikoo.el)
+    .then(() => NexT.utils.getScript(
+      CONFIG.twikoo.jsUrl || 'https://cdn.jsdelivr.net/npm/twikoo/dist/twikoo.all.min.js',
+      { condition: window.twikoo }
+    ))
+    .then(() => {
+      twikoo.init(CONFIG.twikoo);
+    });
+});
+</script>
+<style>
+.post-block, .comments {
+  overflow: visible;
+}
+.tk-owo-emotion {
+  display: inline-block;
+}
+</style>
+
+</body>
+</html>
